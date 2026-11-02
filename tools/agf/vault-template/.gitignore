@@ -1,0 +1,3 @@
+# Volatile Obsidian state (per-device, not shared)
+.obsidian/workspace.json
+.obsidian/plugins/*/data.json
