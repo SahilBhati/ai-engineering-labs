@@ -110,7 +110,12 @@ only on human approval.
 
 `vault-template/` ships an empty vault skeleton: the folder layout
 above, the structure note (folder roles, required fields, load tiers,
-promotion criteria, approval rule), and a Map-of-Content template.
+promotion criteria, approval rule), a Map-of-Content template, an
+empty profile (`000-Meta/Profile.md` — who you are and how agents
+should work with you, loaded first every session), and a `CLAUDE.md`
+that makes Claude Code load the profile and structure note
+automatically. Your filled profile stays in your vault; AGF never
+ships it.
 Point AGF at an empty folder and it copies the template in, so a
 stranger with no vault gets a working one on first run.
 

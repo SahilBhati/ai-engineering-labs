@@ -39,6 +39,18 @@ AGF loads this factory model first, then runs the managed skills in
   cloud. A private vault stays private. Removing the skill removes
   the skill, never the vault.
 
+## Profile — load it first, every time
+
+Before any routine, read `$VAULT_ROOT/000-Meta/Profile.md` (L0). It
+says who the user is, how they learn, how to work with them, and their
+hard rules. Follow it in every routine and every reply. AGF ships only
+the empty template; the filled profile is the user's private data and
+never leaves their vault.
+
+The profile improves through the learning loop, not by direct edits:
+when the user corrects how an agent works with them, `learn` logs it
+as a miss, and a repeated correction becomes a proposed profile rule.
+
 ## Router — which routine runs when
 
 | User wants | Run | Output |

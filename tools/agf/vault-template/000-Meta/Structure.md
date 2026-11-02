@@ -27,7 +27,7 @@ structure into tags — pick one system for organization, not both.
 Every note carries:
 
 ```yaml
-type: concept | lab | recipe | paper | project | decision | moc
+type: concept | lab | recipe | paper | project | decision | moc | profile
 status: seed | growing | evergreen | archived
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
@@ -47,8 +47,9 @@ source is an error, not a note.
 
 Load the smallest tier that answers the task. Rough budgets:
 
-- L0 — identity and profile: who the vault belongs to, hard rules.
-  (~500 tokens, always loaded)
+- L0 — identity and profile: 000-Meta/Profile.md — who the vault
+  belongs to, how to work with them, hard rules. (~500 tokens,
+  always loaded, before anything else)
 - L1 — how to find things: this note plus the agent protocol.
   (~2,000 tokens, loaded at session start)
 - L2 — what is happening now: the inbox queue, the rolling
