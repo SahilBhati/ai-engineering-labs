@@ -1,0 +1,15 @@
+# AI Engineering Labs
+
+> LLM internals and AI infrastructure, explained for software engineers by building things. Interactive lessons, project write-ups with measured results, and small open-source tools.
+
+## Pages
+
+- [Home](index.md): overview
+- [Lessons](lessons/index.md): course "LLM Foundations for engineers"
+- [Write-ups](writeups/index.md): projects and labs
+- [Tools](tools/index.md): AGF and usage-tracker
+- [About](about.md)
+
+## Code
+
+- [Repository](https://github.com/SahilBhati/ai-engineering-labs)
