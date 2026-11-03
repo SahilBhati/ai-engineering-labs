@@ -1,0 +1,53 @@
+/* Layout idea: a calm reading column; one teal accent; mono for numbers and code.
+   Same type system as the interactive lessons, so lessons and site read as one. */
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --ink:#16201e; --muted:#5c6a67;
+  --line:#d3dcda; --accent:#0f6e66; --hot:#c2570c;
+  --font-display:"Source Serif 4", Georgia, serif;
+  --font-body:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1514; --surface:#172020; --ink:#e2ebe9; --muted:#9aaaa6;
+    --line:#2b3836; --accent:#4cc2b4; --hot:#f29a50; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#172020; --ink:#e2ebe9; --muted:#9aaaa6;
+  --line:#2b3836; --accent:#4cc2b4; --hot:#f29a50; color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg); color:var(--ink); font:17px/1.6 var(--font-body)}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--ink); outline-offset:2px; border-radius:3px}
+.wrap{max-width:820px; margin:0 auto; padding:0 18px}
+header.site{border-bottom:1px solid var(--line); background:var(--surface)}
+header.site .wrap{display:flex; flex-wrap:wrap; gap:8px 20px; align-items:baseline; justify-content:space-between; padding-top:14px; padding-bottom:14px}
+.brand{font:600 1.15rem var(--font-display); color:var(--ink); text-decoration:none}
+nav.site{display:flex; flex-wrap:wrap; gap:4px 16px; font-size:.95rem}
+nav.site a{color:var(--muted); text-decoration:none}
+nav.site a[aria-current="page"], nav.site a:hover{color:var(--accent)}
+main{padding:36px 0 56px; display:flex; flex-direction:column; gap:36px}
+h1,h2,h3{font-family:var(--font-display); font-weight:600; line-height:1.2; margin:0; text-wrap:balance}
+h1{font-size:2.2rem}
+h2{font-size:1.4rem}
+h3{font-size:1.1rem}
+p{margin:0; max-width:65ch}
+.lede{font-size:1.15rem; color:var(--muted)}
+.eyebrow{font:500 .78rem var(--font-mono); letter-spacing:.06em; text-transform:uppercase; color:var(--accent)}
+section{display:flex; flex-direction:column; gap:14px}
+.cards{display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:12px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:8px}
+.card h3 a{color:var(--ink); text-decoration:none}
+.card h3 a:hover{color:var(--accent)}
+.meta{font:500 .8rem var(--font-mono); color:var(--muted)}
+.status{display:inline-block; font:500 .72rem var(--font-mono); padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted)}
+.status.live{border-color:var(--accent); color:var(--accent)}
+.status.soon{border-color:var(--hot); color:var(--hot)}
+footer.site{border-top:1px solid var(--line); color:var(--muted); font-size:.88rem}
+footer.site .wrap{display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:space-between; padding-top:18px; padding-bottom:28px}
+code{font-family:var(--font-mono); font-size:.92em}
