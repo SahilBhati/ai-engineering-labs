@@ -3,26 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tools</title>
+<title>Tools · AI Engineering Labs</title>
+<meta name="description" content="LLM internals and AI infrastructure, explained for software engineers by building things.">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="alternate" type="text/markdown" href="index.md">
 </head>
 <body>
 <header class="site"><div class="wrap">
-  <a class="brand" href="../">AI Engineering Labs</a>
+  <a class="brand" href="../">AI Engineering <span>Labs</span></a>
   <nav class="site" aria-label="Main"><a href="../lessons/">Lessons</a><a href="../writeups/">Write-ups</a><a href="../tools/" aria-current="page">Tools</a><a href="../about.html">About</a></nav>
+  <div class="header-cta"><a class="gh" href="https://github.com/SahilBhati/ai-engineering-labs">GitHub</a><a class="btn primary small" href="../lessons/llm-foundations-1/">Start lesson 1</a></div>
 </div></header>
-<main class="wrap">
-  <section>
-    <h1>Tools</h1>
-    <p class="lede">Small, dependency-free tools, open source under MIT.</p>
-  </section>
-  <section>
-    <div class="cards">
-      <article class="card"><span class="status live">open source</span><h3><a href="https://github.com/SahilBhati/ai-engineering-labs/tree/main/tools/agf">AGF</a></h3><p>A skill factory for a self-learning markdown vault. Agents propose changes as git batches; you approve them. Works with any Agent Skills-compatible agent.</p></article>
-      <article class="card"><span class="status live">open source</span><h3><a href="https://github.com/SahilBhati/ai-engineering-labs/tree/main/tools/usage-tracker">usage-tracker</a></h3><p>Your Claude Code usage from local logs: current 5-hour window, last 7 days, per project and model. No API key, no network, no dependencies.</p></article>
-    </div>
-  </section>
+<main>
+<section class="band"><div class="wrap">
+  <div class="section-head"><div class="copy"><h1>Tools and projects</h1><p class="lede">Small, dependency-free, open source under MIT.</p></div></div>
+  <div class="tiles"><article class="tile"><span class="badge live">open source</span><h3><span class="num">01</span>AGF</h3><p>A skill factory for a self-learning notes vault. Agents propose changes as git batches; you approve them.</p><div class="chips"><span class="chip">Agent Skills</span><span class="chip">markdown</span><span class="chip">git</span></div><div class="spacer"></div><a class="tile-cta" href="https://github.com/SahilBhati/ai-engineering-labs/tree/main/tools/agf">View on GitHub<span>→</span></a></article><article class="tile"><span class="badge live">open source</span><h3><span class="num">02</span>usage-tracker</h3><p>Your Claude Code usage from local logs: the current 5-hour window, the last 7 days, per project and model.</p><div class="chips"><span class="chip">python</span><span class="chip">no dependencies</span></div><div class="spacer"></div><a class="tile-cta" href="https://github.com/SahilBhati/ai-engineering-labs/tree/main/tools/usage-tracker">View on GitHub<span>→</span></a></article><article class="tile"><span class="badge soon">building</span><h3><span class="num">03</span>Mini LLM serving gateway</h3><p>Batching, per-tenant rate limits, streaming and metrics in front of a local model, with measured latency and throughput.</p><div class="chips"><span class="chip">continuous batching</span><span class="chip">rate limits</span><span class="chip">TTFT</span><span class="chip">throughput</span></div><div class="spacer"></div><span class="tile-cta off">Write-up coming<span>·</span></span></article></div>
+</div></section>
 </main>
 <footer class="site"><div class="wrap">
   <span>AI Engineering Labs · learning in public</span>

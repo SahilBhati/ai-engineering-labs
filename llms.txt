@@ -1,19 +1,20 @@
 # AI Engineering Labs
 
-> LLM internals and AI infrastructure, explained for software engineers by building things. Interactive lessons, project write-ups with measured results, and small open-source tools.
+> Interactive lessons on how LLMs work and what they cost to serve, for software engineers. Plus small open-source tools.
 
 ## Pages
 
-- [Home](index.md): overview
+- [Home](index.md)
 - [Lessons](lessons/index.md): course "LLM Foundations for engineers"
-- [Write-ups](writeups/index.md): projects and labs
-- [Tools](tools/index.md): AGF and usage-tracker
+- [Tools](tools/index.md)
+- [Write-ups](writeups/index.md)
 - [About](about.md)
 
 ## Lessons
 
-- [LLM Foundations 1: Tokens, Embeddings, Attention](lessons/llm-foundations-1/index.md)
-- [LLM Foundations 2: The Block, Sampling, the KV Cache](lessons/llm-foundations-2/index.md)
+1. [Tokens, embeddings, attention](lessons/llm-foundations-1/index.md)
+2. [The block, sampling, the KV cache](lessons/llm-foundations-2/index.md)
+3. Training and inference economics (coming next)
 
 ## Code
 

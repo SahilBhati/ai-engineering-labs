@@ -105,6 +105,22 @@ textarea{width:100%; min-height:84px; font:15px/1.5 var(--font-body); color:var(
 .pill.warn{border-color:var(--hot); color:var(--hot)}
 .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
 @media (prefers-reduced-motion: reduce){ .flyer{transition:none} }
+
+/* Phone fixes: content never wider than the screen; Back/Next always reachable. */
+.card, .visual{min-width:0}
+.visual{overflow-x:hidden}
+.say, .card p{overflow-wrap:break-word}
+.chapters{flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding-bottom:2px}
+.chapters::-webkit-scrollbar{display:none}
+.chapters button{flex:0 0 auto}
+@media (max-width:640px){
+  main{padding-bottom:88px}
+  .card{min-height:0; padding:16px 12px}
+  .visual table{display:block; overflow-x:auto; max-width:100%}
+  .bar{grid-template-columns:64px 1fr 44px}
+  .nav{position:fixed; left:0; right:0; bottom:0; z-index:5; background:var(--surface); border-top:1px solid var(--line); padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+  .nav button{min-width:96px; min-height:44px}
+}
 .crumbs{font:500 .85rem var(--font-mono);color:var(--muted)}.crumbs a{color:var(--accent)}footer.lesson{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:.85rem}</style>
 </head>
 <body>
