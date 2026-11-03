@@ -111,3 +111,18 @@ footer.site .wrap{display:flex; flex-wrap:wrap; gap:10px 24px; justify-content:s
   .header-cta .gh{display:none}
   .stats{gap:22px}
 }
+
+/* Desktop layout: sticky side navigation + content. Header stays on top. */
+.layout{display:grid; grid-template-columns:260px minmax(0,1fr)}
+.sidenav{position:sticky; top:60px; align-self:start; height:calc(100vh - 60px); overflow-y:auto; border-right:1px solid var(--line); padding:28px 16px 28px 24px; display:flex; flex-direction:column; gap:24px}
+.sidenav .grp{display:flex; flex-direction:column; gap:2px}
+.sidenav .lbl{font:500 .68rem var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 6px 10px}
+.sidenav a, .sidenav .off{display:flex; gap:8px; align-items:baseline; padding:6px 10px; border-radius:6px; font-size:.9rem; line-height:1.35; color:var(--ink); text-decoration:none}
+.sidenav a:hover{background:var(--surface)}
+.sidenav a[aria-current="page"]{background:var(--surface); box-shadow:inset 2px 0 0 var(--accent); color:var(--accent)}
+.sidenav .num{font:500 .72rem var(--font-mono); color:var(--accent)}
+.sidenav .off{color:var(--muted)}
+.sidenav .off em{margin-left:auto; font:500 .62rem var(--font-mono); font-style:normal; text-transform:uppercase; letter-spacing:.08em; color:var(--hot)}
+.layout main .wrap{max-width:1000px; margin-inline:0; padding-inline:48px}
+header.site .wrap{max-width:none; padding-inline:24px}
+@media (max-width:900px){ .layout{grid-template-columns:1fr} .sidenav{display:none} .layout main .wrap{padding-inline:24px} }
