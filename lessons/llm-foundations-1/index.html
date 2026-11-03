@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM Foundations 1: Tokens, Embeddings, Attention</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one step per screen. A big visual you control, two sentences, Next. */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --ink:#16201e; --muted:#5c6a67;
+  --line:#d3dcda; --accent:#0f6e66; --hot:#c2570c; --cool:#2f5fb3;
+  --font-display:"Source Serif 4", Georgia, serif;
+  --font-body:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1514; --surface:#172020; --ink:#e2ebe9; --muted:#9aaaa6;
+    --line:#2b3836; --accent:#4cc2b4; --hot:#f29a50; --cool:#7fa6ee; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#172020; --ink:#e2ebe9; --muted:#9aaaa6;
+  --line:#2b3836; --accent:#4cc2b4; --hot:#f29a50; --cool:#7fa6ee; color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg); color:var(--ink); font:16px/1.55 var(--font-body)}
+main{max-width:760px; margin:0 auto; padding:16px 16px 40px; display:flex; flex-direction:column; gap:14px}
+h1,h2{font-family:var(--font-display); font-weight:600; line-height:1.2; margin:0; text-wrap:balance}
+h1{font-size:1.15rem; color:var(--muted)}
+h2{font-size:1.6rem}
+p{margin:0}
+.chapters{display:flex; gap:6px; flex-wrap:wrap}
+.chapters button{font:500 .8rem var(--font-mono); padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--muted); cursor:pointer}
+.chapters button[aria-current="true"]{border-color:var(--accent); color:var(--accent)}
+.progress{display:flex; gap:3px}
+.progress span{flex:1; height:4px; border-radius:2px; background:var(--line)}
+.progress span.on{background:var(--accent)}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 16px; display:flex; flex-direction:column; gap:14px; min-height:420px}
+.step-tag{font:500 .75rem var(--font-mono); letter-spacing:.06em; text-transform:uppercase; color:var(--accent)}
+.say{font-size:1.05rem; max-width:62ch}
+.visual{display:flex; flex-direction:column; gap:12px}
+details.deeper{border-top:1px solid var(--line); padding-top:10px; color:var(--muted); font-size:.93rem}
+details.deeper summary{cursor:pointer; color:var(--accent); font-weight:500}
+details.deeper p{margin-top:8px}
+.nav{display:flex; gap:8px; justify-content:space-between; align-items:center}
+button{font:500 .95rem var(--font-body); padding:9px 16px; border-radius:8px; border:1px solid var(--accent); background:var(--accent); color:var(--surface); cursor:pointer}
+button.ghost{background:transparent; color:var(--accent)}
+button:disabled{opacity:.4; cursor:not-allowed}
+button:focus-visible, input:focus-visible, textarea:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; flex-wrap:wrap}
+.seg button{border:0; border-radius:0; background:transparent; color:var(--muted); padding:7px 12px; font-size:.88rem}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--surface)}
+.chips{display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start}
+.chip{display:inline-flex; flex-direction:column; align-items:center; gap:2px; padding:6px 9px; border-radius:7px; border:1px solid var(--line); background:var(--bg); font:500 .95rem var(--font-mono); cursor:default}
+.chip small{font-size:.68rem; color:var(--muted)}
+.chip.unk{border-color:var(--hot); color:var(--hot)}
+.chip.byte{border-style:dashed}
+.chip.tap{cursor:pointer}
+.chip.sel{border-color:var(--hot); color:var(--hot); outline:1px solid var(--hot)}
+.chip.dim{opacity:.35}
+.meters{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.meter{background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px 12px}
+.meter b{display:block; font:600 1.4rem var(--font-mono); font-variant-numeric:tabular-nums}
+.meter span{font-size:.8rem; color:var(--muted)}
+input[type=text]{width:100%; font:1rem var(--font-mono); padding:9px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+input[type=range]{width:100%; accent-color:var(--accent)}
+.lbl{font:500 .8rem var(--font-mono); color:var(--muted)}
+svg{max-width:100%; height:auto; display:block}
+.vec{font:500 .95rem var(--font-mono); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px; overflow-x:auto; white-space:nowrap}
+table.emb{border-collapse:collapse; font:500 .85rem var(--font-mono); width:100%}
+table.emb td{padding:5px 6px; border-bottom:1px solid var(--line); text-align:right; font-variant-numeric:tabular-nums}
+table.emb td:first-child, table.emb td:nth-child(2){text-align:left; color:var(--muted)}
+table.emb tr.hit td{background:color-mix(in srgb, var(--hot) 18%, transparent); color:var(--ink)}
+.scroll{overflow-x:auto}
+.bars{display:flex; flex-direction:column; gap:5px}
+.bar{display:grid; grid-template-columns:70px 1fr 44px; gap:8px; align-items:center; font:500 .85rem var(--font-mono)}
+.bar .t{height:12px; border-radius:4px; background:var(--bg); border:1px solid var(--line); overflow:hidden}
+.bar .f{height:100%; background:var(--hot)}
+.bar .n{text-align:right; font-variant-numeric:tabular-nums}
+.grid{display:grid; gap:2px; font:500 .7rem var(--font-mono)}
+.grid div{padding:6px 2px; text-align:center; border-radius:3px}
+.g-ok{background:color-mix(in srgb, var(--accent) 25%, transparent)}
+.g-self{background:color-mix(in srgb, var(--accent) 45%, transparent)}
+.g-no{background:var(--bg); color:var(--muted)}
+.g-cheat{background:color-mix(in srgb, var(--hot) 35%, transparent); color:var(--hot)}
+.g-h{color:var(--muted)}
+canvas{max-width:100%; display:block; border:1px solid var(--line); border-radius:8px; background:var(--bg)}
+.pipe{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font:500 .85rem var(--font-mono)}
+.box{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--bg)}
+.box.lock{border-color:var(--accent)}
+.flyer{display:inline-block; padding:4px 8px; border-radius:6px; background:var(--hot); color:var(--surface); font:500 .78rem var(--font-mono); transition:transform .7s ease, opacity .7s ease}
+.counter{font:500 .9rem var(--font-mono)}
+.q{display:flex; flex-direction:column; gap:6px; border-left:3px solid var(--accent); padding-left:12px}
+.q .tag{font:500 .72rem var(--font-mono); color:var(--accent); text-transform:uppercase; letter-spacing:.05em}
+textarea{width:100%; min-height:84px; font:15px/1.5 var(--font-body); color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:9px 11px; resize:vertical}
+.saved{font:500 .76rem var(--font-mono); color:var(--muted)}
+.pill{font:500 .76rem var(--font-mono); padding:3px 9px; border-radius:999px; border:1px solid var(--line); color:var(--muted)}
+.pill.ok{border-color:var(--accent); color:var(--accent)}
+.pill.warn{border-color:var(--hot); color:var(--hot)}
+.row{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+@media (prefers-reduced-motion: reduce){ .flyer{transition:none} }
+.crumbs{font:500 .85rem var(--font-mono);color:var(--muted)}.crumbs a{color:var(--accent)}footer.lesson{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:.85rem}</style>
+</head>
+<body>
+<main>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="../../">AI Engineering Labs</a> / <a href="../">Lessons</a></nav>
+  <h1>LLM Foundations · Lesson 1: tokens → embeddings → attention</h1>
+  <nav class="chapters" id="chapters" aria-label="Jump to a chapter"></nav>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+  <section class="card" id="card" aria-live="polite"></section>
+  <div class="nav">
+    <button class="ghost" id="back">Back</button>
+    <span class="lbl" id="count"></span>
+    <button id="next">Next</button>
+  </div>
+</main>
+<footer class="lesson">LLM Foundations for engineers · lesson 1 · <a href="../../">Home</a> · <a href="index.md">Markdown version</a></footer>
+
+<script>
+(function(){
+"use strict";
+const $ = (s, r=document) => r.querySelector(s);
+const el = (tag, attrs={}, html="") => { const e = document.createElement(tag);
+  for(const k in attrs){ if(k==="class") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
+  if(html) e.innerHTML = html; return e; };
+const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ================= toy tokenizer ================= */
+const PIECES = ["the","river","bank","flood","ed","after","storm","i","deposit","cash","at","cat","dog","sat","on","mat",
+  "str","aw","berry","token","iz","er","ing","un","believ","able","model","read","man","bites","walk","ran","a","to","in",
+  "of","and","is","it","fl","oo","s","came","rain"];
+const WORDS = new Set(["the","river","bank","flooded","after","storm","i","deposited","cash","at","cat","dog","sat","on",
+  "mat","strawberry","man","bites","unbelievable","a","to","in","of","and","is","it","came","rain"]);
+const LETTERS = "abcdefghijklmnopqrstuvwxyz".split("");
+const VOCAB = new Set([...PIECES, ...LETTERS]);
+function idOf(p){ let h = 2166136261; for(const c of p){ h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return 1000 + (Math.abs(h) % 48000); }
+function subwords(text){
+  const out = [];
+  for(const word of text.split(/\s+/).filter(Boolean)){
+    let i = 0; const low = word.toLowerCase();
+    while(i < word.length){
+      const ch = word[i];
+      if(!/[a-z]/i.test(ch)){
+        // byte fallback: not in the learned vocabulary
+        const cp = word.codePointAt(i), s = String.fromCodePoint(cp);
+        for(const b of new TextEncoder().encode(s)) out.push({t:"<" + b.toString(16).toUpperCase() + ">", id:b, byte:true});
+        i += s.length; continue;
+      }
+      let len = Math.min(10, word.length - i), hit = null;
+      for(; len > 0; len--){ const p = low.slice(i, i+len); if(VOCAB.has(p)){ hit = p; break; } }
+      out.push({t: word.slice(i, i+len), id: idOf(hit)}); i += len;
+    }
+  }
+  return out;
+}
+function words(text){ return text.split(/\s+/).filter(Boolean).map(w=>{ const k = w.toLowerCase().replace(/[^a-z]/g,"");
+  return WORDS.has(k) ? {t:w, id:idOf("w:"+k)} : {t:w, unk:true}; }); }
+function chars(text){ return Array.from(text).map(c => ({t: c===" " ? "␣" : c, id: c.codePointAt(0)})); }
+function chipHTML(tok, showId=true){ return '<span class="chip' + (tok.unk?" unk":"") + (tok.byte?" byte":"") + '">' +
+  esc(tok.unk ? "[UNKNOWN]" : tok.t) + (showId && !tok.unk ? "<small>" + tok.id + "</small>" : "") + "</span>"; }
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]); }
+
+/* ================= embedding map data ================= */
+const MAPW = [
+  ["cat",.20,.76,"a"],["dog",.27,.70,"a"],["horse",.16,.63,"a"],
+  ["car",.76,.78,"v"],["truck",.84,.70,"v"],["bus",.72,.65,"v"],
+  ["apple",.30,.24,"f"],["banana",.20,.32,"f"],["mango",.36,.33,"f"],
+  ["ran",.75,.26,"m"],["walked",.84,.34,"m"],["jumped",.70,.17,"m"]
+];
+function rnd(seed){ let x = Math.sin(seed*999)*10000; return x - Math.floor(x); }
+const START = MAPW.map((w,i)=>[.08 + .84*rnd(i+1), .08 + .84*rnd(i+41)]);
+
+/* ================= steps ================= */
+const STEPS = [];
+const add = (ch, title, say, render, deeper) => STEPS.push({ch, title, say, render, deeper});
+
+/* ---------- 1.1 Tokenization ---------- */
+add("1.1","Models read numbers, not text",
+ "A tokenizer cuts text into pieces from a fixed list, then swaps each piece for its ID. Type anything.",
+ v=>{
+  const inp = el("input",{type:"text","aria-label":"Text to tokenize",value:"The river bank flooded"});
+  const out = el("div",{class:"chips"});
+  const draw = ()=>{ out.innerHTML = subwords(inp.value).map(t=>chipHTML(t)).join(""); };
+  inp.addEventListener("input", draw); v.append(inp, out); draw();
+ },
+ "The small number under each piece is its ID. Try <code>unbelievable</code> or <code>flooooded</code>: a word the tokenizer has never seen still works, because it splits into pieces it knows. This is a toy tokenizer with a tiny vocabulary; real ones have 50k to 200k pieces.");
+
+add("1.1","Choose the size of the pieces",
+ "Small pieces make long sequences. Big pieces need a huge vocabulary. Subwords sit in between.",
+ v=>{
+  let mode = "sub";
+  const inp = el("input",{type:"text","aria-label":"Text",value:"The river bank flooooded"});
+  const seg = el("div",{class:"seg",role:"group","aria-label":"Piece size"},
+    '<button data-m="char">Characters</button><button data-m="sub">Subwords</button><button data-m="word">Words</button>');
+  const out = el("div",{class:"chips"});
+  const meters = el("div",{class:"meters"});
+  const VOC = {char:["~256","every possible byte"], sub:["~100k","common chunks"], word:["millions","every word, name, typo, language"]};
+  const draw = ()=>{
+    const toks = mode==="char" ? chars(inp.value) : mode==="word" ? words(inp.value) : subwords(inp.value);
+    out.innerHTML = toks.map(t=>chipHTML(t,false)).join("");
+    meters.innerHTML = '<div class="meter"><b>' + toks.length + '</b><span>tokens for this text</span></div>' +
+      '<div class="meter"><b>' + VOC[mode][0] + '</b><span>vocabulary: ' + VOC[mode][1] + '</span></div>';
+    seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.m===mode));
+  };
+  seg.addEventListener("click", e=>{ if(e.target.dataset.m){ mode = e.target.dataset.m; draw(); } });
+  inp.addEventListener("input", draw);
+  v.append(seg, inp, out, meters); draw();
+ },
+ "Characters: the sequence gets long, and attention compares every token with every other, so cost grows with the <em>square</em> of length (you'll see this near the end of 1.3). Words: a word not in the list becomes <code>[UNKNOWN]</code> and the model learns nothing about it, and rare words barely get trained. Subwords: any text can be built from known pieces.");
+
+add("1.1","The model never sees letters",
+ "Ask a model to count the r's in “strawberry”. Flip to what the model actually receives.",
+ v=>{
+  let ids = false;
+  const btn = el("button",{class:"ghost"},"Show what the model sees");
+  const out = el("div",{class:"chips"}), note = el("p",{class:"lbl"});
+  const toks = subwords("strawberry");
+  const draw = ()=>{
+    out.innerHTML = toks.map(t=>'<span class="chip" style="min-width:64px">' + (ids ? t.id : esc(t.t)) + '</span>').join("");
+    note.textContent = ids ? "Three opaque numbers. Nothing in " + toks[0].id + " says “contains an r”." : "What you see: three pieces, letters visible.";
+    btn.textContent = ids ? "Show the pieces" : "Show what the model sees";
+  };
+  btn.addEventListener("click", ()=>{ ids = !ids; draw(); });
+  v.append(out, note, btn); draw();
+ },
+ "To count letters the model would have to have memorized how each of its token IDs is spelled. Same root cause for reversing words, rhymes and long-number arithmetic. Backend version: counting the characters in a customer's name when you only receive <code>customer_id</code>.");
+
+add("1.1","Other languages pay more",
+ "The tokenizer learned its pieces from mostly English text, then was frozen. Text it rarely saw falls back to raw bytes.",
+ v=>{
+  const en = "The river flooded", hi = "नदी में बाढ़ आई";
+  const a = subwords(en), b = subwords(hi);
+  const max = Math.max(a.length, b.length);
+  v.innerHTML =
+   '<div class="lbl">English: ' + esc(en) + '</div><div class="chips">' + a.map(t=>chipHTML(t,false)).join("") + '</div>' +
+   '<div class="lbl">Hindi (same meaning): ' + esc(hi) + '</div><div class="chips">' + b.map(t=>chipHTML(t,false)).join("") + '</div>' +
+   '<div class="bars">' +
+   '<div class="bar"><span>English</span><div class="t"><div class="f" style="width:' + (a.length/max*100) + '%"></div></div><span class="n">' + a.length + '</span></div>' +
+   '<div class="bar"><span>Hindi</span><div class="t"><div class="f" style="width:' + (b.length/max*100) + '%"></div></div><span class="n">' + b.length + '</span></div></div>';
+ },
+ "More tokens for the same meaning means higher cost (billed per token), slower output (one token per step), less fits in the context window, and usually worse quality. Training the model afterwards can't fix it, because the tokenizer was built and frozen first. Real tokenizers have some Hindi pieces, so the gap is smaller than this toy's, but it's real. Backend version: a compression dictionary trained on English logs, used on other data.");
+
+/* ---------- 1.2 Embeddings ---------- */
+const TABLE = [
+  ["the",   [ 0.12,-0.80, 0.33, 0.05]],
+  ["cat",   [ 0.91, 0.05,-0.47, 0.62]],
+  ["dog",   [ 0.88, 0.11,-0.41, 0.58]],
+  ["sat",   [-0.30, 0.72, 0.18,-0.09]],
+  ["on",    [ 0.02,-0.55, 0.40, 0.21]],
+  ["mat",   [ 0.40, 0.33,-0.12,-0.70]]
+];
+add("1.2","Each ID picks a row",
+ "The embedding table has one row of numbers per token. “Embedding a token” just means reading its row. Tap a word.",
+ v=>{
+  const sent = ["the","cat","sat","on","the","mat"];
+  let sel = 1;
+  const chipsEl = el("div",{class:"chips"}), tbl = el("div",{class:"scroll"}), vec = el("div",{class:"vec"});
+  const draw = ()=>{
+    chipsEl.innerHTML = sent.map((w,i)=>'<span class="chip tap' + (i===sel?" sel":"") + '" data-i="'+i+'" role="button" tabindex="0">' + w + '<small>' + idOf(w) + '</small></span>').join("");
+    const w = sent[sel];
+    tbl.innerHTML = '<table class="emb"><tbody>' + TABLE.map(([t,r])=>'<tr class="' + (t===w?"hit":"") + '"><td>' + idOf(t) + '</td><td>' + t + '</td>' + r.map(x=>'<td>' + x.toFixed(2) + '</td>').join("") + '<td>…</td></tr>').join("") +
+      '<tr><td colspan="7" style="text-align:left">… one row for every token in the vocabulary</td></tr></tbody></table>';
+    const row = TABLE.find(r=>r[0]===w)[1];
+    vec.textContent = w + " → [" + row.map(x=>x.toFixed(2)).join(", ") + ", … 4,092 more numbers]";
+  };
+  chipsEl.addEventListener("click", e=>{ const c = e.target.closest("[data-i]"); if(c){ sel = +c.dataset.i; draw(); } });
+  chipsEl.addEventListener("keydown", e=>{ const c = e.target.closest("[data-i]"); if(c && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); sel = +c.dataset.i; draw(); } });
+  v.append(chipsEl, tbl, vec); draw();
+ },
+ "Rows = vocabulary size (set by the tokenizer). Row width = a design choice, like 768 in a small model or 4,096 in a large one. 100,000 × 4,096 is about 410 million numbers. Both <code>the</code>s read the same row: the table has no idea of context. Why not feed the ID itself? IDs are labels, not quantities. 1001 and 1002 are unrelated, like auto-increment keys, so arithmetic on them is meaningless.");
+
+add("1.2","Training moves similar words together",
+ "Rows start as random numbers. Every training correction nudges them. Words used in similar sentences get similar nudges, so they drift together. Drag the slider.",
+ v=>{
+  const lab = el("label",{class:"lbl",for:"trainS"},"training progress: 0%");
+  const s = el("input",{type:"range",id:"trainS",min:"0",max:"100",value:"0"});
+  const svg = el("div");
+  const draw = ()=>{
+    const t = +s.value/100, e = t<.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+    lab.textContent = "training progress: " + s.value + "%";
+    svg.innerHTML = mapSVG(MAPW.map((w,i)=>[START[i][0] + (w[1]-START[i][0])*e, START[i][1] + (w[2]-START[i][1])*e]), t>.85);
+  };
+  s.addEventListener("input", draw); v.append(lab, s, svg); draw();
+ },
+ "A 2D picture of what really happens in thousands of dimensions. Nobody labels “cat” as an animal: sentences like “feed the ___” and “the ___ is sleeping” push cat and dog the same way. Backend version: recommendation systems learn user and item vectors the same way, and similar behaviour ends up nearby.");
+
+add("1.2","Close means similar, and that is how it generalizes",
+ "Distance between two rows is a number you can compute. Tap two words.",
+ v=>{
+  let picks = [0,1];
+  const svg = el("div"), out = el("p",{class:"say"});
+  const pos = MAPW.map(w=>[w[1],w[2]]);
+  const draw = ()=>{
+    svg.innerHTML = mapSVG(pos, true, picks);
+    const [a,b] = picks.map(i=>pos[i]);
+    const d = Math.hypot(a[0]-b[0], a[1]-b[1]) * 10;
+    out.innerHTML = "<b>" + MAPW[picks[0]][0] + "</b> ↔ <b>" + MAPW[picks[1]][0] + "</b>: distance " + d.toFixed(1) + (d < 2 ? " (close: the model treats them alike)" : " (far)");
+    svg.querySelectorAll("[data-w]").forEach(g=>g.addEventListener("click", ()=>{ picks = [picks[1], +g.dataset.w]; draw(); }));
+  };
+  v.append(svg, out); draw();
+ },
+ "Everything after the embedding is multiplication and addition. Nearly identical inputs give nearly identical outputs, so what the model learns from “the cat sat” carries over to “the dog sat”. That is generalization. Real models usually measure the angle between vectors (cosine similarity) rather than straight distance; the idea is the same.");
+
+add("1.2","Position: order changes meaning",
+ "Embeddings say what each token is, not where it is. Without position, these two sentences look identical.",
+ v=>{
+  let on = false;
+  const btn = el("button",{class:"ghost"});
+  const out = el("div",{class:"visual"});
+  const S = [["dog","bites","man"],["man","bites","dog"]];
+  const draw = ()=>{
+    out.innerHTML = S.map(s=>{
+      const toks = on ? s.map((w,i)=>({w,i})) : [...s].sort().map(w=>({w}));
+      return '<div class="chips">' + toks.map(t=>'<span class="chip">' + t.w + (on ? '<small>slot ' + t.i + '</small>' : '') + '</span>').join("") +
+        '<span class="lbl" style="align-self:center">' + (on ? "" : "← same set") + '</span></div>';
+    }).join("") + '<p class="lbl">' + (on ? "With position stamped on, the inputs differ." : "Without position: the model receives the same three vectors either way.") + '</p>';
+    btn.textContent = on ? "Remove position" : "Add position";
+  };
+  btn.addEventListener("click", ()=>{ on = !on; draw(); });
+  v.append(out, btn); draw();
+ },
+ "Position also gives distance: a “river” right next to “bank” should count more than one 300 tokens back, and without position they're identical vectors. Older models add a second table with one row per slot, which is also a hard length limit. Most modern models use RoPE: a formula that rotates vectors by slot number, with no table. Backend version: TCP sequence numbers.");
+
+add("1.2","Training writes. Using only reads.",
+ "When you use a model, its tables are frozen. Each request copies rows out, computes with the copies, and throws them away. Run some requests.",
+ v=>{
+  let req = 0;
+  const pipe = el("div",{class:"pipe"},
+    '<div class="box lock">embedding table<br><span class="lbl">weights · frozen</span></div><span>→ copy →</span>' +
+    '<div class="box" id="work">working vector<br><span class="lbl">activation · temporary</span></div><span>→ rotate by slot → attention → discard</span>');
+  const fly = el("div",{style:"height:30px"});
+  const cnt = el("p",{class:"counter"});
+  const btn = el("button",{},"Run a request");
+  const draw = ()=>{ cnt.textContent = "requests run: " + req + " · changes to the table: 0"; };
+  btn.addEventListener("click", ()=>{
+    req++; draw();
+    const f = el("span",{class:"flyer"},"bank @ slot " + (2 + req));
+    fly.innerHTML = ""; fly.appendChild(f);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ f.style.transform = "translateX(" + (reduceMotion ? 0 : 220) + "px)"; f.style.opacity = "0"; }));
+  });
+  v.append(pipe, fly, btn, cnt); draw();
+ },
+ "Two kinds of numbers. <b>Weights</b> (the embedding table and every other learned number) change only during training. <b>Activations</b> are computed fresh for every request, then thrown away. RoPE works on the copy, never on the table. Backend version: weights are read-only database rows; activations are values computed in a SELECT, never an UPDATE.");
+
+/* ---------- 1.3 Attention ---------- */
+
+/* ---------- Basics: the four primitives attention is built from ---------- */
+function plane(vecs, R){
+  const S = 240, C = S/2, k = (C-20)/R, X = x=>C + x*k, Y = y=>C - y*k;
+  let g = '<svg viewBox="0 0 ' + S + ' ' + S + '" style="max-width:300px" role="img" aria-label="Vectors drawn as arrows"><defs>' +
+    ['hot','cool','accent','ink'].map(c=>'<marker id="m-'+c+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--'+c+')"/></marker>').join("") +
+    '</defs><g font-family="IBM Plex Mono, monospace" font-size="11">' +
+    '<line x1="10" y1="'+C+'" x2="'+(S-10)+'" y2="'+C+'" style="stroke:var(--line)"/><line x1="'+C+'" y1="10" x2="'+C+'" y2="'+(S-10)+'" style="stroke:var(--line)"/>';
+  vecs.forEach(([x,y,c,l,dot])=>{
+    if(dot) g += '<circle cx="'+X(x)+'" cy="'+Y(y)+'" r="7" style="fill:var(--'+c+')"/>';
+    else if(Math.hypot(x,y) > 0.01) g += '<line x1="'+C+'" y1="'+C+'" x2="'+X(x)+'" y2="'+Y(y)+'" style="stroke:var(--'+c+')" stroke-width="2.5" marker-end="url(#m-'+c+')"/>';
+    g += '<text x="'+(X(x)+8)+'" y="'+(Y(y)-6)+'" style="fill:var(--'+c+')" font-weight="600">'+l+'</text>';
+  });
+  return g + '</g></svg>';
+}
+function slider(id, label, min, max, stepv, val){
+  const w = el("div",{class:"visual",style:"gap:2px"});
+  w.innerHTML = '<label class="lbl" for="'+id+'"></label><input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="'+stepv+'" value="'+val+'">';
+  const inp = w.querySelector("input"), lab = w.querySelector("label");
+  return {w, inp, set:(t)=>{ lab.textContent = label + ": " + t; }};
+}
+
+add("B","A vector is just a list of numbers",
+ "Two numbers can be drawn as an arrow: first number = how far right, second = how far up. Move the sliders.",
+ v=>{
+  const a = slider("v1x","first number (money-ness)",-3,3,0.5,2), b = slider("v1y","second number (water-ness)",-3,3,0.5,1);
+  const pic = el("div"), out = el("div",{class:"vec"});
+  const draw = ()=>{ const x=+a.inp.value, y=+b.inp.value; a.set(x); b.set(y);
+    out.textContent = "[" + x + ", " + y + "]"; pic.innerHTML = plane([[x,y,"hot","v"]],3); };
+  [a,b].forEach(s=>s.inp.addEventListener("input",draw)); v.append(a.w,b.w,out,pic); draw();
+ },
+ "Real embeddings have thousands of numbers, so you can't draw them, but every rule in the next three steps works the same way with 2 numbers or 4,096. The names money-ness and water-ness are labels for this toy only.");
+
+add("B","Dot product: how well two lists match",
+ "Multiply the numbers in matching positions, then add. Same direction gives a big score, a right angle gives 0, opposite gives a negative score. Move the arrows.",
+ v=>{
+  const s1 = slider("d1","A first",-3,3,0.5,2), s2 = slider("d2","A second",-3,3,0.5,1),
+        s3 = slider("d3","B first",-3,3,0.5,1), s4 = slider("d4","B second",-3,3,0.5,2);
+  const pic = el("div"), out = el("p",{class:"say"});
+  const draw = ()=>{ const a=[+s1.inp.value,+s2.inp.value], b=[+s3.inp.value,+s4.inp.value];
+    s1.set(a[0]); s2.set(a[1]); s3.set(b[0]); s4.set(b[1]);
+    const d = a[0]*b[0] + a[1]*b[1];
+    out.innerHTML = '<span class="mono">[' + a.join(", ") + '] · [' + b.join(", ") + '] = ' + a[0] + '×' + b[0] + ' + ' + a[1] + '×' + b[1] + ' = <b>' + d + '</b></span> ' +
+      (d > 3 ? "(strong match)" : d > 0 ? "(weak match)" : d === 0 ? "(no match)" : "(opposite)");
+    pic.innerHTML = plane([[a[0],a[1],"hot","A"],[b[0],b[1],"cool","B"]],3); };
+  [s1,s2,s3,s4].forEach(s=>s.inp.addEventListener("input",draw));
+  const grid = el("div",{class:"meters"}); grid.append(s1.w,s2.w,s3.w,s4.w);
+  v.append(grid,out,pic); draw();
+ },
+ "This is the closeness idea from 1.2 turned into one number. Attention uses it to answer “how relevant is that word to me?”");
+
+add("B","Softmax: turn scores into percentages",
+ "Scores can be any numbers. Softmax turns them into shares that are never negative and always add up to 100%. Bigger scores take a much bigger share. Drag the scores.",
+ v=>{
+  const names = ["The","river","bank"], init = [0,3,2];
+  const ss = names.map((n,i)=>slider("sm"+i,"score for "+n,-2,5,0.5,init[i]));
+  const bars = el("div",{class:"bars"}), eq = el("p",{class:"lbl"});
+  const draw = ()=>{ const sc = ss.map(s=>+s.inp.value); ss.forEach((s,i)=>s.set(sc[i]));
+    const ex = sc.map(Math.exp), z = ex.reduce((a,b)=>a+b,0), w = ex.map(x=>x/z);
+    bars.innerHTML = names.map((n,i)=>'<div class="bar"><span>'+n+'</span><div class="t"><div class="f" style="width:'+(w[i]*100).toFixed(1)+'%"></div></div><span class="n">'+(w[i]*100).toFixed(0)+'%</span></div>').join("");
+    eq.textContent = "eˢᶜᵒʳᵉ: " + ex.map(x=>x.toFixed(1)).join(", ") + "  → each ÷ " + z.toFixed(1) + " (their total)"; };
+  ss.forEach(s=>s.inp.addEventListener("input",draw));
+  v.append(...ss.map(s=>s.w), bars, eq); draw();
+ },
+ "How: raise e (≈2.718) to each score, then divide each by the total. Raising to a power makes every share positive and stretches the gaps, so the winner wins clearly but losers keep a little. Why add up to 100%: the next step is an average, and an average needs shares that sum to 1.");
+
+add("B","Weighted average: blend by the percentages",
+ "Mix several vectors using the percentages as the recipe. Slide the recipe and watch the blend move between them.",
+ v=>{
+  const s = slider("wa","river's share (cash gets the rest)",0,100,5,70);
+  const pic = el("div"), out = el("p",{class:"mono"});
+  const draw = ()=>{ const t = +s.inp.value/100; s.set(Math.round(t*100) + "%");
+    const r = [0,3], c = [3,0], m = [r[0]*t + c[0]*(1-t), r[1]*t + c[1]*(1-t)];
+    out.textContent = (t*100).toFixed(0) + "% × river[0, 3] + " + ((1-t)*100).toFixed(0) + "% × cash[3, 0] = [" + m.map(x=>x.toFixed(2)).join(", ") + "]";
+    pic.innerHTML = plane([[0,3,"cool","river"],[3,0,"cool","cash"],[m[0],m[1],"hot","blend",true]],3); };
+  s.inp.addEventListener("input",draw); v.append(s.w,out,pic); draw();
+ },
+ "Attention = dot product (score every word) → softmax (scores to percentages) → weighted average (blend). One more basic first: how training sets all these numbers.");
+
+add("B","Gradient: how training nudges each number",
+ "Training wants a higher score. Each column is nudged in proportion to its influence: what it gets multiplied by. Press Train step a few times, then set a multiplier to 0.",
+ v=>{
+  const START_ROW = [0.2,-0.5], TARGET = 2, LR = 0.05;
+  let row = START_ROW.slice(), hist = [], last = [0,0];
+  const m1 = slider("g1","col 1 is multiplied by",0,3,0.5,1), m2 = slider("g2","col 2 is multiplied by",0,3,0.5,3);
+  const tbl = el("div",{class:"scroll"}), sc = el("div",{class:"bars"}), hs = el("p",{class:"lbl"});
+  const btn = el("button",{},"Train step"), rst = el("button",{class:"ghost"},"Reset");
+  const mult = ()=>[+m1.inp.value, +m2.inp.value];
+  const score = ()=>row[0]*mult()[0] + row[1]*mult()[1];
+  const draw = ()=>{
+    const m = mult(); m1.set(m[0]); m2.set(m[1]);
+    const s0 = score();
+    tbl.innerHTML = '<table class="emb"><thead><tr><td>column</td><td>value</td><td>multiplied by</td><td>last nudge</td></tr></thead><tbody>' +
+      [0,1].map(i=>'<tr'+(Math.abs(last[i])>0.001?' class="hit"':'')+'><td>col '+(i+1)+'</td><td>'+row[i].toFixed(3)+'</td><td>'+m[i]+'</td><td>'+(last[i]>=0?"+":"")+last[i].toFixed(3)+'</td></tr>').join("") + '</tbody></table>';
+    const pct = v=>Math.max(0, Math.min(100, (v+2)/5*100));
+    sc.innerHTML = '<div class="bar"><span>score</span><div class="t"><div class="f" style="width:'+pct(s0)+'%"></div></div><span class="n">'+s0.toFixed(2)+'</span></div>' +
+      '<div class="bar"><span>target</span><div class="t"><div class="f" style="width:'+pct(TARGET)+'%;background:var(--accent)"></div></div><span class="n">'+TARGET.toFixed(2)+'</span></div>';
+    hs.textContent = "score history: " + (hist.length ? hist.map(x=>x.toFixed(2)).join(" → ") + " → " : "") + s0.toFixed(2);
+  };
+  btn.addEventListener("click", ()=>{
+    const m = mult(), err = TARGET - score();
+    hist.push(score()); if(hist.length > 6) hist.shift();
+    last = m.map(x=>LR*err*x); row = row.map((r,i)=>r + last[i]); draw();
+  });
+  rst.addEventListener("click", ()=>{ row = START_ROW.slice(); hist = []; last = [0,0]; draw(); });
+  [m1,m2].forEach(x=>x.inp.addEventListener("input", ()=>{ hist = []; last = [0,0]; draw(); }));
+  const grid = el("div",{class:"meters"}); grid.append(m1.w, m2.w);
+  const r = el("div",{class:"row"}); r.append(btn, rst);
+  v.append(grid, tbl, sc, r, hs); draw();
+ },
+ "Nudge = step size × how far off the score is × what the column is multiplied by. A column multiplied by 0 has no influence, so it never moves. Nobody picks a column: every number used in a prediction gets its own nudge, all calculated in one pass (backpropagation). Repeat over billions of sentences and the rows, W_Q, W_K, W_V, everything, settle into useful values. That's all training is. Backend version: 4,096 config knobs, each adjusted in proportion to how sensitive the output is to it, measured all at once.");
+
+add("1.3","bank has one row, but two meanings",
+ "Same row in both sentences. Attention mixes in information from earlier tokens, so bank ends up meaning the right thing. Switch it on.",
+ v=>{
+  let sent = "river", on = false;
+  const seg = el("div",{class:"seg",role:"group","aria-label":"Sentence"},'<button data-s="river">The river bank…</button><button data-s="money">Cash at the bank…</button>');
+  const btn = el("button",{class:"ghost"});
+  const svg = el("div");
+  const draw = ()=>{
+    const x = !on ? 0.5 : sent==="river" ? 0.85 : 0.15;
+    svg.innerHTML = '<svg viewBox="0 0 360 90" role="img" aria-label="Meaning meter for bank"><g font-family="IBM Plex Mono, monospace" font-size="12">' +
+      '<line x1="30" y1="45" x2="330" y2="45" style="stroke:var(--line)" stroke-width="6" stroke-linecap="round"/>' +
+      '<text x="30" y="78" style="fill:var(--muted)">money</text><text x="330" y="78" text-anchor="end" style="fill:var(--muted)">water</text>' +
+      '<circle cx="' + (30 + 300*x) + '" cy="45" r="11" style="fill:var(--hot)"><title>bank</title></circle>' +
+      '<text x="' + (30 + 300*x) + '" y="24" text-anchor="middle" style="fill:var(--hot)" font-weight="600">bank</text></g></svg>';
+    seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.s===sent));
+    btn.textContent = on ? "Attention: on" : "Attention: off (row only)";
+  };
+  seg.addEventListener("click", e=>{ if(e.target.dataset.s){ sent = e.target.dataset.s; draw(); } });
+  btn.addEventListener("click", ()=>{ on = !on; draw(); });
+  v.append(seg, svg, btn); draw();
+ },
+ "With attention off, bank is just its row: halfway between meanings, in both sentences. With it on, bank pulls in “river” or “cash” and moves. This is an activation: computed for this sentence, gone afterwards.");
+
+
+
+add("1.3","The three basics, running together",
+ "bank asks the same question in every sentence: its query. Each earlier word answers with its key. Score, softmax, blend. Switch the sentence.",
+ v=>{
+  const SENT = {
+    river:{label:"The river bank", toks:[["The",[0,0]],["river",[0,3]],["bank",[1,1]]]},
+    cash:{label:"cash at the bank", toks:[["cash",[3,0]],["at",[0,0]],["the",[0,0]],["bank",[1,1]]]}
+  };
+  const q = [1,1]; let k = "river";
+  const seg = el("div",{class:"seg",role:"group","aria-label":"Sentence"},'<button data-k="river">The river bank</button><button data-k="cash">cash at the bank</button>');
+  const tbl = el("div",{class:"scroll"}), res = el("p",{class:"mono"}), meter = el("div");
+  const draw = ()=>{
+    const toks = SENT[k].toks;
+    const sc = toks.map(([,key])=>q[0]*key[0] + q[1]*key[1]);
+    const ex = sc.map(Math.exp), z = ex.reduce((a,b)=>a+b,0), w = ex.map(x=>x/z);
+    const out = [0,1].map(d=>toks.reduce((a,[,key],i)=>a + w[i]*key[d], 0));
+    tbl.innerHTML = '<table class="emb"><thead><tr><td>word</td><td>key</td><td>1. score = query · key</td><td>2. softmax</td></tr></thead><tbody>' +
+      toks.map(([t,key],i)=>'<tr'+(w[i]>.5?' class="hit"':'')+'><td>'+t+'</td><td>['+key.join(", ")+']</td><td>1×'+key[0]+' + 1×'+key[1]+' = '+sc[i]+'</td><td>'+(w[i]*100).toFixed(0)+'%</td></tr>').join("") + '</tbody></table>';
+    res.textContent = "3. blend → new bank = [" + out.map(x=>x.toFixed(2)).join(", ") + "]   (query stays [1, 1])";
+    const x = Math.max(0, Math.min(1, 0.5 + (out[1]-out[0])/6));
+    meter.innerHTML = '<svg viewBox="0 0 360 70" role="img" aria-label="Where bank ends up between money and water"><g font-family="IBM Plex Mono, monospace" font-size="12">' +
+      '<line x1="30" y1="30" x2="330" y2="30" style="stroke:var(--line)" stroke-width="6" stroke-linecap="round"/>' +
+      '<text x="30" y="60" style="fill:var(--muted)">money</text><text x="330" y="60" text-anchor="end" style="fill:var(--muted)">water</text>' +
+      '<circle cx="'+(30+300*x)+'" cy="30" r="10" style="fill:var(--hot)"/></g></svg>';
+    seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.k===k));
+  };
+  seg.addEventListener("click", e=>{ if(e.target.dataset.k){ k = e.target.dataset.k; draw(); } });
+  v.append(seg, el("p",{class:"lbl"},"bank's query: [1, 1] = “is anyone here about money or water?”"), tbl, res, meter); draw();
+ },
+ "<b>Who decides the query?</b> Nobody, by hand. query = bank's row × W_Q, where W_Q is a learned matrix shared by every token. Keys come from another learned matrix, W_K, and the vectors that get blended (values) from a third, W_V. Here values equal keys to keep it simple. All three matrices start random; wrong predictions nudge them until queries pull in useful context, the same way embedding rows learned in 1.2. The matrices are weights (frozen in use); each query, key and value is an activation. I picked [1, 1] so the arithmetic is easy; a real query has thousands of numbers nobody chose. <b>Backend version:</b> a search engine where every document comes back, blended by relevance, instead of only the top hit.");
+
+const ATT = {
+  A:{toks:["The","river","bank","flooded","after","the","storm"], sel:2, w:{2:[.05,.70,.25],3:[.02,.28,.55,.15],6:[.02,.20,.10,.35,.10,.05,.18]}},
+  B:{toks:["I","deposited","cash","at","the","bank"], sel:5, w:{5:[.03,.38,.34,.08,.04,.13]}}
+};
+function attW(s,i){ if(s.w[i]) return s.w[i]; const w = new Array(i+1).fill(0); if(i===0){w[0]=1; return w;}
+  w[i]=.4; w[i-1]+=.3; const r=.3/Math.max(1,i-1); for(let j=0;j<i-1;j++) w[j]+=r; if(i===1) w[0]+=.3;
+  const z=w.reduce((a,b)=>a+b,0); return w.map(x=>x/z); }
+function arcsSVG(toks, sel, w){
+  const gap = 360/toks.length, xs = toks.map((_,i)=>gap*i + gap/2);
+  let s = '<svg viewBox="0 0 360 170" role="img" aria-label="Arcs show how much the selected token attends to each earlier token"><g font-family="IBM Plex Mono, monospace" font-size="11">';
+  for(let j=0;j<=sel;j++){ if(j===sel) continue; const h = 20 + (sel-j)*18, wt = w[j];
+    s += '<path d="M' + xs[sel] + ',125 C' + xs[sel] + ',' + (125-h*1.6) + ' ' + xs[j] + ',' + (125-h*1.6) + ' ' + xs[j] + ',125" fill="none" style="stroke:var(--hot)" stroke-width="' + Math.max(1, wt*16).toFixed(1) + '" stroke-linecap="round" opacity="' + (0.35 + wt*0.65).toFixed(2) + '"/>';
+    s += '<text x="' + xs[j] + '" y="' + (118 - Math.min(80, h*1.15)) + '" text-anchor="middle" style="fill:var(--hot)">' + wt.toFixed(2) + '</text>'; }
+  toks.forEach((t,i)=>{ const st = i===sel ? "fill:var(--hot);font-weight:600" : i>sel ? "fill:var(--muted);opacity:.4" : "fill:var(--ink)";
+    s += '<text data-i="' + i + '" x="' + xs[i] + '" y="145" text-anchor="middle" style="' + st + ';cursor:pointer">' + esc(t) + '</text>'; });
+  s += '<text x="' + xs[sel] + '" y="162" text-anchor="middle" style="fill:var(--muted)" font-size="10">self ' + w[sel].toFixed(2) + '</text>';
+  return s + '</g></svg>';
+}
+add("1.3","Who does each token listen to?",
+ "Tap any word. Arc thickness is how much it listens to each earlier word. Later words are greyed: a token only looks backward (why comes with training, in 1.7).",
+ v=>{
+  let k = "A";
+  const seg = el("div",{class:"seg",role:"group","aria-label":"Sentence"},'<button data-k="A">River</button><button data-k="B">Money</button>');
+  const box = el("div");
+  const draw = ()=>{ const s = ATT[k]; box.innerHTML = arcsSVG(s.toks, s.sel, attW(s, s.sel));
+    box.querySelectorAll("[data-i]").forEach(t=>t.addEventListener("click", ()=>{ s.sel = +t.dataset.i; draw(); }));
+    seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.k===k)); };
+  seg.addEventListener("click", e=>{ if(e.target.dataset.k){ k = e.target.dataset.k; draw(); } });
+  v.append(seg, box); draw();
+ },
+ "The weights for one token always add up to 1: it's a blend. Tap “flooded”: it leans on “bank” (what flooded?) and “river”. Weights here are hand-picked to show the idea; a real model learns them and spreads them over many heads and layers.");
+
+add("1.3","Several heads: one blend per need",
+ "bank needs two things: its setting (from “river”) and its grammar (from “the”). One head has one softmax, so one blend has to split between both needs. Compare.",
+ v=>{
+  let mode = "one";
+  const seg = el("div",{class:"seg",role:"group","aria-label":"How many heads"},'<button data-m="one">One head</button><button data-m="two">Two heads</button>');
+  const box = el("div",{class:"visual"});
+  // values as [setting info, grammar info]
+  const V = {the:[0,1], river:[1,0], bank:[0.2,0.2]};
+  const blend = w=>[0,1].map(d=>Object.keys(w).reduce((a,t)=>a + w[t]*V[t][d], 0));
+  const pct = w=>Object.keys(w).map(t=>'<div class="bar"><span>'+t+'</span><div class="t"><div class="f" style="width:'+(w[t]*100)+'%"></div></div><span class="n">'+Math.round(w[t]*100)+'%</span></div>').join("");
+  const kept = (a,b)=>'<div class="meters"><div class="meter"><b>'+Math.round(a*100)+'%</b><span>setting info kept (river)</span></div><div class="meter"><b>'+Math.round(b*100)+'%</b><span>grammar info kept (the)</span></div></div>';
+  const draw = ()=>{
+    if(mode==="one"){
+      const w = {the:.45, river:.45, bank:.10}, o = blend(w);
+      box.innerHTML = '<p class="lbl">One head, one softmax, asked for both at once:</p><div class="bars">'+pct(w)+'</div>' +
+        '<p class="mono">blend = [' + o.map(x=>x.toFixed(2)).join(", ") + ']</p>' + kept(o[0], o[1]) +
+        '<p class="lbl">Both signals arrive at half strength, mixed into the same numbers.</p>';
+    } else {
+      const wa = {the:.10, river:.80, bank:.10}, wb = {the:.75, river:.15, bank:.10}, a = blend(wa), b = blend(wb);
+      box.innerHTML = '<div class="meters"><div class="visual"><p class="lbl">Head A asks “setting?”</p><div class="bars">'+pct(wa)+'</div><p class="mono">['+a.map(x=>x.toFixed(2)).join(", ")+']</p></div>' +
+        '<div class="visual"><p class="lbl">Head B asks “grammar?”</p><div class="bars">'+pct(wb)+'</div><p class="mono">['+b.map(x=>x.toFixed(2)).join(", ")+']</p></div></div>' +
+        '<p class="mono">stitched: [' + a.concat(b).map(x=>x.toFixed(2)).join(", ") + ']  → × W_O → one vector for bank</p>' + kept(a[0], b[1]) +
+        '<p class="lbl">Each head has its own softmax, so each gives 75–80% to the one word it cares about.</p>';
+    }
+    seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.m===mode));
+  };
+  seg.addEventListener("click", e=>{ if(e.target.dataset.m){ mode = e.target.dataset.m; draw(); } });
+  v.append(seg, box); draw();
+ },
+ "A head is one complete copy of the attention calculation with its own W_Q, W_K, W_V. Heads run at the same time on the same words, independently. Heads split the width rather than adding to it: a model 4,096 wide with 32 heads gives each head 128 numbers, so 32 heads cost about the same as one wide head. Nobody assigns each head's question: they start from different random matrices and gradient nudges each toward whatever helps. The weights here are hand-picked to show the idea. Backend version: fan out one request to several specialized indexes in parallel, then merge the responses.");
+
+add("1.3","Cost grows with the square of the context",
+ "Every token scores every token it can see. Drag the slider: double the tokens, about four times the work.",
+ v=>{
+  const lab = el("label",{class:"lbl",for:"nS"});
+  const s = el("input",{type:"range",id:"nS",min:"2",max:"48",value:"8"});
+  const c = el("canvas",{width:"300",height:"300","aria-label":"Grid of token pairs"});
+  const t = el("div",{class:"meters"});
+  const draw = ()=>{
+    const n = +s.value; lab.textContent = "tokens: " + n;
+    const ctx = c.getContext("2d"); ctx.clearRect(0,0,300,300); const cell = 300/n;
+    for(let i=0;i<n;i++) for(let j=0;j<n;j++){ ctx.fillStyle = j<=i ? css("--accent") : css("--line");
+      ctx.fillRect(j*cell + .5, i*cell + .5, Math.max(1, cell-1), Math.max(1, cell-1)); }
+    t.innerHTML = '<div class="meter"><b>' + (n*n).toLocaleString() + '</b><span>scores for ' + n + ' tokens</span></div>' +
+      '<div class="meter"><b>' + ((2*n)*(2*n)).toLocaleString() + '</b><span>scores for ' + (2*n) + ' tokens (4×)</span></div>';
+  };
+  s.addEventListener("input", draw); v.append(lab, s, c, t); draw();
+ },
+ "8,000 tokens → 64 million scores; 16,000 → 256 million; 128,000 → about 16 billion, per head, per layer. Looking only backward removes about half, which doesn't change how it scales. This is why long context is expensive and why token counts (step 4) matter. Backend version: a self-join done as a nested loop.");
+
+
+/* ---------- Videos (all links verified 2026-11-02) ---------- */
+const VIDS = [
+  ["Watch first","Transformers, the tech behind LLMs","3Blue1Brown · Deep Learning Ch. 5 · ~27 min","https://www.youtube.com/watch?v=wjZofJX0v4M",
+   "The whole system map, then embeddings: the embedding matrix, directions that carry meaning, and the dot product.","Steps 5–9, 11"],
+  ["Watch second","Attention in transformers, step-by-step","3Blue1Brown · Deep Learning Ch. 6 · ~26 min","https://www.youtube.com/watch?v=eMlx5fFNoYc",
+   "Query, key, value, softmax and multiple heads, animated. It also covers the mask, which this course saves for 1.7.","Steps 15–18"],
+  ["Then","Gradient descent, how neural networks learn","3Blue1Brown · Deep Learning Ch. 2","https://www.youtube.com/watch?v=IHZwWFHWa-w",
+   "Training as rolling downhill on an error surface: every number moves in the direction that reduces the error.","Step 14"],
+  ["Then","Backpropagation, intuitively","3Blue1Brown · Deep Learning Ch. 3 · ~12–15 min","https://www.youtube.com/watch?v=Ilg3gGewQ5U",
+   "How each number's nudge is worked out: blame flows backward in proportion to influence.","Step 14, Go deeper"],
+  ["Optional, long","Let's build the GPT Tokenizer","Andrej Karpathy · ~2 h 13 min, hands-on code","https://www.youtube.com/watch?v=zduSFxRajkE",
+   "Builds a real BPE tokenizer from scratch and traces odd LLM behaviour back to tokenization. Watch the opening for the why; the rest is code.","Steps 1–4"]
+];
+add("V","Videos: build the intuition",
+ "Five videos that animate what you just did by hand. Watch in this order. Links open in YouTube.",
+ v=>{
+  VIDS.forEach(([when,title,meta,url,why,maps])=>{
+    const d = el("div",{class:"q"});
+    d.innerHTML = '<span class="tag">' + esc(when) + ' · lesson ' + esc(maps) + '</span>' +
+      '<a href="' + url + '" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600;font-size:1.05rem">' + esc(title) + '</a>' +
+      '<span class="lbl">' + esc(meta) + '</span><p>' + esc(why) + '</p>';
+    v.appendChild(d);
+  });
+ },
+ "If Chapter 2 assumes too much, 3Blue1Brown's Chapter 1, “But what is a Neural Network?”, comes before it in the same series. These cover the same mechanisms as the lesson with different examples; seeing one idea two ways is what makes it stick.");
+
+/* ---------- Questions ---------- */
+const QS = [
+  ["mechanism","q1","Why do LLMs use subword tokens instead of characters or whole words? What breaks at each extreme?"],
+  ["mechanism","q2","Why can't an LLM reliably count the r's in “strawberry”?"],
+  ["consequence","q3","Why does the same paragraph cost more in Hindi than in English, and why can't training the model fix it?"],
+  ["mechanism","q4","Why can't a token ID be fed to the model as a plain number?"],
+  ["mechanism","q5","Nobody labels cat and dog as related. How do their rows end up close, and why does that help the model?"],
+  ["consequence","q6","What breaks without position information? Give one example about order and one about distance."],
+  ["distinction","q7","Which numbers change during training, which during use? How can RoPE work if use changes nothing?"],
+  ["mechanism","q8","Walk through one attention step for “bank”: query, keys, scores, weights, values, result."],
+  ["design","q9","Why use three separate vectors (query, key, value) instead of the token's embedding for everything?"],
+  ["mechanism","q10","Who decides a token's query, and how does it get good at finding useful words?"],
+  ["mechanism","q14","What does softmax do to a list of scores, and why must the results add up to 100%?"],
+  ["mechanism","q15","During training, how does one column of an embedding row get changed? Why does one column move a lot while another doesn't move at all?"],
+  ["design","q16","Why do models run several attention heads instead of one, when the total width is the same?"],
+  ["numbers","q11","Context goes from 8k to 16k tokens. What happens to attention's work, and which backend operation is this like?"],
+  ["transfer","q12","A tokenizer has no piece for four spaces. What happens to cost and context when you send it Python code, and why?"],
+  ["transfer","q13","Hallucination: how does “an LLM is a function, not a lookup table” explain it?"]
+];
+add("✓","Check yourself",
+ "Answer each question out loud or in your notes before looking anything up. If one is hard, go back to its step.",
+ v=>{
+  QS.forEach(([tag,id,p],n)=>{
+    const q = el("div",{class:"q"});
+    q.innerHTML = '<span class="tag">' + (n+1) + ' · ' + esc(tag.replace("warm-up · L1","review · lesson 1")) + '</span><p>' + esc(p) + '</p>';
+    v.appendChild(q);
+  });
+ });
+
+/* ================= shared map drawing ================= */
+function mapSVG(pos, showGroups, picks){
+  const X = x=>20 + x*320, Y = y=>230 - y*210;
+  const col = {a:"--hot", v:"--cool", f:"--accent", m:"--muted"};
+  let s = '<svg viewBox="0 0 360 250" role="img" aria-label="Words as points; similar words cluster after training"><g font-family="IBM Plex Mono, monospace" font-size="12">' +
+    '<rect x="1" y="1" width="358" height="248" rx="8" style="fill:var(--bg);stroke:var(--line)"/>';
+  if(picks){ const [a,b] = picks.map(i=>pos[i]); s += '<line x1="' + X(a[0]) + '" y1="' + Y(a[1]) + '" x2="' + X(b[0]) + '" y2="' + Y(b[1]) + '" style="stroke:var(--ink)" stroke-dasharray="4 3"/>'; }
+  pos.forEach((p,i)=>{ const c = showGroups ? col[MAPW[i][3]] : "--ink", pk = picks && picks.includes(i);
+    s += '<g data-w="' + i + '" style="cursor:' + (picks ? "pointer" : "default") + '"><circle cx="' + X(p[0]) + '" cy="' + Y(p[1]) + '" r="' + (pk ? 8 : 5) + '" style="fill:var(' + c + ')"/>' +
+      '<text x="' + (X(p[0]) + 9) + '" y="' + (Y(p[1]) + 4) + '" style="fill:var(' + c + ')' + (pk ? ";font-weight:600" : "") + '">' + MAPW[i][0] + '</text></g>'; });
+  return s + '</g></svg>';
+}
+
+/* ================= answer store ================= */
+const CH = "L1";
+const answers = {}; let db = null, finished = false, storeText = "Connecting to your answer store…";
+const LS = "ael-lesson-1";
+try{ const s = JSON.parse(localStorage.getItem(LS) || "{}"); Object.assign(answers, s.answers || {}); finished = !!s.finished; }catch(e){}
+function lsSave(){ try{ localStorage.setItem(LS, JSON.stringify({answers, finished, step:cur})); }catch(e){} }
+function setStore(cls, t){ storeText = t; const p = $("#storePill"); if(p){ p.className = "pill " + cls; p.textContent = t; } storeCls = cls; }
+let storeCls = "";
+async function persist(id, body){
+  answers[id] = body; lsSave(); if(!db) return false;
+  const ref = db.doc("answers/" + CH + "-" + id), data = Object.assign({lesson:CH, qid:id}, body);
+  try{ await ref.set(data); return true; }
+  catch(e){ if(e && e.code==="unavailable"){ await new Promise(r=>setTimeout(r, 500 + Math.random()*700)); try{ await ref.set(data); return true; }catch(e2){} }
+    setStore("warn","Couldn't save to the store. Kept on this device; use Copy."); return false; }
+}
+
+/* ================= stepper ================= */
+let cur = 0;
+try{ const s = JSON.parse(localStorage.getItem(LS) || "{}"); if(Number.isInteger(s.step) && s.step < STEPS.length) cur = s.step; }catch(e){}
+const CHS = [["1.1","1.1 Tokens"],["1.2","1.2 Embeddings"],["B","Basics"],["1.3","1.3 Attention"],["V","Videos"],["✓","Questions"]];
+function render(){
+  const st = STEPS[cur], card = $("#card");
+  card.innerHTML = "";
+  card.append(el("span",{class:"step-tag"}, (st.ch==="✓" ? "Questions" : st.ch==="B" ? "Basics" : st.ch==="V" ? "Videos" : "Chapter " + st.ch) + " · step " + (cur+1) + " of " + STEPS.length));
+  card.append(el("h2",{}, esc(st.title)));
+  card.append(el("p",{class:"say"}, esc(st.say)));
+  const v = el("div",{class:"visual"}); card.append(v); st.render(v);
+  if(st.deeper){ const d = el("details",{class:"deeper"},'<summary>Go deeper</summary><p>' + st.deeper + '</p>'); card.append(d); }
+  $("#back").disabled = cur===0; $("#next").disabled = cur===STEPS.length-1;
+  $("#count").textContent = (cur+1) + " / " + STEPS.length;
+  $("#progress").innerHTML = STEPS.map((_,i)=>'<span class="' + (i<=cur?"on":"") + '"></span>').join("");
+  $("#chapters").querySelectorAll("button").forEach(b=>b.setAttribute("aria-current", b.dataset.ch===st.ch));
+  if(storeCls) setStore(storeCls, storeText);
+  lsSave();
+}
+$("#chapters").innerHTML = CHS.map(([k,l])=>'<button data-ch="' + k + '">' + l + '</button>').join("");
+$("#chapters").addEventListener("click", e=>{ const k = e.target.dataset.ch; if(!k) return; cur = STEPS.findIndex(s=>s.ch===k); render(); window.scrollTo(0,0); });
+$("#back").addEventListener("click", ()=>{ if(cur>0){ cur--; render(); window.scrollTo(0,0); } });
+$("#next").addEventListener("click", ()=>{ if(cur<STEPS.length-1){ cur++; render(); window.scrollTo(0,0); } });
+document.addEventListener("keydown", e=>{ if(/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if(e.key==="ArrowRight") $("#next").click(); if(e.key==="ArrowLeft") $("#back").click(); });
+render();
+
+})();
+</script>
+</body>
+</html>
