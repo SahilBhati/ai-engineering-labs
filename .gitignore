@@ -29,3 +29,6 @@ htmlcov/
 
 # Logs
 *.log
+
+# Publish staging (sources copied in for /publish; never committed)
+publish-staging/

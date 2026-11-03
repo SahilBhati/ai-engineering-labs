@@ -1,0 +1,40 @@
+---
+name: publish
+description: Turns approved items from docs/publish-queue.md into site pages and documentation in this repository, one item per run, on a local branch for the owner to review. Use when the user says "publish", "work on the site", "update docs", or has spare tokens to use. Never pushes, never merges, never reads private repositories or folders outside this repository.
+---
+
+# publish: approved items → site and docs, on a local branch
+
+## Boundaries (enforced, not optional)
+
+- Work **only inside this repository**. Never read or write any path outside it,
+  including private vaults or notes. Everything you need is in the queue item and
+  in `publish-staging/`.
+- **Never push and never merge.** A pushed branch on a public repository is
+  already public; the owner pushes after review.
+- One queue item per run. If the queue has no item with status `approved`, stop
+  and say so.
+- No personal data: names of people other than the author, employers' internal
+  details, private paths. If a staged source contains any, stop and report it.
+
+## Steps
+
+1. Read `docs/publish-queue.md`. Take the first item with status `approved`.
+2. Create a branch from `main`: `publish/<YYYY-MM-DD>-<short-slug>`.
+3. Do the item:
+   - **site/**: plain static HTML/CSS/JS, no build step and no dependencies,
+     so it can be served by any static host. Lesson pages: copy from
+     `publish-staging/`, remove the private answer store (no `claude.use`), keep
+     the interactive steps, and add the site header and footer.
+   - **docs/** or a tool README: write for a stranger. Pitch first, then install,
+     quick start, how it works.
+4. Check: open every changed HTML file's inline script with
+   `node -e "new Function(src)"`. Confirm every link you added resolves. Grep the
+   diff for personal paths (`/Users/`) and stop if any appear.
+5. Commit on the branch with a clear message. Set the item's status to
+   `ready for review (branch publish/…)` in the queue file in the same commit.
+6. Report: the branch, files changed, what to look at, and the exact command to
+   publish once approved: `git push -u origin <branch>` and then a pull request.
+
+Done when the branch exists locally with one item done, the queue file shows it
+as ready for review, and nothing has been pushed.
