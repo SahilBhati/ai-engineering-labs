@@ -7,6 +7,12 @@ git ignores.
 
 Statuses: `proposed` → `approved` → `ready for review (branch …)` → `published`.
 
+**Standing permission (owner, 2026-11-02):** changes under `site/` (and this queue
+file) may be committed, pushed and merged to `main` without asking, because the
+site isn't announced yet. Everything else still needs the owner's yes: other
+folders, enabling hosting, announcing the site. The personal-data check stays
+mandatory.
+
 | # | Item | Source | Status |
 | --- | --- | --- | --- |
 | 1 | Site skeleton under `site/`; see **Site brief** below | none | approved (owner, 2026-11-02) |

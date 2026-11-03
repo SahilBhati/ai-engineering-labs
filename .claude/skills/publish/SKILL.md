@@ -1,6 +1,6 @@
 ---
 name: publish
-description: Turns approved items from docs/publish-queue.md into site pages and documentation in this repository, one item per run, on a local branch for the owner to review. Use when the user says "publish", "work on the site", "update docs", or has spare tokens to use. Never pushes, never merges, never reads private repositories or folders outside this repository.
+description: Turns approved items from docs/publish-queue.md into site pages and documentation in this repository, one item per run, on a branch. Use when the user says "publish", "work on the site", "update docs", or has spare tokens to use. Pushes only what a recorded standing permission covers; never reads private repositories or folders outside this repository.
 ---
 
 # publish: approved items → site and docs, on a local branch
@@ -10,7 +10,9 @@ description: Turns approved items from docs/publish-queue.md into site pages and
 - Work **only inside this repository**. Never read or write any path outside it,
   including private vaults or notes. Everything you need is in the queue item and
   in `publish-staging/`.
-- **Never push and never merge.** A pushed branch on a public repository is
+- **Push and merge only what a standing permission in `docs/publish-queue.md`
+  covers** (currently: changes under `site/` and the queue file). Anything else
+  stays on a local branch, because a pushed branch on a public repository is
   already public; the owner pushes after review.
 - One queue item per run. If the queue has no item with status `approved`, stop
   and say so.
@@ -33,8 +35,11 @@ description: Turns approved items from docs/publish-queue.md into site pages and
    diff for personal paths (`/Users/`) and stop if any appear.
 5. Commit on the branch with a clear message. Set the item's status to
    `ready for review (branch publish/…)` in the queue file in the same commit.
-6. Report: the branch, files changed, what to look at, and the exact command to
-   publish once approved: `git push -u origin <branch>` and then a pull request.
+6. If every changed file is covered by a standing permission: merge the branch
+   into `main` (fast-forward), push, and set the item's status to `published`.
+   Otherwise report the branch, the files changed, what to look at, and the
+   command to publish once approved: `git push -u origin <branch>`.
 
-Done when the branch exists locally with one item done, the queue file shows it
-as ready for review, and nothing has been pushed.
+Done when one item is done on a branch and the queue shows its status: `published`
+if a standing permission covered every file and it was pushed, otherwise
+`ready for review` with nothing pushed.
