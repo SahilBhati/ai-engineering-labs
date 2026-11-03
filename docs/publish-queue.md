@@ -35,5 +35,6 @@ agents. Build our own identity: never reuse its name, copy, logo or visual style
 - **Agent-readable:** every content page also as `.md`, plus a `/llms.txt` index.
 - **Build:** static HTML/CSS/JS, no build step, no dependencies, phone-first,
   light and dark themes, served from `site/` by any static host.
-- **Hosting:** not decided. Enabling GitHub Pages or any host is public and needs
-  the owner's yes.
+- **Hosting:** GitHub Pages, approved by the owner 2026-11-02, unannounced. Served
+  from the `gh-pages` branch (a subtree split of `site/`) at
+  https://sahilbhati.github.io/ai-engineering-labs/

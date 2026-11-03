@@ -37,6 +37,10 @@ description: Turns approved items from docs/publish-queue.md into site pages and
    `ready for review (branch publish/…)` in the queue file in the same commit.
 6. If every changed file is covered by a standing permission: merge the branch
    into `main` (fast-forward), push, and set the item's status to `published`.
+   Then redeploy the live site, which GitHub Pages serves from the `gh-pages`
+   branch: `git subtree split --prefix site -b gh-pages && git push origin gh-pages`,
+   and confirm the changed pages return HTTP 200 at
+   https://sahilbhati.github.io/ai-engineering-labs/.
    Otherwise report the branch, the files changed, what to look at, and the
    command to publish once approved: `git push -u origin <branch>`.
 
