@@ -13,6 +13,7 @@
 ## Lessons
 
 - [LLM Foundations 1: Tokens, Embeddings, Attention](lessons/llm-foundations-1/index.md)
+- [LLM Foundations 2: The Block, Sampling, the KV Cache](lessons/llm-foundations-2/index.md)
 
 ## Code
 

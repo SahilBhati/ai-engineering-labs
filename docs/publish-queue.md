@@ -17,7 +17,7 @@ mandatory.
 | --- | --- | --- | --- |
 | 1 | Site skeleton under `site/`; see **Site brief** below | none | published (2026-11-02) |
 | 2 | Lesson 1: tokens, embeddings, basics, attention (interactive, no answer store) | `publish-staging/lesson-1.1-1.3.html` | published (2026-11-02) |
-| 4 | Lesson 2: the transformer block, sampling, the KV cache (interactive, no answer store) | `publish-staging/lesson-1.4-1.6.html` | approved (owner, 2026-11-02) |
+| 4 | Lesson 2: the transformer block, sampling, the KV cache (interactive, no answer store) | `publish-staging/lesson-1.4-1.6.html` | published (2026-11-02) |
 | 3 | AGF docs: README refresh for the profile mechanism, plus `docs/agf.md` explaining the factory model | `tools/agf/` | proposed |
 
 ## Site brief (approved by the owner with item 1, 2026-11-02)

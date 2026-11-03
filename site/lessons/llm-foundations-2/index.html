@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM Foundations 2: The Block, Sampling, the KV Cache</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one step per screen. A big visual you control, two sentences, Next. */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --ink:#16201e; --muted:#5c6a67;
+  --line:#d3dcda; --accent:#0f6e66; --hot:#c2570c; --cool:#2f5fb3;
+  --font-display:"Source Serif 4", Georgia, serif;
+  --font-body:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1514; --surface:#172020; --ink:#e2ebe9; --muted:#9aaaa6;
+    --line:#2b3836; --accent:#4cc2b4; --hot:#f29a50; --cool:#7fa6ee; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#172020; --ink:#e2ebe9; --muted:#9aaaa6;
+  --line:#2b3836; --accent:#4cc2b4; --hot:#f29a50; --cool:#7fa6ee; color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg); color:var(--ink); font:16px/1.55 var(--font-body)}
+main{max-width:760px; margin:0 auto; padding:16px 16px 40px; display:flex; flex-direction:column; gap:14px}
+h1,h2{font-family:var(--font-display); font-weight:600; line-height:1.2; margin:0; text-wrap:balance}
+h1{font-size:1.15rem; color:var(--muted)}
+h2{font-size:1.6rem}
+p{margin:0}
+.chapters{display:flex; gap:6px; flex-wrap:wrap}
+.chapters button{font:500 .8rem var(--font-mono); padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--muted); cursor:pointer}
+.chapters button[aria-current="true"]{border-color:var(--accent); color:var(--accent)}
+.progress{display:flex; gap:3px}
+.progress span{flex:1; height:4px; border-radius:2px; background:var(--line)}
+.progress span.on{background:var(--accent)}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 16px; display:flex; flex-direction:column; gap:14px; min-height:420px}
+.step-tag{font:500 .75rem var(--font-mono); letter-spacing:.06em; text-transform:uppercase; color:var(--accent)}
+.say{font-size:1.05rem; max-width:62ch}
+.visual{display:flex; flex-direction:column; gap:12px}
+details.deeper{border-top:1px solid var(--line); padding-top:10px; color:var(--muted); font-size:.93rem}
+details.deeper summary{cursor:pointer; color:var(--accent); font-weight:500}
+details.deeper p{margin-top:8px}
+.nav{display:flex; gap:8px; justify-content:space-between; align-items:center}
+button{font:500 .95rem var(--font-body); padding:9px 16px; border-radius:8px; border:1px solid var(--accent); background:var(--accent); color:var(--surface); cursor:pointer}
+button.ghost{background:transparent; color:var(--accent)}
+button:disabled{opacity:.4; cursor:not-allowed}
+button:focus-visible, input:focus-visible, textarea:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; flex-wrap:wrap}
+.seg button{border:0; border-radius:0; background:transparent; color:var(--muted); padding:7px 12px; font-size:.88rem}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--surface)}
+.chips{display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start}
+.chip{display:inline-flex; flex-direction:column; align-items:center; gap:2px; padding:6px 9px; border-radius:7px; border:1px solid var(--line); background:var(--bg); font:500 .95rem var(--font-mono); cursor:default}
+.chip small{font-size:.68rem; color:var(--muted)}
+.chip.unk{border-color:var(--hot); color:var(--hot)}
+.chip.byte{border-style:dashed}
+.chip.tap{cursor:pointer}
+.chip.sel{border-color:var(--hot); color:var(--hot); outline:1px solid var(--hot)}
+.chip.dim{opacity:.35}
+.meters{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.meter{background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px 12px}
+.meter b{display:block; font:600 1.4rem var(--font-mono); font-variant-numeric:tabular-nums}
+.meter span{font-size:.8rem; color:var(--muted)}
+input[type=text]{width:100%; font:1rem var(--font-mono); padding:9px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+input[type=range]{width:100%; accent-color:var(--accent)}
+.lbl{font:500 .8rem var(--font-mono); color:var(--muted)}
+svg{max-width:100%; height:auto; display:block}
+.vec{font:500 .95rem var(--font-mono); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px; overflow-x:auto; white-space:nowrap}
+table.emb{border-collapse:collapse; font:500 .85rem var(--font-mono); width:100%}
+table.emb td{padding:5px 6px; border-bottom:1px solid var(--line); text-align:right; font-variant-numeric:tabular-nums}
+table.emb td:first-child, table.emb td:nth-child(2){text-align:left; color:var(--muted)}
+table.emb tr.hit td{background:color-mix(in srgb, var(--hot) 18%, transparent); color:var(--ink)}
+.scroll{overflow-x:auto}
+.bars{display:flex; flex-direction:column; gap:5px}
+.bar{display:grid; grid-template-columns:70px 1fr 44px; gap:8px; align-items:center; font:500 .85rem var(--font-mono)}
+.bar .t{height:12px; border-radius:4px; background:var(--bg); border:1px solid var(--line); overflow:hidden}
+.bar .f{height:100%; background:var(--hot)}
+.bar .n{text-align:right; font-variant-numeric:tabular-nums}
+.grid{display:grid; gap:2px; font:500 .7rem var(--font-mono)}
+.grid div{padding:6px 2px; text-align:center; border-radius:3px}
+.g-ok{background:color-mix(in srgb, var(--accent) 25%, transparent)}
+.g-self{background:color-mix(in srgb, var(--accent) 45%, transparent)}
+.g-no{background:var(--bg); color:var(--muted)}
+.g-cheat{background:color-mix(in srgb, var(--hot) 35%, transparent); color:var(--hot)}
+.g-h{color:var(--muted)}
+canvas{max-width:100%; display:block; border:1px solid var(--line); border-radius:8px; background:var(--bg)}
+.pipe{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font:500 .85rem var(--font-mono)}
+.box{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--bg)}
+.box.lock{border-color:var(--accent)}
+.flyer{display:inline-block; padding:4px 8px; border-radius:6px; background:var(--hot); color:var(--surface); font:500 .78rem var(--font-mono); transition:transform .7s ease, opacity .7s ease}
+.counter{font:500 .9rem var(--font-mono)}
+.q{display:flex; flex-direction:column; gap:6px; border-left:3px solid var(--accent); padding-left:12px}
+.q .tag{font:500 .72rem var(--font-mono); color:var(--accent); text-transform:uppercase; letter-spacing:.05em}
+textarea{width:100%; min-height:84px; font:15px/1.5 var(--font-body); color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:9px 11px; resize:vertical}
+.saved{font:500 .76rem var(--font-mono); color:var(--muted)}
+.pill{font:500 .76rem var(--font-mono); padding:3px 9px; border-radius:999px; border:1px solid var(--line); color:var(--muted)}
+.pill.ok{border-color:var(--accent); color:var(--accent)}
+.pill.warn{border-color:var(--hot); color:var(--hot)}
+.row{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+@media (prefers-reduced-motion: reduce){ .flyer{transition:none} }
+.crumbs{font:500 .85rem var(--font-mono);color:var(--muted)}.crumbs a{color:var(--accent)}footer.lesson{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:.85rem}</style>
+</head>
+<body>
+<main>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="../../">AI Engineering Labs</a> / <a href="../">Lessons</a></nav>
+  <h1>LLM Foundations · Lesson 2: block → sampling → KV cache</h1>
+  <nav class="chapters" id="chapters" aria-label="Jump to a chapter"></nav>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+  <section class="card" id="card" aria-live="polite"></section>
+  <div class="nav">
+    <button class="ghost" id="back">Back</button>
+    <span class="lbl" id="count"></span>
+    <button id="next">Next</button>
+  </div>
+</main>
+<footer class="lesson">LLM Foundations for engineers · lesson 2 · <a href="../../">Home</a> · <a href="index.md">Markdown version</a></footer>
+
+<script>
+(function(){
+"use strict";
+const $ = (s, r=document) => r.querySelector(s);
+const el = (tag, attrs={}, html="") => { const e = document.createElement(tag);
+  for(const k in attrs){ if(k==="class") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
+  if(html) e.innerHTML = html; return e; };
+const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ================= helpers ================= */
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]); }
+function slider(id, label, min, max, stepv, val){
+  const w = el("div",{class:"visual",style:"gap:2px"});
+  w.innerHTML = '<label class="lbl" for="'+id+'"></label><input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="'+stepv+'" value="'+val+'">';
+  const inp = w.querySelector("input"), lab = w.querySelector("label");
+  return {w, inp, set:(t)=>{ lab.textContent = label + ": " + t; }};
+}
+function bars(rows){ // rows: [label, fraction 0..1, text]
+  return '<div class="bars">' + rows.map(([l,f,t])=>'<div class="bar"><span>'+esc(l)+'</span><div class="t"><div class="f" style="width:'+(Math.max(0,Math.min(1,f))*100).toFixed(1)+'%"></div></div><span class="n">'+t+'</span></div>').join("") + '</div>';
+}
+function softmax(xs){ const m = Math.max(...xs), ex = xs.map(x=>Math.exp(x-m)), z = ex.reduce((a,b)=>a+b,0); return ex.map(x=>x/z); }
+function seg(name, options, cur){ // options: [[key,label],...]
+  const s = el("div",{class:"seg",role:"group","aria-label":name}, options.map(([k,l])=>'<button data-k="'+k+'">'+esc(l)+'</button>').join(""));
+  s.sync = c => s.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.k===c));
+  s.sync(cur); return s;
+}
+const fmtB = b => b >= 1e9 ? (b/1e9).toFixed(1) + " GB" : b >= 1e6 ? (b/1e6).toFixed(1) + " MB" : (b/1e3).toFixed(0) + " KB";
+const fmtN = n => n >= 1e9 ? (n/1e9).toFixed(2) + "B" : n >= 1e6 ? (n/1e6).toFixed(1) + "M" : n.toLocaleString("en-US");
+
+/* ================= steps ================= */
+const STEPS = [];
+const add = (ch, title, say, render, deeper) => STEPS.push({ch, title, say, render, deeper});
+
+/* ---------- 1.4 Transformer block (conceptual) ---------- */
+add("1.4","After attention, each token thinks on its own",
+ "A block has two parts: attention moves information between tokens, then a small network (the MLP) processes each token by itself. Its neurons work like detectors. Slide bank's water-ness and watch which ones fire.",
+ v=>{
+  const s = slider("mw","bank's water-ness (money-ness fixed at 0.5)",0,3,0.1,1.7);
+  const out = el("div",{class:"visual"});
+  const N = [["water place",[0,1],-1.0],["money place",[1,0],-1.0],["flood risk",[-0.3,1],-1.8]];
+  const draw = ()=>{
+    const x = [0.5, +s.inp.value]; s.set(x[1].toFixed(1));
+    const rows = N.map(([n,w,b])=>{ const pre = w[0]*x[0] + w[1]*x[1] + b, o = Math.max(0, pre);
+      return {n, pre, o, txt: w[0]+"×"+x[0]+" + "+w[1]+"×"+x[1].toFixed(1)+" "+(b<0?"− "+(-b):"+ "+b)}; });
+    out.innerHTML = '<table class="emb"><thead><tr><td>neuron</td><td>dot product + bias</td><td>= </td><td>fires</td></tr></thead><tbody>' +
+      rows.map(r=>'<tr'+(r.o>0?' class="hit"':'')+'><td>'+r.n+'</td><td>'+r.txt+'</td><td>'+r.pre.toFixed(2)+'</td><td>'+r.o.toFixed(2)+'</td></tr>').join("") +
+      '</tbody></table>' + bars(rows.map(r=>[r.n, r.o/2.5, r.o.toFixed(2)]));
+  };
+  s.inp.addEventListener("input", draw); v.append(s.w, out); draw();
+ },
+ "Each neuron is a dot product (Basics) plus a bias, then a rule that turns negatives into 0 (ReLU), so it either fires or stays silent. Real MLPs have thousands of neurons per token and nobody labels them; these three are hand-made to show the idea. The MLP holds about two-thirds of a block's parameters, and much of what a model “knows” is thought to live there. Backend version: a bank of learned feature flags evaluated per request.");
+
+add("1.4","The residual stream: add, don't replace",
+ "Each block adds its result to the token's vector instead of overwriting it. Toggle the residual connection and watch how much of the original token survives 12 blocks.",
+ v=>{
+  let on = true;
+  const sg = seg("Residual", [["on","Residual: on"],["off","Residual: off"]], "on");
+  const out = el("div");
+  const draw = ()=>{
+    const rows = []; for(let L=1; L<=12; L++){ const kept = on ? 1 : Math.pow(0.7, L); rows.push(["after "+L, kept, Math.round(kept*100)+"%"]); }
+    out.innerHTML = bars(rows) + '<p class="lbl">' + (on ? "x + f(x): the original is still in the sum after every block." : "x → f(x): each block overwrites; the original fades (illustrative 30% loss per block).") + '</p>';
+    sg.sync(on ? "on" : "off");
+  };
+  sg.addEventListener("click", e=>{ if(e.target.dataset.k){ on = e.target.dataset.k==="on"; draw(); } });
+  v.append(sg, out); draw();
+ },
+ "The stream is the token's vector flowing through every block; attention and the MLP each read it and add something back. It also makes deep models trainable: the gradient nudges from Basics flow straight back through the additions. Before each part, normalization (LayerNorm or RMSNorm) rescales the vector so the numbers don't blow up. Backend version: an append-only event stream that every stage adds to, instead of each stage rewriting the record.");
+
+add("1.4","Stack the blocks: where the parameters live",
+ "A model is the same block repeated. Each block has about 12 × width² parameters, and storing them takes 2 bytes each at 16-bit. Move the width and depth.",
+ v=>{
+  const sd = slider("pd","width (numbers per token)",512,8192,512,4096), sl = slider("pl","layers (blocks)",1,100,1,32);
+  const out = el("div",{class:"meters"});
+  const draw = ()=>{
+    const d = +sd.inp.value, L = +sl.inp.value; sd.set(d); sl.set(L);
+    const blocks = 12*d*d*L, emb = 128000*d, total = blocks + emb, bytes = total*2;
+    out.innerHTML = '<div class="meter"><b>'+fmtN(total)+'</b><span>parameters (blocks '+fmtN(blocks)+' + embeddings '+fmtN(emb)+')</span></div>' +
+      '<div class="meter"><b>'+fmtB(bytes)+'</b><span>to hold the weights at 16-bit · '+Math.ceil(bytes/80e9)+' × 80 GB GPU</span></div>';
+  };
+  [sd,sl].forEach(s=>s.inp.addEventListener("input", draw)); v.append(sd.w, sl.w, out); draw();
+ },
+ "Where 12 × width² comes from: attention uses 4 width × width matrices (query, key, value, output), and the MLP widens each token 4× and back, which is 8 × width². Embeddings assume a 128k vocabulary. Real models vary (grouped-query attention shrinks the attention part), so treat this as an estimate. Width 4,096 with 32 layers gives about 7 billion parameters and about 14 GB, the size class of common open 7–8B models. For serving, two facts follow: the weights must fit in GPU memory, and generating each token reads all of them once.");
+
+/* ---------- 1.5 Logits and sampling ---------- */
+const VOCAB = [["flooded",[0.2,2.0]],["collapsed",[0.3,1.4]],["account",[2.0,0.1]],["closed",[1.2,0.8]],["the",[0.1,0.1]]];
+const CTX = {river:{label:"The river bank…", v:[0.46,1.70]}, money:{label:"cash at the bank…", v:[2.29,0.25]}};
+function logitsFor(v){ return VOCAB.map(([,r])=>r[0]*v[0] + r[1]*v[1]); }
+
+add("1.5","The last vector scores every token in the vocabulary",
+ "After the last block, the final vector is compared with a row for every vocabulary token (a dot product). Those scores are the logits; softmax turns them into probabilities. Switch the context.",
+ v=>{
+  let k = "river";
+  const sg = seg("Context", [["river","The river bank…"],["money","cash at the bank…"]], k);
+  const out = el("div",{class:"visual"});
+  const draw = ()=>{
+    const fv = CTX[k].v, lg = logitsFor(fv), p = softmax(lg);
+    out.innerHTML = '<p class="mono">final vector for “bank” = [' + fv.join(", ") + '] (the blends from Lesson 1)</p>' +
+      '<table class="emb"><thead><tr><td>next token</td><td>its row</td><td>logit = row · vector</td><td>probability</td></tr></thead><tbody>' +
+      VOCAB.map(([t,r],i)=>'<tr'+(p[i]>0.4?' class="hit"':'')+'><td>'+t+'</td><td>['+r.join(", ")+']</td><td>'+lg[i].toFixed(2)+'</td><td>'+(p[i]*100).toFixed(0)+'%</td></tr>').join("") +
+      '</tbody></table>';
+    sg.sync(k);
+  };
+  sg.addEventListener("click", e=>{ if(e.target.dataset.k){ k = e.target.dataset.k; draw(); } });
+  v.append(sg, out); draw();
+ },
+ "The table of rows is the unembedding matrix: one row per vocabulary token, the same shape as the embedding table (some models share the two). Real models score about 100k tokens at every step. Backend version: brute-force ranking of every candidate on every request, then turning scores into shares.");
+
+add("1.5","Temperature: how sharp the choice is",
+ "Before softmax, the logits are divided by the temperature. Low temperature sharpens toward the top token, high temperature flattens. Drag it.",
+ v=>{
+  const s = slider("tt","temperature",0.1,2,0.05,1);
+  const out = el("div");
+  const lg = logitsFor(CTX.river.v);
+  const draw = ()=>{
+    const T = +s.inp.value; s.set(T.toFixed(2));
+    const p = softmax(lg.map(x=>x/T));
+    out.innerHTML = bars(VOCAB.map(([t],i)=>[t, p[i], (p[i]*100).toFixed(1)+"%"])) +
+      '<p class="lbl">logits ÷ ' + T.toFixed(2) + ' = [' + lg.map(x=>(x/T).toFixed(2)).join(", ") + '] → softmax</p>';
+  };
+  s.inp.addEventListener("input", draw); v.append(s.w, out); draw();
+ },
+ "Dividing by a small number stretches the gaps between logits, and softmax's exponent turns stretched gaps into a near-certain winner. As temperature approaches 0 you get greedy decoding: always the top token. Even at temperature 0, a served model can occasionally differ between runs, because tiny floating-point differences change when requests are batched differently.");
+
+add("1.5","Sampling: roll the dice, but cut the tail",
+ "The next token is drawn at random by these probabilities. Top-p keeps only the most likely tokens that together reach p, so unlikely ones can't be picked. Sample 50 times.",
+ v=>{
+  const st = slider("st","temperature",0.1,2,0.05,1.2), sp = slider("sp","top-p",0.5,1,0.05,1);
+  const btn = el("button",{},"Sample 50 tokens");
+  const out = el("div"), hist = el("div");
+  const lg = logitsFor(CTX.river.v);
+  const dist = ()=>{
+    const T = +st.inp.value, P = +sp.inp.value; st.set(T.toFixed(2)); sp.set(P.toFixed(2));
+    const p = softmax(lg.map(x=>x/T)), order = p.map((x,i)=>i).sort((a,b)=>p[b]-p[a]);
+    const keep = new Set(); let cum = 0; for(const i of order){ keep.add(i); cum += p[i]; if(cum >= P - 1e-9) break; }
+    const z = [...keep].reduce((a,i)=>a+p[i],0);
+    return p.map((x,i)=>keep.has(i) ? x/z : 0);
+  };
+  const draw = ()=>{ const q = dist(); out.innerHTML = '<p class="lbl">probabilities after top-p (cut tokens show 0)</p>' + bars(VOCAB.map(([t],i)=>[t, q[i], (q[i]*100).toFixed(0)+"%"])); };
+  btn.addEventListener("click", ()=>{
+    const q = dist(), cnt = q.map(()=>0);
+    for(let n=0; n<50; n++){ let r = Math.random(), i = 0; while(i < q.length-1 && (r -= q[i]) > 0) i++; cnt[i]++; }
+    hist.innerHTML = '<p class="lbl">50 draws</p>' + bars(VOCAB.map(([t],i)=>[t, cnt[i]/50, cnt[i]+"×"]));
+  });
+  [st,sp].forEach(s=>s.inp.addEventListener("input", ()=>{ hist.innerHTML = ""; draw(); }));
+  v.append(st.w, sp.w, out, btn, hist); draw();
+ },
+ "Top-k is the blunter cousin: keep the k best tokens. Sampling happens once per token, so a long answer is hundreds of dice rolls, and one unlucky pick can steer everything after it. Backend version: weighted random load balancing that drops low-weight backends before choosing.");
+
+/* ---------- 1.6 Generation and the KV cache (deep) ---------- */
+const PROMPT = ["The","river","bank"], CONT = ["flooded","after","heavy","rain","last","night","."];
+add("1.6","Generation is a loop: one token per pass",
+ "The model only ever predicts one next token. To write more, it appends that token and runs again. Press Next token and watch how much work each pass repeats.",
+ v=>{
+  let n = 0;
+  const toks = el("div",{class:"chips"}), cnt = el("div",{class:"meters"});
+  const btn = el("button",{},"Next token"), rst = el("button",{class:"ghost"},"Reset");
+  const draw = ()=>{
+    const seq = PROMPT.concat(CONT.slice(0,n));
+    toks.innerHTML = seq.map((t,i)=>'<span class="chip'+(i>=PROMPT.length?' sel':'')+'">'+esc(t)+'</span>').join("");
+    let nocache = 0; for(let i=0;i<=n;i++) nocache += PROMPT.length + i;
+    const cache = PROMPT.length + n;
+    cnt.innerHTML = '<div class="meter"><b>'+nocache+'</b><span>token positions processed, recomputing everything each pass</span></div>' +
+      '<div class="meter"><b>'+cache+'</b><span>token positions processed, reusing past work</span></div>';
+    btn.disabled = n >= CONT.length;
+  };
+  btn.addEventListener("click", ()=>{ n++; draw(); }); rst.addEventListener("click", ()=>{ n = 0; draw(); });
+  const r = el("div",{class:"row"}); r.append(btn, rst);
+  v.append(toks, r, cnt); draw();
+ },
+ "Each pass runs the whole stack of blocks. Without reuse, pass k reprocesses all k earlier tokens, even though their keys and values haven't changed (a token only looks backward, so later tokens can't change earlier ones). The next steps show what gets reused.");
+
+add("1.6","Without a cache, work grows with the square of the length",
+ "Recomputing every earlier token on every pass adds up fast. Move the prompt and output lengths and compare.",
+ v=>{
+  const sp = slider("qp","prompt tokens",100,8000,100,2000), so = slider("qo","output tokens",10,2000,10,500);
+  const out = el("div",{class:"meters"});
+  const draw = ()=>{
+    const p = +sp.inp.value, n = +so.inp.value; sp.set(p); so.set(n);
+    const nocache = n*p + n*(n-1)/2, cache = p + n;
+    out.innerHTML = '<div class="meter"><b>'+fmtN(nocache)+'</b><span>positions processed without a cache</span></div>' +
+      '<div class="meter"><b>'+fmtN(cache)+'</b><span>with a cache · '+Math.round(nocache/cache)+'× less</span></div>';
+  };
+  [sp,so].forEach(s=>s.inp.addEventListener("input", draw)); v.append(sp.w, so.w, out); draw();
+ },
+ "Without a cache: output token k reprocesses the prompt plus k earlier outputs, so the total is n × prompt + n²/2. With a cache, each token is processed once: prompt + n. Backend version: recomputing a running total from scratch on every request versus keeping the running total.");
+
+add("1.6","The KV cache: compute keys and values once, keep them",
+ "Earlier tokens' keys and values never change, so the model stores them. Each new token computes only its own query, key and value, then reads the rest from the cache. Step through.",
+ v=>{
+  let n = 0; const LAYERS = 3;
+  const grid = el("div",{class:"scroll"}), cnt = el("p",{class:"counter"});
+  const btn = el("button",{},"Next token"), rst = el("button",{class:"ghost"},"Reset");
+  const draw = ()=>{
+    const seq = PROMPT.concat(CONT.slice(0,n)), last = seq.length-1;
+    let h = '<table class="emb"><thead><tr><td>token</td>'; for(let l=1;l<=LAYERS;l++) h += '<td>layer '+l+' K,V</td>'; h += '</tr></thead><tbody>';
+    seq.forEach((t,i)=>{ const isNew = n>0 ? i===last : true;
+      h += '<tr'+(isNew?' class="hit"':'')+'><td>'+esc(t)+'</td>'; for(let l=1;l<=LAYERS;l++) h += '<td>'+(isNew ? 'computed now' : 'read from cache')+'</td>'; h += '</tr>'; });
+    grid.innerHTML = h + '</tbody></table>';
+    cnt.textContent = n===0 ? "Prefill: all "+PROMPT.length+" prompt tokens computed in one parallel pass." :
+      "This step: 1 token × "+LAYERS+" layers computed · "+(seq.length-1)+" tokens × "+LAYERS+" layers read from cache.";
+    btn.disabled = n >= CONT.length;
+  };
+  btn.addEventListener("click", ()=>{ n++; draw(); }); rst.addEventListener("click", ()=>{ n = 0; draw(); });
+  const r = el("div",{class:"row"}); r.append(btn, rst);
+  v.append(r, grid, cnt); draw();
+ },
+ "Queries aren't cached: only the newest token asks a question each step. The cache grows by one row per token, per layer, and lives in GPU memory for as long as the request runs. So each decode step does little math but reads a lot of memory: all the weights plus the whole cache, to produce one token. That's why decode is limited by memory bandwidth. Backend version: write-once memoization keyed by position, in an append-only store.");
+
+add("1.6","Prefill and decode are two different jobs",
+ "The prompt is processed in one parallel pass (prefill), which sets the time to first token. Then tokens come out one at a time (decode), which sets the speed per token. Move the lengths.",
+ v=>{
+  const sp = slider("fp","prompt tokens",100,32000,100,4000), so = slider("fo","output tokens",10,2000,10,400);
+  const out = el("div",{class:"visual"});
+  const PRE = 10000, DEC = 40;
+  const draw = ()=>{
+    const p = +sp.inp.value, n = +so.inp.value; sp.set(p); so.set(n);
+    const ttft = p/PRE, dec = n/DEC, tot = ttft + dec;
+    out.innerHTML = '<div style="display:flex;height:22px;border-radius:6px;overflow:hidden;border:1px solid var(--line)">' +
+      '<div style="width:'+(ttft/tot*100)+'%;background:var(--accent)" title="prefill"></div><div style="width:'+(dec/tot*100)+'%;background:var(--hot)" title="decode"></div></div>' +
+      '<div class="meters"><div class="meter"><b>'+ttft.toFixed(2)+' s</b><span>time to first token (prefill)</span></div>' +
+      '<div class="meter"><b>'+dec.toFixed(1)+' s</b><span>decode, at '+(1000/DEC)+' ms per token</span></div></div>' +
+      '<p class="lbl">Toy rates for one request on one GPU: prefill 10,000 tokens/s, decode 40 tokens/s. Real numbers depend on the model and hardware.</p>';
+  };
+  [sp,so].forEach(s=>s.inp.addEventListener("input", draw)); v.append(sp.w, so.w, out); draw();
+ },
+ "Prefill is compute-bound: thousands of tokens' worth of math in parallel. Decode is memory-bound: one token's math per full read of the weights and cache. That's why serving systems batch many users' decode steps together, sharing each read of the weights (continuous batching). The metrics interviewers use: TTFT (time to first token), TPOT or ITL (time per output token), and throughput (tokens per second across all users).");
+
+add("1.6","How big is the KV cache?",
+ "Per token, every layer stores one key and one value per KV head. Multiply it out: the cache, not the weights, often decides how many users fit on a GPU.",
+ v=>{
+  const sL = slider("kl","layers",8,128,1,80), sH = slider("kh","KV heads",1,64,1,8), sD = slider("kd","head size",64,256,64,128),
+        sC = slider("kc","context per request (tokens)",1024,131072,1024,8192), sB = slider("kb","bytes per number (2 = 16-bit, 1 = 8-bit)",1,2,1,2);
+  const out = el("div",{class:"visual"});
+  const draw = ()=>{
+    const L = +sL.inp.value, H = +sH.inp.value, D = +sD.inp.value, C = +sC.inp.value, B = +sB.inp.value;
+    sL.set(L); sH.set(H); sD.set(D); sC.set(C.toLocaleString("en-US")); sB.set(B);
+    const perTok = 2*L*H*D*B, perReq = perTok*C;
+    const free = 2*80e9 - 70e9*2; // two 80 GB GPUs holding 70B weights at 16-bit
+    out.innerHTML = '<p class="mono">2 (K and V) × '+L+' layers × '+H+' heads × '+D+' × '+B+' bytes = '+fmtB(perTok)+' per token</p>' +
+      '<div class="meters"><div class="meter"><b>'+fmtB(perReq)+'</b><span>per request at '+C.toLocaleString("en-US")+' tokens</span></div>' +
+      '<div class="meter"><b>'+Math.max(0, Math.floor(free/perReq))+'</b><span>such requests fit on 2 × 80 GB after a 70B model\'s 140 GB of weights (20 GB left)</span></div></div>';
+  };
+  [sL,sH,sD,sC,sB].forEach(s=>s.inp.addEventListener("input", draw)); v.append(sL.w,sH.w,sD.w,sC.w,sB.w,out); draw();
+ },
+ "The defaults match a 70B-class model with grouped-query attention (80 layers, 8 KV heads, head size 128): about 330 KB per token and 2.7 GB per 8K-token request, so only about 7 such requests fit beside the weights on two 80 GB GPUs. The levers are exactly the interview topics: fewer KV heads (grouped-query attention), an 8-bit cache (halves it; try bytes = 1), paged allocation so memory isn't wasted on fragments (PagedAttention, in vLLM), and sharing the cache for identical prompt prefixes (prefix caching).");
+
+add("1.6","Why context windows have a limit",
+ "Three costs grow with context: KV memory grows in line with it, attention work in prefill grows with its square, and the model only learned positions up to the length it was trained on. Drag the context.",
+ v=>{
+  const s = slider("cw","context length (tokens)",1024,1048576,1024,131072);
+  const out = el("div",{class:"meters"});
+  const draw = ()=>{
+    const C = +s.inp.value; s.set(C.toLocaleString("en-US"));
+    const kv = 2*80*8*128*2*C, pairs = C*C/2;
+    out.innerHTML = '<div class="meter"><b>'+fmtB(kv)+'</b><span>KV cache for one request (70B-class, 16-bit)</span></div>' +
+      '<div class="meter"><b>'+fmtN(pairs)+'</b><span>attention scores in prefill, per head per layer</span></div>';
+  };
+  s.inp.addEventListener("input", draw); v.append(s.w, out); draw();
+ },
+ "Long-context models extend the trained range (RoPE scaling and long-context training) and cut the costs (grouped-query attention, smarter attention kernels), but memory and compute still grow with length. That's why serving systems cap context per tier, and why a 1M-token request costs far more than a short one. This is the bridge to 1.9, inference economics.");
+
+/* ---------- Videos (verified 2026-11-02) ---------- */
+const VIDS = [
+  ["Watch","How might LLMs store facts","3Blue1Brown · Deep Learning Ch. 7","https://www.youtube.com/watch?v=9-Jl0dxWQs8",
+   "The MLP part of the block: neurons as detectors and where facts may live.","Steps 1–3"],
+  ["Optional, long","Let's build GPT: from scratch, in code, spelled out","Andrej Karpathy · hands-on code","https://www.youtube.com/watch?v=kCc8FmEb1nY",
+   "Builds a small GPT end to end, including the block, sampling and the generation loop. Useful once you want to see it in code.","Steps 1–9"]
+];
+add("V","Videos: build the intuition",
+ "Watch the first; the second is for when you want to see it all in code. Links open in YouTube.",
+ v=>{
+  VIDS.forEach(([when,title,meta,url,why,maps])=>{
+    const d = el("div",{class:"q"});
+    d.innerHTML = '<span class="tag">'+esc(when)+' · lesson '+esc(maps)+'</span>' +
+      '<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600;font-size:1.05rem">'+esc(title)+'</a>' +
+      '<span class="lbl">'+esc(meta)+'</span><p>'+esc(why)+'</p>';
+    v.appendChild(d);
+  });
+ });
+
+/* ---------- Questions ---------- */
+const QS = [
+  ["warm-up · L1","w1","Why do LLMs use subword tokens instead of characters or whole words?"],
+  ["warm-up · L1","w2","Who decides a token's query, and how does it get good at finding useful words?"],
+  ["warm-up · L1","w3","What does softmax do to a list of scores, and why must the results add up to 100%?"],
+  ["warm-up · L1","w4","Why run several attention heads instead of one at the same total width?"],
+  ["warm-up · L1","w5","Context goes from 8k to 16k tokens. What happens to attention's work in prefill, and why?"],
+  ["mechanism","q1","What does the MLP do that attention doesn't?"],
+  ["mechanism","q2","What is the residual stream, and what would break without it?"],
+  ["numbers","q3","Estimate the parameters and the 16-bit memory of a model with width 4,096 and 32 layers. Show the formula."],
+  ["mechanism","q4","How does the final vector become a probability for every token in the vocabulary?"],
+  ["mechanism","q5","What does temperature do, mechanically? What happens as it approaches 0?"],
+  ["design","q6","What does top-p do, and why would you use it?"],
+  ["mechanism","q7","Why does generating without a cache take work that grows with the square of the output length?"],
+  ["mechanism","q8","What exactly does the KV cache store, and why can it be reused?"],
+  ["distinction","q9","Prefill vs decode: which sets time to first token, which sets time per token, and why are they different kinds of work?"],
+  ["numbers","q10","Compute the KV cache per token and per 8K-token request for 80 layers, 8 KV heads, head size 128, 16-bit."],
+  ["consequence","q11","A 70B model on two 80 GB GPUs: why do only a handful of 8K-context requests fit at once? Name two ways to fit more."],
+  ["transfer","q12","Every request to a chatbot starts with the same 2,000-token system prompt. How could the server avoid redoing that work?"],
+  ["backend","q13","Which backend pattern is the KV cache like, and which is the residual stream like?"]
+];
+add("✓","Check yourself",
+ "Answer each question out loud or in your notes before looking anything up. If one is hard, go back to its step.",
+ v=>{
+  QS.forEach(([tag,id,p],n)=>{
+    const q = el("div",{class:"q"});
+    q.innerHTML = '<span class="tag">' + (n+1) + ' · ' + esc(tag.replace("warm-up · L1","review · lesson 1")) + '</span><p>' + esc(p) + '</p>';
+    v.appendChild(q);
+  });
+ });
+
+/* ================= answer store ================= */
+const CH = "L2";
+const answers = {}; let db = null, finished = false, storeText = "Connecting to your answer store…";
+const LS = "ael-lesson-2";
+try{ const s = JSON.parse(localStorage.getItem(LS) || "{}"); Object.assign(answers, s.answers || {}); finished = !!s.finished; }catch(e){}
+function lsSave(){ try{ localStorage.setItem(LS, JSON.stringify({answers, finished, step:cur})); }catch(e){} }
+function setStore(cls, t){ storeText = t; const p = $("#storePill"); if(p){ p.className = "pill " + cls; p.textContent = t; } storeCls = cls; }
+let storeCls = "";
+async function persist(id, body){
+  answers[id] = body; lsSave(); if(!db) return false;
+  const ref = db.doc("answers/" + CH + "-" + id), data = Object.assign({lesson:CH, qid:id}, body);
+  try{ await ref.set(data); return true; }
+  catch(e){ if(e && e.code==="unavailable"){ await new Promise(r=>setTimeout(r, 500 + Math.random()*700)); try{ await ref.set(data); return true; }catch(e2){} }
+    setStore("warn","Couldn't save to the store. Kept on this device; use Copy."); return false; }
+}
+
+/* ================= stepper ================= */
+let cur = 0;
+try{ const s = JSON.parse(localStorage.getItem(LS) || "{}"); if(Number.isInteger(s.step) && s.step < STEPS.length) cur = s.step; }catch(e){}
+const CHS = [["1.4","1.4 Block"],["1.5","1.5 Sampling"],["1.6","1.6 KV cache"],["V","Videos"],["✓","Questions"]];
+function render(){
+  const st = STEPS[cur], card = $("#card");
+  card.innerHTML = "";
+  card.append(el("span",{class:"step-tag"}, (st.ch==="✓" ? "Questions" : st.ch==="B" ? "Basics" : st.ch==="V" ? "Videos" : "Chapter " + st.ch) + " · step " + (cur+1) + " of " + STEPS.length));
+  card.append(el("h2",{}, esc(st.title)));
+  card.append(el("p",{class:"say"}, esc(st.say)));
+  const v = el("div",{class:"visual"}); card.append(v); st.render(v);
+  if(st.deeper){ const d = el("details",{class:"deeper"},'<summary>Go deeper</summary><p>' + st.deeper + '</p>'); card.append(d); }
+  $("#back").disabled = cur===0; $("#next").disabled = cur===STEPS.length-1;
+  $("#count").textContent = (cur+1) + " / " + STEPS.length;
+  $("#progress").innerHTML = STEPS.map((_,i)=>'<span class="' + (i<=cur?"on":"") + '"></span>').join("");
+  $("#chapters").querySelectorAll("button").forEach(b=>b.setAttribute("aria-current", b.dataset.ch===st.ch));
+  if(storeCls) setStore(storeCls, storeText);
+  lsSave();
+}
+$("#chapters").innerHTML = CHS.map(([k,l])=>'<button data-ch="' + k + '">' + l + '</button>').join("");
+$("#chapters").addEventListener("click", e=>{ const k = e.target.dataset.ch; if(!k) return; cur = STEPS.findIndex(s=>s.ch===k); render(); window.scrollTo(0,0); });
+$("#back").addEventListener("click", ()=>{ if(cur>0){ cur--; render(); window.scrollTo(0,0); } });
+$("#next").addEventListener("click", ()=>{ if(cur<STEPS.length-1){ cur++; render(); window.scrollTo(0,0); } });
+document.addEventListener("keydown", e=>{ if(/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if(e.key==="ArrowRight") $("#next").click(); if(e.key==="ArrowLeft") $("#back").click(); });
+render();
+
+})();
+</script>
+</body>
+</html>
