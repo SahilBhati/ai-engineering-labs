@@ -9,11 +9,11 @@ Statuses: `proposed` → `approved` → `ready for review (branch …)` → `pub
 
 | # | Item | Source | Status |
 | --- | --- | --- | --- |
-| 1 | Site skeleton under `site/`; see **Site brief** below | none | proposed |
+| 1 | Site skeleton under `site/`; see **Site brief** below | none | approved (owner, 2026-11-02) |
 | 2 | Lesson 1: tokens, embeddings, basics, attention (interactive, no answer store) | `publish-staging/lesson-1.1-1.3.html` | proposed |
 | 3 | AGF docs: README refresh for the profile mechanism, plus `docs/agf.md` explaining the factory model | `tools/agf/` | proposed |
 
-## Site brief (draft, 2026-11-02)
+## Site brief (approved by the owner with item 1, 2026-11-02)
 
 Reference for *structure only*: aihero.dev, a learning site built around free
 tutorials, courses and events, where public pages also exist as Markdown for
