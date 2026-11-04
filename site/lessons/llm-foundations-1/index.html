@@ -185,6 +185,7 @@ html[data-dir="back"]::view-transition-new(lesson-card){animation-name:ael-in-ba
 .panel.analogy{border-left:3px solid var(--accent)}
 .panel.analogy .panel-l{color:var(--accent)}
 .panel.evidence{border-style:dashed}
+.panel a, .deeper a{color:var(--accent)}
 .panel .duo{display:grid; grid-template-columns:1fr 1fr; gap:12px}
 .panel .duo > div{display:flex; flex-direction:column; gap:4px}
 .panel .duo b{font-size:.875rem}
@@ -751,6 +752,7 @@ add("✓","Check yourself",
   });
  });
 
+
 /* ================= shared map drawing ================= */
 function mapSVG(pos, showGroups, picks){
   const X = x=>20 + x*320, Y = y=>230 - y*210;
@@ -765,6 +767,119 @@ function mapSVG(pos, showGroups, picks){
       '<text x="' + (X(p[0]) + dx) + '" y="' + (Y(p[1]) + dy) + '" text-anchor="' + anc + '" style="fill:var(' + c + ')' + (pk ? ";font-weight:600" : "") + '">' + MAPW[i][0] + '</text></g>'; });
   return s + '</g></svg>';
 }
+
+
+/* ---------- Explanation panels for every Lesson 1 step (attached by step title) ---------- */
+const DUO = (a, b) => '<div class="duo"><div><b>Everyday</b><span>' + a + '</span></div><div><b>Technical</b><span>' + b + '</span></div></div>';
+const SRC = (href, text) => ' <a href="' + href + '">' + text + ' ↗</a>';
+const PANELS = {
+  "Models read numbers, not text": {
+    what: "<p>A <b>tokenizer</b> splits text into <b>tokens</b> (pieces from a fixed list called the <b>vocabulary</b>) and replaces each with its <b>token ID</b>, a number. The model only ever sees these numbers.</p>",
+    analogy: DUO("A library catalogue: books are found by call number, not by reading every cover. The number stands for the book.",
+                 "A lexer turning source code into tokens before the parser runs, combined with a dictionary encoder (like Huffman or gzip) that maps frequent pieces to codes."),
+    real: "<p>Modern tokenizers use <b>byte-pair encoding (BPE)</b>: start from single bytes, then repeatedly merge the most frequent neighbouring pair into a new token, until the vocabulary reaches its target size (roughly 50k–200k). Training the tokenizer happens once, before the model is trained, and then it's frozen.</p>",
+    evidence: "<p>Subword units let a model with a fixed vocabulary handle any word, including rare and unknown ones, by spelling them from smaller pieces." + SRC("https://arxiv.org/abs/1508.07909","Sennrich et al., Neural Machine Translation of Rare Words with Subword Units (2015)") + "</p>"},
+  "Choose the size of the pieces": {
+    what: "<p>The piece size is a trade-off between <b>sequence length</b> (how many tokens a text becomes) and <b>vocabulary size</b> (how many distinct pieces the model must know).</p>",
+    analogy: DUO("Packing for a move: tiny boxes mean hundreds of trips; one giant box per room is impossible to lift. Medium boxes win.",
+                 "Choosing a page or chunk size: too small and per-item overhead dominates; too large and you waste space on things you rarely need."),
+    real: "<p>Characters make sequences long, and attention cost grows with the square of length. Whole words need millions of entries and fail on any unseen word. Subwords keep both reasonable and can still spell any text.</p>"},
+  "The model never sees letters": {
+    what: "<p>Each token is one opaque ID. “strawberry” arrives as a few IDs like <code>str</code> + <code>aw</code> + <code>berry</code>; the letters inside each piece are not part of the input.</p>",
+    analogy: DUO("Counting the letters in someone's name when you only have their employee number.",
+                 "Being asked to count characters in a string when the service only receives <code>customer_id = 48213</code>: the information isn't in the request."),
+    real: "<p>To count the r's, the model would have to have memorized how each token is spelled and add across pieces. The same cause breaks reversing words, rhyming, and arithmetic on long numbers.</p>",
+    evidence: "<p>Andrej Karpathy traces many odd LLM behaviours, spelling and arithmetic among them, back to tokenization." + SRC("https://www.youtube.com/watch?v=zduSFxRajkE","Let's build the GPT Tokenizer") + "</p>"},
+  "Other languages pay more": {
+    what: "<p>A tokenizer learns its pieces from its training text. Languages it saw less of get fewer merged pieces, so the same meaning takes more tokens, down to raw bytes in the worst case.</p>",
+    analogy: DUO("A phrasebook written for English speakers: common English phrases are one entry; anything else must be spelled out letter by letter.",
+                 "A compression dictionary trained on English logs, then applied to other data: it still works, but it barely compresses."),
+    real: "<p>More tokens means higher cost (billed per token), slower generation (one token per step), less room in the context window, and usually lower quality. Training the model later can't fix it, because the tokenizer is frozen first.</p>",
+    evidence: "<p>The same text translated into different languages can differ in token count by up to 15×, even with tokenizers built for multilingual use, which affects cost, latency, and how much fits in context." + SRC("https://arxiv.org/abs/2305.15425","Petrov et al., Language Model Tokenizers Introduce Unfairness Between Languages (2023)") + "</p>"},
+  "A vector is just a list of numbers": {
+    what: "<p>A <b>vector</b> is an ordered list of numbers. Two numbers can be drawn as an arrow (right, up); models use lists of thousands, which can't be drawn but follow the same rules.</p>",
+    analogy: DUO("GPS coordinates: two numbers pin a place on a map. Change one and the place moves.",
+                 "A fixed-length feature array, <code>float[4096]</code>, like a row of numeric columns in a table."),
+    real: "<p>In a model, every token becomes a vector of a few thousand numbers. No single number means much; the meaning is in where the whole vector points.</p>"},
+  "Each ID picks a row": {
+    what: "<p>The <b>embedding table</b> has one row (a vector) per token in the vocabulary. <b>Embedding</b> a token means looking up its row by ID.</p>",
+    analogy: DUO("A dictionary where each word's entry is a list of numbers instead of a definition.",
+                 "<code>Map&lt;tokenId, float[]&gt;</code>, or a categorical feature lookup: you'd never do arithmetic on a user ID, so you map each ID to learned numbers."),
+    real: "<p>100,000 rows × 4,096 numbers ≈ 410 million learned numbers, just for this table. The same token always reads the same row; context is added later, by attention.</p>"},
+  "Training moves similar words together": {
+    what: "<p>Rows start as random numbers. During <b>training</b> the model keeps predicting the next word, and every mistake nudges the rows involved. Words used in similar sentences get similar nudges.</p>",
+    analogy: DUO("People who keep turning up at the same events end up in the same friend group, without anyone assigning them.",
+                 "Collaborative filtering: users who buy similar things end up with similar learned vectors, with no one labelling them."),
+    real: "<p>“Feed the ___” and “the ___ is asleep” push cat and dog in the same directions, so their rows drift together over billions of examples. Nobody labels them as animals; their usage does.</p>",
+    evidence: "<p>The word2vec models learned high-quality word vectors from 1.6 billion words in under a day, and the vectors captured both syntactic and semantic similarity." + SRC("https://arxiv.org/abs/1301.3781","Mikolov et al., Efficient Estimation of Word Representations in Vector Space (2013)") + "</p>"},
+  "Close means similar, and that is how it generalizes": {
+    what: "<p>The distance between two rows is computable. <b>Generalization</b> means applying what was learned from one example to similar ones the model never saw.</p>",
+    analogy: DUO("Having learned to drive one car, you can drive a similar one, because the controls are close to what you know.",
+                 "Nearest-neighbour search: similar inputs land near each other, so a decision made for one point transfers to its neighbours."),
+    real: "<p>Everything after the embedding is multiplication and addition, so nearly identical inputs give nearly identical outputs. What the model learns from “the cat sat” carries over to “the dog sat”. Models usually measure the angle between vectors (cosine similarity).</p>"},
+  "Position: order changes meaning": {
+    what: "<p><b>Position information</b> tells the model where each token is. Without it, attention sees the tokens as an unordered set.</p>",
+    analogy: DUO("Pages of a letter with no page numbers dropped on the floor: all the words are there, the meaning isn't.",
+                 "TCP sequence numbers: packets can arrive in any order; the numbers let the receiver rebuild the stream."),
+    real: "<p>Older models add a learned row per position (a hard length limit). Most modern models use <b>RoPE</b>: they rotate the query and key vectors by an angle that depends on position, so attention scores depend on how far apart two tokens are.</p>",
+    evidence: "<p>RoPE encodes absolute position as a rotation and builds relative distance into attention, with dependency that decays as tokens get farther apart." + SRC("https://arxiv.org/abs/2104.09864","Su et al., RoFormer (2021)") + "</p>"},
+  "Training writes. Using only reads.": {
+    what: "<p><b>Weights</b> are the learned numbers (the embedding table and everything else); they change only during training. <b>Activations</b> are the vectors computed while handling one request; they're thrown away afterwards.</p>",
+    analogy: DUO("A recipe book versus tonight's cooking: you read the recipe, cook a meal, and the book is unchanged.",
+                 "Read-only reference rows versus values computed in a SELECT: every request reads the table, none of them UPDATEs it."),
+    real: "<p>At inference the weights are frozen, which is why one copy in GPU memory can serve many users at once. Each request's activations (its vectors, attention scores, KV cache) are private and temporary.</p>"},
+  "Dot product: how well two lists match": {
+    what: "<p>The <b>dot product</b> multiplies two vectors position by position and adds the results into one number: large when they point the same way, zero at right angles, negative when opposite.</p>",
+    analogy: DUO("Matching a job's requirements against a candidate's skills: each skill counts only if both have it, and the total is the fit.",
+                 "A weighted relevance score: <code>sum(query[i] * doc[i])</code>, the core of vector search."),
+    real: "<p>It's the closeness idea from 1.2 as a single number. Attention uses it to score how relevant each earlier word is to the current one.</p>"},
+  "Softmax: turn scores into percentages": {
+    what: "<p><b>Softmax</b> turns any list of scores into positive shares that add up to 100%: raise e to each score, then divide each by the total.</p>",
+    analogy: DUO("Splitting a bonus pool by performance score: everyone gets a share, the best get much more, and the shares always add up to the pool.",
+                 "Normalizing weights for weighted random selection, with an exponent that exaggerates the leader."),
+    real: "<p>The exponent keeps every share positive and stretches the gaps, so the top score wins clearly while the others keep a little. Shares must sum to 1 because the next step is an average.</p>",
+    evidence: "<p>3Blue1Brown animates softmax inside attention, including why it's the right choice for weights." + SRC("https://www.youtube.com/watch?v=eMlx5fFNoYc","Attention in transformers, step-by-step") + "</p>"},
+  "Weighted average: blend by the percentages": {
+    what: "<p>A <b>weighted average</b> mixes several vectors, each multiplied by its share; the shares come from softmax.</p>",
+    analogy: DUO("Mixing paint: 70% blue and 30% yellow lands between the two, closer to blue.",
+                 "A blended score in a ranking system: <code>0.7 × signalA + 0.3 × signalB</code>."),
+    real: "<p>Dot product (score every word) → softmax (scores to shares) → weighted average (blend) is all of attention. You'll see the three run together in 1.3.</p>"},
+  "Gradient: how training nudges each number": {
+    what: "<p>A <b>gradient</b> says, for each number, how much the error would change if that number moved a little. Training moves every number a small step in the direction that reduces the error.</p>",
+    analogy: DUO("Adjusting a recipe after tasting: too salty, so cut the salt most, because salt had the biggest effect on the taste.",
+                 "A profiler for error: blame is attributed to each config value in proportion to how much it contributed, and each is adjusted accordingly, all at once."),
+    real: "<p><b>Backpropagation</b> computes every number's gradient in one backward pass. Repeated over billions of sentences, these nudges set the embedding rows, the attention matrices, and everything else.</p>",
+    evidence: "<p>3Blue1Brown's chapters on gradient descent and backpropagation animate this." + SRC("https://www.youtube.com/watch?v=IHZwWFHWa-w","Gradient descent, how neural networks learn") + "</p>"},
+  "bank has one row, but two meanings": {
+    what: "<p><b>Attention</b> updates each word's vector using the words before it, so the same row ends up meaning different things in different sentences.</p>",
+    analogy: DUO("“Bank” in a conversation: you work out which meaning from the words around it, not from the word alone.",
+                 "Resolving a variable's value from its surrounding scope at runtime, rather than from its declaration alone."),
+    real: "<p>bank's row is the same in both sentences; the blended vector after attention is not. That blended vector is an activation, computed for this sentence and discarded after.</p>"},
+  "The three basics, running together": {
+    what: "<p>Each word computes a <b>query</b> (what it's looking for); every earlier word offers a <b>key</b> (what it matches on) and a <b>value</b> (what it hands over). Score = query · key, softmax, then blend the values.</p>",
+    analogy: DUO("Asking a room “who knows about water?”: people whose expertise matches answer loudest, and you take in a mix of what they say.",
+                 "A search engine that returns a blend of every document, weighted by relevance, instead of only the top hit: a soft lookup."),
+    real: "<p>query = x × W_Q, key = x × W_K, value = x × W_V, where the three matrices are learned weights. Scores are divided by √(vector size) before softmax so they don't grow too large.</p>",
+    evidence: "<p>This is scaled dot-product attention as defined in the original transformer paper." + SRC("https://arxiv.org/abs/1706.03762","Vaswani et al., Attention Is All You Need (2017)") + "</p>"},
+  "Who does each token listen to?": {
+    what: "<p>The <b>attention weights</b> (the softmax shares) say how much each word draws from each earlier word. They always add up to 1 per word.</p>",
+    analogy: DUO("Each person in a meeting deciding how much to weigh each earlier speaker.",
+                 "A per-row weight vector over earlier rows, like a learned, content-based window function."),
+    real: "<p>A word only looks backward (the reason comes with training, in 1.7). Real models learn these weights; the ones shown are hand-picked to illustrate the pattern.</p>"},
+  "Several heads: one blend per need": {
+    what: "<p>A <b>head</b> is one complete copy of attention with its own query, key and value matrices. <b>Multi-head attention</b> runs several heads side by side and joins their outputs.</p>",
+    analogy: DUO("Asking several specialists the same question at once (a geographer, a grammarian) instead of one generalist who has to average their views.",
+                 "Fanning one request out to several specialised indexes in parallel, then merging the responses."),
+    real: "<p>Heads split the width rather than adding to it: 32 heads × 128 numbers = 4,096. Each head gets its own softmax, so it can focus sharply on its own target.</p>",
+    evidence: "<p>The original transformer introduced multi-head attention so the model can attend to information from different representation subspaces at once." + SRC("https://arxiv.org/abs/1706.03762","Vaswani et al. (2017)") + "</p>"},
+  "Cost grows with the square of the context": {
+    what: "<p>Every token scores every earlier token, so the number of scores grows with the square of the number of tokens.</p>",
+    analogy: DUO("Introductions at a party: with twice as many guests, there are about four times as many handshakes.",
+                 "A self-join done as a nested loop: every row compared with every row."),
+    real: "<p>8,000 tokens → 64 million scores; 16,000 → 256 million; 128,000 → about 16 billion, per head, per layer. This is why long context is expensive and why token counts matter.</p>",
+    evidence: "<p>Self-attention's time and memory grow quadratically with sequence length; FlashAttention speeds it up by reading and writing GPU memory more carefully, without approximating." + SRC("https://arxiv.org/abs/2205.14135","Dao et al., FlashAttention (2022)") + "</p>"}
+};
+STEPS.forEach(s => { if(PANELS[s.title]) s.x = Object.assign({}, PANELS[s.title], s.x); });
 
 /* ================= answer store ================= */
 const CH = "L1";
