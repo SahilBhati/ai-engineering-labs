@@ -796,7 +796,7 @@ $("#chapters").innerHTML = CHS.map(([k,l])=>'<button data-ch="' + k + '">' + l +
 function go(n){
   if(n === cur || n < 0 || n >= STEPS.length) return;
   const r = document.documentElement, run = ()=>{ cur = n; render(); };
-  if(document.startViewTransition && !reduceMotion){ r.dataset.dir = n > cur ? "fwd" : "back"; document.startViewTransition(run).finished.finally(()=>{ delete r.dataset.dir; }); }
+  if(document.startViewTransition && !reduceMotion){ r.dataset.dir = n > cur ? "fwd" : "back"; const t = document.startViewTransition(run); t.ready.catch(()=>{}); t.updateCallbackDone.catch(()=>{}); t.finished.catch(()=>{}).finally(()=>{ delete r.dataset.dir; }); }
   else run();
   if(window.scrollY > 0) window.scrollTo({top:0, behavior: reduceMotion ? "auto" : "smooth"});
 }
@@ -837,7 +837,8 @@ render();
   const tb = document.getElementById("themeBtn"), cb = document.getElementById("tocBtn");
   const dark = ()=> r.dataset.theme ? r.dataset.theme === "dark" : !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
   const syncT = ()=>{ tb.textContent = dark() ? "Light mode" : "Dark mode"; tb.setAttribute("aria-pressed", String(dark())); };
-  const smooth = fn => (document.startViewTransition && !reduceMotion) ? document.startViewTransition(fn) : fn();
+  const smooth = fn => { if(!(document.startViewTransition && !reduceMotion)) return fn();
+    const t = document.startViewTransition(fn); t.ready.catch(()=>{}); t.finished.catch(()=>{}); t.updateCallbackDone.catch(()=>{}); return t; };
   tb.addEventListener("click", ()=>smooth(()=>{ r.dataset.theme = dark() ? "light" : "dark"; store("ael-theme", r.dataset.theme); syncT(); render(); }));
   const syncC = ()=>{ const c = r.classList.contains("toc-collapsed"); cb.setAttribute("aria-expanded", String(!c)); cb.setAttribute("aria-label", c ? "Show contents" : "Hide contents"); cb.title = c ? "Show contents" : "Hide contents"; };
   cb.addEventListener("click", ()=>smooth(()=>{ r.classList.toggle("toc-collapsed"); store("ael-toc", r.classList.contains("toc-collapsed") ? "0" : "1"); syncC(); }));
