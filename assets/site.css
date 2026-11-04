@@ -170,7 +170,8 @@ header.site .wrap{max-width:none; padding-inline:24px}
 /* Collapsed side nav: content takes the full width */
 html.nav-collapsed .layout{grid-template-columns:minmax(0,1fr)}
 html.nav-collapsed .sidenav{display:none}
-html.nav-collapsed .layout main .wrap{margin-inline:auto}
+/* Collapsed: content keeps its left edge and grows into the freed space */
+html.nav-collapsed .layout main .wrap{max-width:1560px; margin-inline:0; padding-inline:64px}
 html.nav-collapsed .icon-btn{border-color:var(--accent); color:var(--accent)}
 /* Header hides while scrolling down long pages; the side nav moves up with it */
 html.hdr-hidden header.site{transform:translateY(-100%)}
