@@ -10,10 +10,9 @@ description: Turns approved items from docs/publish-queue.md into site pages and
 - Work **only inside this repository**. Never read or write any path outside it,
   including private vaults or notes. Everything you need is in the queue item and
   in `publish-staging/`.
-- **Push and merge only what a standing permission in `docs/publish-queue.md`
-  covers** (currently: changes under `site/` and the queue file). Anything else
-  stays on a local branch, because a pushed branch on a public repository is
-  already public; the owner pushes after review.
+- **Push and merge what a standing permission in `docs/publish-queue.md` covers**
+  (currently: every change, pushed right away, once the checks below pass). A
+  failing QE gate or personal-data check always stops the push.
 - One queue item per run. If the queue has no item with status `approved`, stop
   and say so.
 - No personal data: names of people other than the author, employers' internal
