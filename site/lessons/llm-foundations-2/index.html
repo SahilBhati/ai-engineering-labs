@@ -716,6 +716,62 @@ add("✓","Check yourself",
   });
  });
 
+
+/* ---------- Explanation panels for 1.5 and 1.6 (attached by step title) ---------- */
+const DUO = (a, b) => '<div class="duo"><div><b>Everyday</b><span>' + a + '</span></div><div><b>Technical</b><span>' + b + '</span></div></div>';
+const PANELS = {
+  "The last vector scores every token in the vocabulary": {
+    what: "<p><b>Logits</b> are raw scores, one for every word in the vocabulary (about 100,000), made by comparing bank's final vector with each word's row in the <b>unembedding</b> table. <b>Softmax</b> (Basics, step 12) turns them into probabilities that add up to 100%. This answers the lesson's question.</p>",
+    analogy: DUO("Scoring one job posting against every applicant's CV: one match score per applicant, then turned into shortlist chances.",
+                 "Brute-force ranking with no index: score every candidate against the query on every request, then normalize the scores into a distribution."),
+    real: "<p><code>logits = W_unembed · x</code>, a vocabulary × width table (100k × 4,096 ≈ 410 million multiply-adds per generated token for this step alone). It's the same shape as the embedding table; some models share the two.</p>",
+    evidence: '<p>Researchers reuse exactly this scoring step on the middle of the model to read its guess after each block (the logit lens from 1.4, step 5). <a href="https://www.greaterwrong.com/posts/AcKRB8wDpdaN6v6ru/interpreting-gpt-the-logit-lens">interpreting GPT: the logit lens ↗</a></p>'},
+  "Temperature: how sharp the choice is": {
+    what: "<p><b>Temperature</b> is a number set per request (the <code>temperature</code> parameter in an API call). The logits are divided by it before softmax.</p>",
+    analogy: DUO("A strict judge versus a relaxed one. Strict (low temperature): the favorite almost always wins. Relaxed (high): underdogs get real chances.",
+                 "A sharpness knob on weighted routing: low sends nearly all traffic to the best backend, high spreads it across many."),
+    real: "<p><code>p = softmax(logits / T)</code>. As T → 0 you get <b>greedy decoding</b> (always the top word). T = 1 is the model's own distribution. T > 1 flattens it. Dividing by a small number stretches the gaps, and softmax's exponent turns stretched gaps into a near-certain winner.</p>"},
+  "Sampling: roll the dice, but cut the tail": {
+    what: "<p><b>Sampling</b> means drawing the next word at random according to its probability. <b>Top-p</b> (also called <b>nucleus sampling</b>) first keeps only the most likely words whose probabilities add up to p, then draws among them.</p>",
+    analogy: DUO("Picking tonight's restaurant by rolling dice, but only among the places that make up 90% of your past visits, never the one you tried once and hated.",
+                 "Weighted random load balancing that first drops every backend below a cumulative-weight cutoff, then picks among the rest."),
+    real: "<p>Sort words by probability, keep the smallest set reaching p (e.g. 0.9), rescale them to 100%, draw one. <b>Top-k</b> is the blunter version: keep the k best. A long answer is hundreds of these draws, so one unlucky pick can steer everything after it.</p>",
+    evidence: '<p>Always picking the most likely word makes text “bland and strangely repetitive”; nucleus sampling keeps variety while cutting the unreliable tail. <a href="https://arxiv.org/abs/1904.09751">Holtzman et al., The Curious Case of Neural Text Degeneration (ICLR 2020) ↗</a></p>'},
+  "Generation is a loop: one token per pass": {
+    what: "<p><b>Autoregressive generation</b>: the model predicts one token, appends it to the input, and runs the whole model again, until it emits a stop token or hits a length limit. Our answer, “flooded”, was pass 1.</p>",
+    analogy: DUO("Tapping your phone's autocomplete over and over: each tap adds one word, and the next suggestion depends on everything typed so far.",
+                 "A loop whose output feeds its next input, like a fold over time, rather than one batch call that returns the whole answer."),
+    real: "<p>Each pass runs every block on the sequence. Earlier tokens never change (a token only looks backward), so the keys and values computed for them on earlier passes are still valid. The next steps exploit that.</p>"},
+  "Without a cache, work grows with the square of the length": {
+    what: "<p>Without reuse, pass k reprocesses the whole prompt plus the k − 1 tokens already generated, even though nothing about them changed.</p>",
+    analogy: DUO("Rereading a whole book from page one every time you want to write the next sentence of your review.",
+                 "Recomputing an aggregate from scratch on every request instead of maintaining it incrementally, like a materialized view."),
+    real: "<p>For n output tokens: about <code>n × prompt + n²/2</code> token positions without a cache, versus <code>prompt + n</code> with one. At 500 output tokens after a 2,000-token prompt that's over 1.1 million versus 2,500.</p>"},
+  "The KV cache: compute keys and values once, keep them": {
+    what: "<p>The <b>KV cache</b> stores every earlier token's <b>key</b> and <b>value</b> vectors (from attention, Lesson 1) for every layer, so later passes read them instead of recomputing them. K and V are the two things a token offers to others; the query is only needed for the newest token.</p>",
+    analogy: DUO("Taking notes as you read, so you never reread a page: each new page is read once and added to the notes.",
+                 "Memoization keyed by position: compute <code>(k_i, v_i)</code> once, append to a per-request store, read it on every later step."),
+    real: "<p>Each decode step computes q, k, v for the new token only, appends its k and v, then attends over the whole cache. The cache grows by one row per token per layer and lives in GPU memory for the whole request.</p>",
+    evidence: '<p>The cache is large and grows during a request; naive management wastes memory through fragmentation and duplication, which caps batch size. vLLM\'s PagedAttention manages it like OS virtual-memory pages: near-zero waste and 2–4× throughput at the same latency versus FasterTransformer and Orca. <a href="https://arxiv.org/abs/2309.06180">Kwon et al., PagedAttention (SOSP 2023) ↗</a></p>'},
+  "Prefill and decode are two different jobs": {
+    what: "<p><b>Prefill</b>: process the whole prompt in one parallel pass and fill the cache; it sets <b>TTFT</b> (time to first token). <b>Decode</b>: produce tokens one at a time; it sets <b>TPOT</b> (time per output token).</p>",
+    analogy: DUO("A kitchen's prep and service. Prep chops everything at once before the first plate goes out; service then sends plates one by one.",
+                 "A bulk load versus point queries: prefill is one big parallel batch (compute-bound); decode is many tiny sequential reads of all the weights and the cache (memory-bandwidth-bound)."),
+    real: "<p>Decode does little math per byte it reads, so a GPU serving one request mostly waits on memory. Batching many users' decode steps together shares each read of the weights; that's continuous batching, and it's why KV memory per request decides throughput.</p>"},
+  "How big is the KV cache?": {
+    what: "<p>Per token, each layer stores one key and one value for each <b>KV head</b>. <b>Grouped-query attention (GQA)</b> lets several query heads share one KV head, which shrinks the cache.</p>",
+    analogy: DUO("Luggage on a plane: the hold is fixed; the longer each passenger's trip (context), the more luggage, and the fewer passengers fit.",
+                 "Session state per connection: a server's RAM caps concurrent sessions by per-session state size, not by CPU."),
+    real: "<p><code>bytes = 2 × layers × KV heads × head size × bytes per number × tokens</code>. A 70B-class model at 8K tokens is about 2.7 GB per request, so concurrency on a GPU is set by this number more than by the weights.</p>",
+    evidence: '<p>GQA uses a middle number of KV heads shared across groups of query heads and reaches quality close to full multi-head attention at speed close to multi-query attention. <a href="https://arxiv.org/abs/2305.13245">Ainslie et al., GQA (2023) ↗</a></p>'},
+  "Why context windows have a limit": {
+    what: "<p>The <b>context window</b> is the maximum number of tokens (prompt + output) a model handles in one request.</p>",
+    analogy: DUO("A desk: you can only spread out so many pages, a bigger desk takes more room, and scanning everything on it takes longer.",
+                 "A bounded buffer whose memory grows linearly with size and whose full scan (attention in prefill) grows quadratically."),
+    real: "<p>Three limits: KV memory grows in line with tokens, prefill attention grows with their square, and the model only learned positions up to its training length. Long-context models extend training and cut costs (GQA, efficient attention kernels), but a 1M-token request still costs far more than a short one.</p>"}
+};
+STEPS.forEach(s => { if(PANELS[s.title]) s.x = Object.assign({}, PANELS[s.title], s.x); });
+
 /* ================= answer store ================= */
 const CH = "L2";
 const answers = {}; let db = null, finished = false, storeText = "Connecting to your answer store…";
