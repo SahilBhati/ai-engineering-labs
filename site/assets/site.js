@@ -7,7 +7,9 @@
   const set = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} };
   const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   // Animate a DOM change as a crossfade where supported; plain change otherwise.
-  const smooth = fn => (document.startViewTransition && !reduce) ? document.startViewTransition(fn) : fn();
+  // A newer transition can skip an older one; that's expected, so swallow the rejection instead of logging an error.
+  const smooth = fn => { if(!(document.startViewTransition && !reduce)) return fn();
+    const t = document.startViewTransition(fn); t.ready.catch(()=>{}); t.finished.catch(()=>{}); t.updateCallbackDone.catch(()=>{}); return t; };
 
   // Theme: light by default (dark text on light reads better); the choice is remembered.
   const themeBtn = document.getElementById("themeBtn");
@@ -40,7 +42,8 @@
   const header = document.querySelector("header.site");
   let lastY = window.scrollY, ticking = false;
   function onScroll(){
-    const y = window.scrollY, long = document.documentElement.scrollHeight > window.innerHeight * 2.2;
+    // Only in reading mode (side nav collapsed): with the nav open, header and nav stay locked together.
+    const y = window.scrollY, long = root.classList.contains("nav-collapsed") && document.documentElement.scrollHeight > window.innerHeight * 2.2;
     if(!long || y < 80 || y < lastY - 4){ root.classList.remove("hdr-hidden"); }
     else if(y > lastY + 4 && !header.contains(document.activeElement)){ root.classList.add("hdr-hidden"); }
     lastY = y; ticking = false;

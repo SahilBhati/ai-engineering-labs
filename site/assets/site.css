@@ -95,6 +95,7 @@ section.band:last-of-type{border-bottom:0}
 .prose-page{display:flex; flex-direction:column; gap:16px; max-width:65ch; font-size:1.05rem}
 
 footer.site{border-top:1px solid var(--line); color:var(--muted); font-size:.88rem}
+footer.site{margin-top:auto}
 footer.site .wrap{display:flex; flex-wrap:wrap; gap:10px 24px; justify-content:space-between; padding-block:28px}
 
 @media (max-width:900px){
@@ -173,7 +174,6 @@ html.nav-collapsed .layout main .wrap{margin-inline:auto}
 html.nav-collapsed .icon-btn{border-color:var(--accent); color:var(--accent)}
 /* Header hides while scrolling down long pages; the side nav moves up with it */
 html.hdr-hidden header.site{transform:translateY(-100%)}
-html.hdr-hidden .sidenav{top:0; height:100vh}
 @media (prefers-reduced-motion: reduce){ header.site{transition:none} }
 
 button{font-family:inherit}
@@ -196,3 +196,33 @@ header.site{view-transition-name:site-header}
 
 /* Reserve the token area so the typing replay never pushes content around */
 #demo-out{min-height:96px; align-content:flex-start}
+
+/* AGF explainer: hero points, loop diagram, simulation, install */
+.agf-points{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; font-size:1.0625rem}
+.agf-points li{padding-left:22px; position:relative}
+.agf-points li::before{content:"→"; position:absolute; left:0; color:var(--accent)}
+.agf-hero-fig{margin:0; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px}
+.agf-hero-fig svg{width:100%; height:auto; display:block}
+.sim{border:1px solid var(--line); border-radius:14px; background:var(--surface); display:grid; grid-template-columns:1fr; overflow:hidden}
+.sim-cols{display:grid; grid-template-columns:repeat(3, 1fr); border-bottom:1px solid var(--line)}
+.sim-col{padding:20px; display:flex; flex-direction:column; gap:12px; min-height:190px; border-right:1px solid var(--line)}
+.sim-col:last-child{border-right:0}
+.sim-slot{display:flex; flex-direction:column; gap:8px; align-items:flex-start}
+.sim-chip{font:500 .875rem var(--font-mono); padding:6px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+.sim-chip.new{border-color:var(--hot); color:var(--hot)}
+.sim-chip.vault{color:var(--muted)}
+.sim-chip.new-in{border-color:var(--accent); color:var(--accent)}
+.sim-diff{font:400 .8125rem/1.6 var(--font-mono); color:var(--muted); background:var(--bg); border:1px dashed var(--line); border-radius:8px; padding:10px 12px}
+.sim-story{display:grid; grid-template-columns:180px 1fr auto; gap:20px; align-items:center; padding:20px; border-bottom:1px solid var(--line)}
+.sim-step{font:500 .875rem var(--font-mono); color:var(--accent); margin:0}
+.sim-text{margin:0; font-size:1.0625rem; min-height:3.2em}
+.sim-actions{display:flex; gap:8px}
+.sim-actions .btn{cursor:pointer}
+.sim-log{padding:16px 20px 20px}
+.sim-log pre{margin:6px 0 0; font:400 .8125rem/1.6 var(--font-mono); color:var(--ink); white-space:pre-wrap; min-height:3.2em}
+.install{display:flex; flex-direction:column; border:1px solid var(--line); border-radius:12px; background:var(--surface)}
+.cmd{padding:16px 20px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:8px}
+.cmd:last-child{border-bottom:0}
+.cmd-row{display:flex; gap:12px; align-items:center; justify-content:space-between}
+.cmd-row code{font:400 .9375rem var(--font-mono); color:var(--ink)}
+.cmd .copy{cursor:pointer}
