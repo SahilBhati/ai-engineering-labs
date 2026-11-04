@@ -12,7 +12,7 @@
 :root{
   --bg:#f3f5f4; --surface:#ffffff; --ink:#16201e; --muted:#5c6a67;
   --line:#d3dcda; --accent:#0f6e66; --hot:#c2570c; --cool:#2f5fb3;
-  --font-display:"Source Serif 4", Georgia, serif;
+  --font-display:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
   --font-body:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
   --font-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
   color-scheme: light;
@@ -94,7 +94,7 @@ canvas{max-width:100%; display:block; border:1px solid var(--line); border-radiu
 .pipe{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font:500 .85rem var(--font-mono)}
 .box{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--bg)}
 .box.lock{border-color:var(--accent)}
-.flyer{display:inline-block; padding:4px 8px; border-radius:6px; background:var(--hot); color:var(--surface); font:500 .78rem var(--font-mono); transition:transform .7s ease, opacity .7s ease}
+.flyer{display:inline-block; padding:4px 8px; border-radius:6px; background:var(--hot); color:var(--surface); font:500 .78rem var(--font-mono); transition:transform 250ms cubic-bezier(0.2,0,0,1), opacity 250ms cubic-bezier(0.2,0,0,1)}
 .counter{font:500 .9rem var(--font-mono)}
 .q{display:flex; flex-direction:column; gap:6px; border-left:3px solid var(--accent); padding-left:12px}
 .q .tag{font:500 .72rem var(--font-mono); color:var(--accent); text-transform:uppercase; letter-spacing:.05em}
@@ -121,9 +121,27 @@ textarea{width:100%; min-height:84px; font:15px/1.5 var(--font-body); color:var(
   .nav{position:fixed; left:0; right:0; bottom:0; z-index:5; background:var(--surface); border-top:1px solid var(--line); padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
   .nav button{min-width:96px; min-height:44px}
 }
-.crumbs{font:500 .85rem var(--font-mono);color:var(--muted)}.crumbs a{color:var(--accent)}footer.lesson{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:.85rem}</style>
+
+/* Lesson contents sidebar (desktop): where am I, what's next, jump anywhere. */
+.toc{display:none}
+.toc .grp{display:flex; flex-direction:column; gap:2px}
+.toc .grp + .grp{margin-top:14px}
+.toc .gl{font:500 .75rem var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 4px 10px}
+.toc a{display:flex; gap:8px; padding:5px 10px; border-radius:6px; color:var(--ink); text-decoration:none; line-height:1.35; cursor:pointer; font-size:.875rem}
+.toc a:hover{background:var(--surface)}
+.toc a[aria-current="step"]{background:var(--surface); box-shadow:inset 2px 0 0 var(--accent); color:var(--accent)}
+.toc a.seen{color:var(--muted)}
+.toc .n{font:500 .75rem var(--font-mono); color:var(--accent); min-width:1.6em}
+.toc .home{font-weight:600; margin-bottom:6px}
+@media (min-width:1180px){
+  .toc{display:flex; flex-direction:column; gap:18px; position:fixed; top:20px; bottom:20px; left:max(20px, calc(50% - 650px)); width:260px; overflow-y:auto; padding-right:8px}
+  main{margin-left:calc(max(20px, 50% - 650px) + 300px); margin-right:auto}
+  .chapters{display:none}
+}
+.crumbs{font:500 .85rem var(--font-mono);color:var(--muted)}.crumbs a{color:var(--accent)}footer.lesson{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:.875rem}footer.lesson a{color:var(--accent)}@media (min-width:1180px){footer.lesson{margin-left:calc(max(20px, 50% - 650px) + 300px)}}</style>
 </head>
 <body>
+<aside class="toc" aria-label="Lesson contents"><div class="grp"><a class="home" href="../../">← AI Engineering Labs</a><a href="../">All lessons</a></div><div id="tocList"></div></aside>
 <main>
   <nav class="crumbs" aria-label="Breadcrumb"><a href="../../">AI Engineering Labs</a> / <a href="../">Lessons</a></nav>
   <h1>LLM Foundations · Lesson 1: tokens → embeddings → attention</h1>
@@ -194,22 +212,28 @@ function rnd(seed){ let x = Math.sin(seed*999)*10000; return x - Math.floor(x); 
 const START = MAPW.map((w,i)=>[.08 + .84*rnd(i+1), .08 + .84*rnd(i+41)]);
 
 /* ================= steps ================= */
+function switcher(name, options, cur){ // a two-or-more-button switch; the one on/off control style
+  const s = el("div",{class:"seg",role:"group","aria-label":name}, options.map(([k,l])=>'<button data-k="'+k+'">'+esc(l)+'</button>').join(""));
+  s.sync = c => s.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.k===c));
+  s.sync(cur); return s;
+}
+
 const STEPS = [];
 const add = (ch, title, say, render, deeper) => STEPS.push({ch, title, say, render, deeper});
 
 /* ---------- 1.1 Tokenization ---------- */
 add("1.1","Models read numbers, not text",
- "A tokenizer cuts text into pieces from a fixed list, then swaps each piece for its ID. Type anything.",
+ "A tokenizer cuts text into pieces from a fixed list (the vocabulary) and swaps each piece for its ID. Type anything.",
  v=>{
   const inp = el("input",{type:"text","aria-label":"Text to tokenize",value:"The river bank flooded"});
   const out = el("div",{class:"chips"});
   const draw = ()=>{ out.innerHTML = subwords(inp.value).map(t=>chipHTML(t)).join(""); };
-  inp.addEventListener("input", draw); v.append(inp, out); draw();
+  inp.addEventListener("input", draw); v.append(inp, out, el("p",{class:"lbl"},"The small number under each piece is its token ID.")); draw();
  },
  "The small number under each piece is its ID. Try <code>unbelievable</code> or <code>flooooded</code>: a word the tokenizer has never seen still works, because it splits into pieces it knows. This is a toy tokenizer with a tiny vocabulary; real ones have 50k to 200k pieces.");
 
 add("1.1","Choose the size of the pieces",
- "Small pieces make long sequences. Big pieces need a huge vocabulary. Subwords sit in between.",
+ "Small pieces make long sequences; big pieces need a huge vocabulary. Subwords (pieces between a letter and a word) sit in between.",
  v=>{
   let mode = "sub";
   const inp = el("input",{type:"text","aria-label":"Text",value:"The river bank flooooded"});
@@ -232,24 +256,24 @@ add("1.1","Choose the size of the pieces",
  "Characters: the sequence gets long, and attention compares every token with every other, so cost grows with the <em>square</em> of length (you'll see this near the end of 1.3). Words: a word not in the list becomes <code>[UNKNOWN]</code> and the model learns nothing about it, and rare words barely get trained. Subwords: any text can be built from known pieces.");
 
 add("1.1","The model never sees letters",
- "Ask a model to count the r's in “strawberry”. Flip to what the model actually receives.",
+ "The model sees token IDs, not letters, so it can't count the r's in “strawberry”. Switch to what it actually receives.",
  v=>{
   let ids = false;
-  const btn = el("button",{class:"ghost"},"Show what the model sees");
+  const btn = switcher("View", [["pieces","Pieces"],["ids","What the model sees"]], "pieces");
   const out = el("div",{class:"chips"}), note = el("p",{class:"lbl"});
   const toks = subwords("strawberry");
   const draw = ()=>{
     out.innerHTML = toks.map(t=>'<span class="chip" style="min-width:64px">' + (ids ? t.id : esc(t.t)) + '</span>').join("");
     note.textContent = ids ? "Three opaque numbers. Nothing in " + toks[0].id + " says “contains an r”." : "What you see: three pieces, letters visible.";
-    btn.textContent = ids ? "Show the pieces" : "Show what the model sees";
+    btn.sync(ids ? "ids" : "pieces");
   };
-  btn.addEventListener("click", ()=>{ ids = !ids; draw(); });
-  v.append(out, note, btn); draw();
+  btn.addEventListener("click", e=>{ if(e.target.dataset.k){ ids = e.target.dataset.k==="ids"; draw(); } });
+  v.append(btn, out, note); draw();
  },
  "To count letters the model would have to have memorized how each of its token IDs is spelled. Same root cause for reversing words, rhymes and long-number arithmetic. Backend version: counting the characters in a customer's name when you only receive <code>customer_id</code>.");
 
 add("1.1","Other languages pay more",
- "The tokenizer learned its pieces from mostly English text, then was frozen. Text it rarely saw falls back to raw bytes.",
+ "The same sentence costs 4 tokens in English and 36 in Hindi. The tokenizer learned its pieces from mostly English text, then was frozen; rare text falls back to raw bytes.",
  v=>{
   const en = "The river flooded", hi = "नदी में बाढ़ आई";
   const a = subwords(en), b = subwords(hi);
@@ -259,7 +283,8 @@ add("1.1","Other languages pay more",
    '<div class="lbl">Hindi (same meaning): ' + esc(hi) + '</div><div class="chips">' + b.map(t=>chipHTML(t,false)).join("") + '</div>' +
    '<div class="bars">' +
    '<div class="bar"><span>English</span><div class="t"><div class="f" style="width:' + (a.length/max*100) + '%"></div></div><span class="n">' + a.length + '</span></div>' +
-   '<div class="bar"><span>Hindi</span><div class="t"><div class="f" style="width:' + (b.length/max*100) + '%"></div></div><span class="n">' + b.length + '</span></div></div>';
+   '<div class="bar"><span>Hindi</span><div class="t"><div class="f" style="width:' + (b.length/max*100) + '%"></div></div><span class="n">' + b.length + '</span></div></div>' +
+   '<p class="mono"><b style="color:var(--hot)">' + Math.round(b.length/a.length) + '× more tokens</b> for the same meaning</p>';
  },
  "More tokens for the same meaning means higher cost (billed per token), slower output (one token per step), less fits in the context window, and usually worse quality. Training the model afterwards can't fix it, because the tokenizer was built and frozen first. Real tokenizers have some Hindi pieces, so the gap is smaller than this toy's, but it's real. Backend version: a compression dictionary trained on English logs, used on other data.");
 
@@ -272,6 +297,17 @@ const TABLE = [
   ["on",    [ 0.02,-0.55, 0.40, 0.21]],
   ["mat",   [ 0.40, 0.33,-0.12,-0.70]]
 ];
+add("1.2","A vector is just a list of numbers",
+ "A vector is a list of numbers; two numbers draw as an arrow (how far right, how far up). Embeddings are vectors. Move the sliders.",
+ v=>{
+  const a = slider("v1x","first number (money-ness)",-3,3,0.5,2), b = slider("v1y","second number (water-ness)",-3,3,0.5,1);
+  const pic = el("div"), out = el("div",{class:"vec"});
+  const draw = ()=>{ const x=+a.inp.value, y=+b.inp.value; a.set(x); b.set(y);
+    out.textContent = "[" + x + ", " + y + "]"; pic.innerHTML = plane([[x,y,"hot","v"]],3); };
+  [a,b].forEach(s=>s.inp.addEventListener("input",draw)); v.append(a.w,b.w,out,pic); draw();
+ },
+ "Real embeddings have thousands of numbers, so you can't draw them, but every rule that follows works the same way with 2 numbers or 4,096. The names money-ness and water-ness are labels for this toy only.");
+
 add("1.2","Each ID picks a row",
  "The embedding table has one row of numbers per token. “Embedding a token” just means reading its row. Tap a word.",
  v=>{
@@ -281,7 +317,7 @@ add("1.2","Each ID picks a row",
   const draw = ()=>{
     chipsEl.innerHTML = sent.map((w,i)=>'<span class="chip tap' + (i===sel?" sel":"") + '" data-i="'+i+'" role="button" tabindex="0">' + w + '<small>' + idOf(w) + '</small></span>').join("");
     const w = sent[sel];
-    tbl.innerHTML = '<table class="emb"><tbody>' + TABLE.map(([t,r])=>'<tr class="' + (t===w?"hit":"") + '"><td>' + idOf(t) + '</td><td>' + t + '</td>' + r.map(x=>'<td>' + x.toFixed(2) + '</td>').join("") + '<td>…</td></tr>').join("") +
+    tbl.innerHTML = '<table class="emb"><thead><tr><td>ID</td><td>token</td><td>dim 1</td><td>dim 2</td><td>dim 3</td><td>dim 4</td><td></td></tr></thead><tbody>' + TABLE.map(([t,r])=>'<tr class="' + (t===w?"hit":"") + '"><td>' + idOf(t) + '</td><td>' + t + '</td>' + r.map(x=>'<td>' + x.toFixed(2) + '</td>').join("") + '<td>…</td></tr>').join("") +
       '<tr><td colspan="7" style="text-align:left">… one row for every token in the vocabulary</td></tr></tbody></table>';
     const row = TABLE.find(r=>r[0]===w)[1];
     vec.textContent = w + " → [" + row.map(x=>x.toFixed(2)).join(", ") + ", … 4,092 more numbers]";
@@ -293,7 +329,7 @@ add("1.2","Each ID picks a row",
  "Rows = vocabulary size (set by the tokenizer). Row width = a design choice, like 768 in a small model or 4,096 in a large one. 100,000 × 4,096 is about 410 million numbers. Both <code>the</code>s read the same row: the table has no idea of context. Why not feed the ID itself? IDs are labels, not quantities. 1001 and 1002 are unrelated, like auto-increment keys, so arithmetic on them is meaningless.");
 
 add("1.2","Training moves similar words together",
- "Rows start as random numbers. Every training correction nudges them. Words used in similar sentences get similar nudges, so they drift together. Drag the slider.",
+ "Training pulls words used in similar sentences close together. Rows start random; every correction nudges them. Drag the slider.",
  v=>{
   const lab = el("label",{class:"lbl",for:"trainS"},"training progress: 0%");
   const s = el("input",{type:"range",id:"trainS",min:"0",max:"100",value:"0"});
@@ -308,7 +344,7 @@ add("1.2","Training moves similar words together",
  "A 2D picture of what really happens in thousands of dimensions. Nobody labels “cat” as an animal: sentences like “feed the ___” and “the ___ is sleeping” push cat and dog the same way. Backend version: recommendation systems learn user and item vectors the same way, and similar behaviour ends up nearby.");
 
 add("1.2","Close means similar, and that is how it generalizes",
- "Distance between two rows is a number you can compute. Tap two words.",
+ "Nearby rows give nearly the same output, so what the model learns about cat carries over to dog. Tap two words to measure their distance.",
  v=>{
   let picks = [0,1];
   const svg = el("div"), out = el("p",{class:"say"});
@@ -328,7 +364,7 @@ add("1.2","Position: order changes meaning",
  "Embeddings say what each token is, not where it is. Without position, these two sentences look identical.",
  v=>{
   let on = false;
-  const btn = el("button",{class:"ghost"});
+  const btn = switcher("Position", [["off","Without position"],["on","With position"]], "off");
   const out = el("div",{class:"visual"});
   const S = [["dog","bites","man"],["man","bites","dog"]];
   const draw = ()=>{
@@ -337,24 +373,24 @@ add("1.2","Position: order changes meaning",
       return '<div class="chips">' + toks.map(t=>'<span class="chip">' + t.w + (on ? '<small>slot ' + t.i + '</small>' : '') + '</span>').join("") +
         '<span class="lbl" style="align-self:center">' + (on ? "" : "← same set") + '</span></div>';
     }).join("") + '<p class="lbl">' + (on ? "With position stamped on, the inputs differ." : "Without position: the model receives the same three vectors either way.") + '</p>';
-    btn.textContent = on ? "Remove position" : "Add position";
+    btn.sync(on ? "on" : "off");
   };
-  btn.addEventListener("click", ()=>{ on = !on; draw(); });
-  v.append(out, btn); draw();
+  btn.addEventListener("click", e=>{ if(e.target.dataset.k){ on = e.target.dataset.k==="on"; draw(); } });
+  v.append(btn, out); draw();
  },
  "Position also gives distance: a “river” right next to “bank” should count more than one 300 tokens back, and without position they're identical vectors. Older models add a second table with one row per slot, which is also a hard length limit. Most modern models use RoPE: a formula that rotates vectors by slot number, with no table. Backend version: TCP sequence numbers.");
 
 add("1.2","Training writes. Using only reads.",
- "When you use a model, its tables are frozen. Each request copies rows out, computes with the copies, and throws them away. Run some requests.",
+ "Weights (the stored tables) never change when you use a model; activations (copies computed per request) are thrown away. Run some requests.",
  v=>{
   let req = 0;
   const pipe = el("div",{class:"pipe"},
     '<div class="box lock">embedding table<br><span class="lbl">weights · frozen</span></div><span>→ copy →</span>' +
-    '<div class="box" id="work">working vector<br><span class="lbl">activation · temporary</span></div><span>→ rotate by slot → attention → discard</span>');
+    '<div class="box" id="work">working vector<br><span class="lbl">activation · temporary</span></div><span>→ rotate by position → attention → discard</span>');
   const fly = el("div",{style:"height:30px"});
   const cnt = el("p",{class:"counter"});
   const btn = el("button",{},"Run a request");
-  const draw = ()=>{ cnt.textContent = "requests run: " + req + " · changes to the table: 0"; };
+  const draw = ()=>{ cnt.innerHTML = "requests run: " + req + ' · changes to the table: <b style="color:var(--hot)">0</b>'; };
   btn.addEventListener("click", ()=>{
     req++; draw();
     const f = el("span",{class:"flyer"},"bank @ slot " + (2 + req));
@@ -388,37 +424,25 @@ function slider(id, label, min, max, stepv, val){
   return {w, inp, set:(t)=>{ lab.textContent = label + ": " + t; }};
 }
 
-add("B","A vector is just a list of numbers",
- "Two numbers can be drawn as an arrow: first number = how far right, second = how far up. Move the sliders.",
- v=>{
-  const a = slider("v1x","first number (money-ness)",-3,3,0.5,2), b = slider("v1y","second number (water-ness)",-3,3,0.5,1);
-  const pic = el("div"), out = el("div",{class:"vec"});
-  const draw = ()=>{ const x=+a.inp.value, y=+b.inp.value; a.set(x); b.set(y);
-    out.textContent = "[" + x + ", " + y + "]"; pic.innerHTML = plane([[x,y,"hot","v"]],3); };
-  [a,b].forEach(s=>s.inp.addEventListener("input",draw)); v.append(a.w,b.w,out,pic); draw();
- },
- "Real embeddings have thousands of numbers, so you can't draw them, but every rule in the next three steps works the same way with 2 numbers or 4,096. The names money-ness and water-ness are labels for this toy only.");
-
 add("B","Dot product: how well two lists match",
- "Multiply the numbers in matching positions, then add. Same direction gives a big score, a right angle gives 0, opposite gives a negative score. Move the arrows.",
+ "A dot product scores how well two lists match: multiply matching positions, then add. Same direction scores high, a right angle 0, opposite negative. Move B.",
  v=>{
-  const s1 = slider("d1","A first",-3,3,0.5,2), s2 = slider("d2","A second",-3,3,0.5,1),
-        s3 = slider("d3","B first",-3,3,0.5,1), s4 = slider("d4","B second",-3,3,0.5,2);
+  const s3 = slider("d3","B first",-3,3,0.5,1), s4 = slider("d4","B second",-3,3,0.5,2), A = [2,1];
   const pic = el("div"), out = el("p",{class:"say"});
-  const draw = ()=>{ const a=[+s1.inp.value,+s2.inp.value], b=[+s3.inp.value,+s4.inp.value];
-    s1.set(a[0]); s2.set(a[1]); s3.set(b[0]); s4.set(b[1]);
+  const draw = ()=>{ const a=A, b=[+s3.inp.value,+s4.inp.value];
+    s3.set(b[0]); s4.set(b[1]);
     const d = a[0]*b[0] + a[1]*b[1];
     out.innerHTML = '<span class="mono">[' + a.join(", ") + '] · [' + b.join(", ") + '] = ' + a[0] + '×' + b[0] + ' + ' + a[1] + '×' + b[1] + ' = <b>' + d + '</b></span> ' +
       (d > 3 ? "(strong match)" : d > 0 ? "(weak match)" : d === 0 ? "(no match)" : "(opposite)");
     pic.innerHTML = plane([[a[0],a[1],"hot","A"],[b[0],b[1],"cool","B"]],3); };
-  [s1,s2,s3,s4].forEach(s=>s.inp.addEventListener("input",draw));
-  const grid = el("div",{class:"meters"}); grid.append(s1.w,s2.w,s3.w,s4.w);
-  v.append(grid,out,pic); draw();
+  [s3,s4].forEach(s=>s.inp.addEventListener("input",draw));
+  const grid = el("div",{class:"meters"}); grid.append(s3.w,s4.w);
+  v.append(el("p",{class:"lbl"},"A is fixed at [2, 1]. Move B."), grid, out, pic); draw();
  },
  "This is the closeness idea from 1.2 turned into one number. Attention uses it to answer “how relevant is that word to me?”");
 
 add("B","Softmax: turn scores into percentages",
- "Scores can be any numbers. Softmax turns them into shares that are never negative and always add up to 100%. Bigger scores take a much bigger share. Drag the scores.",
+ "Softmax turns any scores into positive shares that add up to 100%; bigger scores take a much bigger share. Drag the scores.",
  v=>{
   const names = ["The","river","bank"], init = [0,3,2];
   const ss = names.map((n,i)=>slider("sm"+i,"score for "+n,-2,5,0.5,init[i]));
@@ -446,20 +470,20 @@ add("B","Weighted average: blend by the percentages",
  "Attention = dot product (score every word) → softmax (scores to percentages) → weighted average (blend). One more basic first: how training sets all these numbers.");
 
 add("B","Gradient: how training nudges each number",
- "Training wants a higher score. Each column is nudged in proportion to its influence: what it gets multiplied by. Press Train step a few times, then set a multiplier to 0.",
+ "Training nudges each number in bank's row in proportion to its influence: what it gets multiplied by. Press Train step, then set the multiplier to 0.",
  v=>{
   const START_ROW = [0.2,-0.5], TARGET = 2, LR = 0.05;
   let row = START_ROW.slice(), hist = [], last = [0,0];
-  const m1 = slider("g1","col 1 is multiplied by",0,3,0.5,1), m2 = slider("g2","col 2 is multiplied by",0,3,0.5,3);
+  const m1 = slider("g1","number 1 is multiplied by (number 2 is fixed at ×3)",0,3,0.5,1);
   const tbl = el("div",{class:"scroll"}), sc = el("div",{class:"bars"}), hs = el("p",{class:"lbl"});
   const btn = el("button",{},"Train step"), rst = el("button",{class:"ghost"},"Reset");
-  const mult = ()=>[+m1.inp.value, +m2.inp.value];
+  const mult = ()=>[+m1.inp.value, 3];
   const score = ()=>row[0]*mult()[0] + row[1]*mult()[1];
   const draw = ()=>{
-    const m = mult(); m1.set(m[0]); m2.set(m[1]);
+    const m = mult(); m1.set(m[0]);
     const s0 = score();
-    tbl.innerHTML = '<table class="emb"><thead><tr><td>column</td><td>value</td><td>multiplied by</td><td>last nudge</td></tr></thead><tbody>' +
-      [0,1].map(i=>'<tr'+(Math.abs(last[i])>0.001?' class="hit"':'')+'><td>col '+(i+1)+'</td><td>'+row[i].toFixed(3)+'</td><td>'+m[i]+'</td><td>'+(last[i]>=0?"+":"")+last[i].toFixed(3)+'</td></tr>').join("") + '</tbody></table>';
+    tbl.innerHTML = '<table class="emb"><thead><tr><td>number</td><td>value</td><td>multiplied by</td><td>last nudge</td></tr></thead><tbody>' +
+      [0,1].map(i=>'<tr'+(Math.abs(last[i])>0.001?' class="hit"':'')+'><td>number '+(i+1)+'</td><td>'+row[i].toFixed(3)+'</td><td>'+m[i]+'</td><td>'+(last[i]>=0?"+":"")+last[i].toFixed(3)+'</td></tr>').join("") + '</tbody></table>';
     const pct = v=>Math.max(0, Math.min(100, (v+2)/5*100));
     sc.innerHTML = '<div class="bar"><span>score</span><div class="t"><div class="f" style="width:'+pct(s0)+'%"></div></div><span class="n">'+s0.toFixed(2)+'</span></div>' +
       '<div class="bar"><span>target</span><div class="t"><div class="f" style="width:'+pct(TARGET)+'%;background:var(--accent)"></div></div><span class="n">'+TARGET.toFixed(2)+'</span></div>';
@@ -471,19 +495,19 @@ add("B","Gradient: how training nudges each number",
     last = m.map(x=>LR*err*x); row = row.map((r,i)=>r + last[i]); draw();
   });
   rst.addEventListener("click", ()=>{ row = START_ROW.slice(); hist = []; last = [0,0]; draw(); });
-  [m1,m2].forEach(x=>x.inp.addEventListener("input", ()=>{ hist = []; last = [0,0]; draw(); }));
-  const grid = el("div",{class:"meters"}); grid.append(m1.w, m2.w);
+  m1.inp.addEventListener("input", ()=>{ hist = []; last = [0,0]; draw(); });
+  const grid = el("div"); grid.append(m1.w);
   const r = el("div",{class:"row"}); r.append(btn, rst);
   v.append(grid, tbl, sc, r, hs); draw();
  },
- "Nudge = step size × how far off the score is × what the column is multiplied by. A column multiplied by 0 has no influence, so it never moves. Nobody picks a column: every number used in a prediction gets its own nudge, all calculated in one pass (backpropagation). Repeat over billions of sentences and the rows, W_Q, W_K, W_V, everything, settle into useful values. That's all training is. Backend version: 4,096 config knobs, each adjusted in proportion to how sensitive the output is to it, measured all at once.");
+ "Nudge = step size × how far off the score is × what the number is multiplied by. A number multiplied by 0 has no influence, so it never moves. Nobody picks a number: every number used in a prediction gets its own nudge, all calculated in one pass (backpropagation). Repeat over billions of sentences and the rows, W_Q, W_K, W_V, everything, settle into useful values. That's all training is. Backend version: 4,096 config knobs, each adjusted in proportion to how sensitive the output is to it, measured all at once.");
 
 add("1.3","bank has one row, but two meanings",
- "Same row in both sentences. Attention mixes in information from earlier tokens, so bank ends up meaning the right thing. Switch it on.",
+ "Attention shifts bank's meaning to fit its sentence; its row never changes. Switch attention on, then change the sentence.",
  v=>{
   let sent = "river", on = false;
   const seg = el("div",{class:"seg",role:"group","aria-label":"Sentence"},'<button data-s="river">The river bank…</button><button data-s="money">Cash at the bank…</button>');
-  const btn = el("button",{class:"ghost"});
+  const btn = switcher("Attention", [["off","Attention off"],["on","Attention on"]], "off");
   const svg = el("div");
   const draw = ()=>{
     const x = !on ? 0.5 : sent==="river" ? 0.85 : 0.15;
@@ -493,11 +517,11 @@ add("1.3","bank has one row, but two meanings",
       '<circle cx="' + (30 + 300*x) + '" cy="45" r="11" style="fill:var(--hot)"><title>bank</title></circle>' +
       '<text x="' + (30 + 300*x) + '" y="24" text-anchor="middle" style="fill:var(--hot)" font-weight="600">bank</text></g></svg>';
     seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.s===sent));
-    btn.textContent = on ? "Attention: on" : "Attention: off (row only)";
+    btn.sync(on ? "on" : "off");
   };
   seg.addEventListener("click", e=>{ if(e.target.dataset.s){ sent = e.target.dataset.s; draw(); } });
-  btn.addEventListener("click", ()=>{ on = !on; draw(); });
-  v.append(seg, svg, btn); draw();
+  btn.addEventListener("click", e=>{ if(e.target.dataset.k){ on = e.target.dataset.k==="on"; draw(); } });
+  v.append(btn, seg, svg); draw();
  },
  "With attention off, bank is just its row: halfway between meanings, in both sentences. With it on, bank pulls in “river” or “cash” and moves. This is an activation: computed for this sentence, gone afterwards.");
 
@@ -552,7 +576,7 @@ function arcsSVG(toks, sel, w){
   return s + '</g></svg>';
 }
 add("1.3","Who does each token listen to?",
- "Tap any word. Arc thickness is how much it listens to each earlier word. Later words are greyed: a token only looks backward (why comes with training, in 1.7).",
+ "Each token blends earlier tokens; arc thickness shows how much. Tap any word. Later words are greyed: a token only looks backward (why comes in 1.7).",
  v=>{
   let k = "A";
   const seg = el("div",{class:"seg",role:"group","aria-label":"Sentence"},'<button data-k="A">River</button><button data-k="B">Money</button>');
@@ -566,7 +590,7 @@ add("1.3","Who does each token listen to?",
  "The weights for one token always add up to 1: it's a blend. Tap “flooded”: it leans on “bank” (what flooded?) and “river”. Weights here are hand-picked to show the idea; a real model learns them and spreads them over many heads and layers.");
 
 add("1.3","Several heads: one blend per need",
- "bank needs two things: its setting (from “river”) and its grammar (from “the”). One head has one softmax, so one blend has to split between both needs. Compare.",
+ "A head is one full copy of attention with its own softmax, so two needs don't share one blend. bank needs its setting (“river”) and its grammar (“the”). Compare.",
  v=>{
   let mode = "one";
   const seg = el("div",{class:"seg",role:"group","aria-label":"How many heads"},'<button data-m="one">One head</button><button data-m="two">Two heads</button>');
@@ -611,7 +635,7 @@ add("1.3","Cost grows with the square of the context",
     t.innerHTML = '<div class="meter"><b>' + (n*n).toLocaleString() + '</b><span>scores for ' + n + ' tokens</span></div>' +
       '<div class="meter"><b>' + ((2*n)*(2*n)).toLocaleString() + '</b><span>scores for ' + (2*n) + ' tokens (4×)</span></div>';
   };
-  s.addEventListener("input", draw); v.append(lab, s, c, t); draw();
+  s.addEventListener("input", draw); v.append(lab, s, c, el("p",{class:"lbl"},"Rows: the token doing the looking ↓ · columns: the tokens it scores → · teal = scored, grey = later token (not seen)"), t); draw();
  },
  "8,000 tokens → 64 million scores; 16,000 → 256 million; 128,000 → about 16 billion, per head, per layer. Looking only backward removes about half, which doesn't change how it scales. This is why long context is expensive and why token counts (step 4) matter. Backend version: a self-join done as a nested loop.");
 
@@ -619,7 +643,7 @@ add("1.3","Cost grows with the square of the context",
 /* ---------- Videos (all links verified 2026-11-02) ---------- */
 const VIDS = [
   ["Watch first","Transformers, the tech behind LLMs","3Blue1Brown · Deep Learning Ch. 5 · ~27 min","https://www.youtube.com/watch?v=wjZofJX0v4M",
-   "The whole system map, then embeddings: the embedding matrix, directions that carry meaning, and the dot product.","Steps 5–9, 11"],
+   "The whole system map, then embeddings: the embedding matrix, directions that carry meaning, and the dot product.","Steps 5–11"],
   ["Watch second","Attention in transformers, step-by-step","3Blue1Brown · Deep Learning Ch. 6 · ~26 min","https://www.youtube.com/watch?v=eMlx5fFNoYc",
    "Query, key, value, softmax and multiple heads, animated. It also covers the mask, which this course saves for 1.7.","Steps 15–18"],
   ["Then","Gradient descent, how neural networks learn","3Blue1Brown · Deep Learning Ch. 2","https://www.youtube.com/watch?v=IHZwWFHWa-w",
@@ -674,13 +698,13 @@ add("✓","Check yourself",
 /* ================= shared map drawing ================= */
 function mapSVG(pos, showGroups, picks){
   const X = x=>20 + x*320, Y = y=>230 - y*210;
-  const col = {a:"--hot", v:"--cool", f:"--accent", m:"--muted"};
-  let s = '<svg viewBox="0 0 360 250" role="img" aria-label="Words as points; similar words cluster after training"><g font-family="IBM Plex Mono, monospace" font-size="12">' +
+  const col = {a:"--accent", v:"--cool", f:"--ink", m:"--muted"};
+  let s = '<svg viewBox="0 0 360 250" style="max-width:480px" role="img" aria-label="Words as points; similar words cluster after training"><g font-family="IBM Plex Mono, monospace" font-size="12">' +
     '<rect x="1" y="1" width="358" height="248" rx="8" style="fill:var(--bg);stroke:var(--line)"/>';
   if(picks){ const [a,b] = picks.map(i=>pos[i]); s += '<line x1="' + X(a[0]) + '" y1="' + Y(a[1]) + '" x2="' + X(b[0]) + '" y2="' + Y(b[1]) + '" style="stroke:var(--ink)" stroke-dasharray="4 3"/>'; }
-  pos.forEach((p,i)=>{ const c = showGroups ? col[MAPW[i][3]] : "--ink", pk = picks && picks.includes(i);
+  pos.forEach((p,i)=>{ const pk = picks && picks.includes(i), c = pk ? "--hot" : showGroups ? col[MAPW[i][3]] : "--ink", dy = i % 2 ? -7 : 15;
     s += '<g data-w="' + i + '" style="cursor:' + (picks ? "pointer" : "default") + '"><circle cx="' + X(p[0]) + '" cy="' + Y(p[1]) + '" r="' + (pk ? 8 : 5) + '" style="fill:var(' + c + ')"/>' +
-      '<text x="' + (X(p[0]) + 9) + '" y="' + (Y(p[1]) + 4) + '" style="fill:var(' + c + ')' + (pk ? ";font-weight:600" : "") + '">' + MAPW[i][0] + '</text></g>'; });
+      '<text x="' + (X(p[0]) + 9) + '" y="' + (Y(p[1]) + dy) + '" style="fill:var(' + c + ')' + (pk ? ";font-weight:600" : "") + '">' + MAPW[i][0] + '</text></g>'; });
   return s + '</g></svg>';
 }
 
@@ -707,13 +731,16 @@ const CHS = [["1.1","1.1 Tokens"],["1.2","1.2 Embeddings"],["B","Basics"],["1.3"
 function render(){
   const st = STEPS[cur], card = $("#card");
   card.innerHTML = "";
-  card.append(el("span",{class:"step-tag"}, (st.ch==="✓" ? "Questions" : st.ch==="B" ? "Basics" : st.ch==="V" ? "Videos" : "Chapter " + st.ch) + " · step " + (cur+1) + " of " + STEPS.length));
+  const content = STEPS.filter(s=>s.ch!=="V" && s.ch!=="✓"), ci = content.indexOf(st);
+  const chLabel = st.ch==="B" ? "Basics" : "Chapter " + st.ch;
+  card.append(el("span",{class:"step-tag"}, st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : chLabel + " · step " + (ci+1) + " of " + content.length));
   card.append(el("h2",{}, esc(st.title)));
   card.append(el("p",{class:"say"}, esc(st.say)));
   const v = el("div",{class:"visual"}); card.append(v); st.render(v);
   if(st.deeper){ const d = el("details",{class:"deeper"},'<summary>Go deeper</summary><p>' + st.deeper + '</p>'); card.append(d); }
   $("#back").disabled = cur===0; $("#next").disabled = cur===STEPS.length-1;
-  $("#count").textContent = (cur+1) + " / " + STEPS.length;
+  $("#count").textContent = st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : (ci+1) + " / " + content.length;
+  renderToc();
   $("#progress").innerHTML = STEPS.map((_,i)=>'<span class="' + (i<=cur?"on":"") + '"></span>').join("");
   $("#chapters").querySelectorAll("button").forEach(b=>b.setAttribute("aria-current", b.dataset.ch===st.ch));
   if(storeCls) setStore(storeCls, storeText);
@@ -725,6 +752,28 @@ $("#back").addEventListener("click", ()=>{ if(cur>0){ cur--; render(); window.sc
 $("#next").addEventListener("click", ()=>{ if(cur<STEPS.length-1){ cur++; render(); window.scrollTo(0,0); } });
 document.addEventListener("keydown", e=>{ if(/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
   if(e.key==="ArrowRight") $("#next").click(); if(e.key==="ArrowLeft") $("#back").click(); });
+
+/* ---- contents sidebar + chapter links (#ch-1-2) ---- */
+const slugOf = k => "ch-" + String(k).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const seen = new Set();
+function renderToc(){
+  const host = document.getElementById("tocList"); if(!host) return;
+  seen.add(cur);
+  host.innerHTML = CHS.map(([k,l])=>{
+    const items = STEPS.map((s,i)=>[s,i]).filter(([s])=>s.ch===k);
+    const content = STEPS.filter(s=>s.ch!=="V" && s.ch!=="✓");
+    return '<div class="grp"><p class="gl">' + esc(l) + '</p>' + items.map(([s,i])=>{
+      const n = (k==="V"||k==="✓") ? "" : (content.indexOf(s)+1);
+      return '<a data-go="' + i + '"' + (i===cur ? ' aria-current="step"' : '') + (seen.has(i) && i!==cur ? ' class="seen"' : '') + '><span class="n">' + n + '</span><span>' + esc(s.title) + '</span></a>';
+    }).join("") + '</div>';
+  }).join("");
+}
+document.addEventListener("click", e=>{ const a = e.target.closest("[data-go]"); if(!a) return; cur = +a.dataset.go; render(); window.scrollTo(0,0); });
+function fromHash(){ const h = location.hash.slice(1); if(!h) return false;
+  const k = CHS.map(c=>c[0]).find(k=>slugOf(k)===h); if(!k) return false;
+  cur = STEPS.findIndex(s=>s.ch===k); return true; }
+window.addEventListener("hashchange", ()=>{ if(fromHash()) render(); });
+fromHash();
 render();
 
 })();
