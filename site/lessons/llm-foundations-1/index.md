@@ -17,7 +17,7 @@ Course: LLM Foundations for engineers. Interactive version: index.html
 13. **Weighted average: blend by the percentages** (B): Mix several vectors using the percentages as the recipe. Slide the recipe and watch the blend move between them.
 14. **Gradient: how training nudges each number** (B): Training nudges each number in bank's row in proportion to its influence: what it gets multiplied by. Press Train step, then set the multiplier to 0.
 15. **bank has one row, but two meanings** (1.3): Attention shifts bank's meaning to fit its sentence; its row never changes. Switch attention on, then change the sentence.
-16. **The three basics, running together** (1.3): bank asks the same question in every sentence: its query. Each earlier word answers with its key. Score, softmax, blend. Switch the sentence.
+16. **The three basics, running together** (1.3): Attention is the three basics in a row: score, softmax, blend. bank asks the same question (its query) in every sentence; each earlier word answers with its key. Switch the sentence.
 17. **Who does each token listen to?** (1.3): Each token blends earlier tokens; arc thickness shows how much. Tap any word. Later words are greyed: a token only looks backward (why comes in 1.7).
 18. **Several heads: one blend per need** (1.3): A head is one full copy of attention with its own softmax, so two needs don't share one blend. bank needs its setting (“river”) and its grammar (“the”). Compare.
 19. **Cost grows with the square of the context** (1.3): Every token scores every token it can see. Drag the slider: double the tokens, about four times the work.

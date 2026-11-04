@@ -123,6 +123,7 @@ textarea{width:100%; min-height:84px; font:15px/1.5 var(--font-body); color:var(
 }
 
 /* Lesson contents sidebar (desktop): where am I, what's next, jump anywhere. */
+.visual > .seg{align-self:flex-start}
 .toc{display:none}
 .toc .grp{display:flex; flex-direction:column; gap:2px}
 .toc .grp + .grp{margin-top:14px}
@@ -393,7 +394,7 @@ add("1.6","Prefill and decode are two different jobs",
     const p = +sp.inp.value, n = +so.inp.value; sp.set(p); so.set(n);
     const ttft = p/PRE, dec = n/DEC, tot = ttft + dec;
     out.innerHTML = '<div style="display:flex;height:22px;border-radius:6px;overflow:hidden;border:1px solid var(--line)">' +
-      '<div style="width:'+(ttft/tot*100)+'%;background:var(--accent);color:var(--surface);font:500 .75rem var(--font-mono);padding:3px 6px;white-space:nowrap;overflow:hidden">prefill</div><div style="width:'+(dec/tot*100)+'%;background:var(--muted);color:var(--surface);font:500 .75rem var(--font-mono);padding:3px 6px;white-space:nowrap;overflow:hidden">decode</div></div>' +
+      '<div style="width:'+(ttft/tot*100)+'%;background:var(--accent);color:var(--surface);font:500 .75rem var(--font-mono);padding:3px 6px;white-space:nowrap;overflow:hidden;min-width:64px;flex:none">prefill</div><div style="width:'+(dec/tot*100)+'%;background:var(--muted);color:var(--surface);font:500 .75rem var(--font-mono);padding:3px 6px;white-space:nowrap;overflow:hidden;flex:1;min-width:0">decode</div></div>' +
       '<div class="meters"><div class="meter"><b>'+ttft.toFixed(2)+' s</b><span>time to first token (prefill)</span></div>' +
       '<div class="meter"><b>'+dec.toFixed(1)+' s</b><span>decode, at '+(1000/DEC)+' ms per token</span></div></div>' +
       '<p class="lbl">Toy rates for one request on one GPU: prefill 10,000 tokens/s, decode 40 tokens/s. Real numbers depend on the model and hardware.</p>';
@@ -408,19 +409,21 @@ add("1.6","How big is the KV cache?",
   let m = "70b";
   const MODELS = {"8b":{label:"8B-class", L:32, H:8, D:128, wBytes:16e9, gpus:1}, "70b":{label:"70B-class", L:80, H:8, D:128, wBytes:140e9, gpus:2}};
   const sg = seg("Model", [["8b","8B-class · 1 GPU"],["70b","70B-class · 2 GPUs"]], m);
-  const sC = slider("kc","context per request (tokens)",1024,131072,1024,8192), sB = slider("kb","bytes per number (2 = 16-bit, 1 = 8-bit)",1,2,1,2);
+  let bytes = "2";
+  const sC = slider("kc","context per request (tokens)",1024,131072,1024,8192), sB = seg("Bytes per number", [["2","16-bit cache"],["1","8-bit cache"]], bytes);
   const out = el("div",{class:"visual"});
   const draw = ()=>{
-    const M = MODELS[m], C = +sC.inp.value, B = +sB.inp.value; sC.set(C.toLocaleString("en-US")); sB.set(B); sg.sync(m);
+    const M = MODELS[m], C = +sC.inp.value, B = +bytes; sC.set(C.toLocaleString("en-US")); sB.sync(bytes); sg.sync(m);
     const perTok = 2*M.L*M.H*M.D*B, perReq = perTok*C, free = M.gpus*80e9 - M.wBytes;
     out.innerHTML = '<p class="mono">2 (K and V) × '+M.L+' layers × '+M.H+' KV heads × '+M.D+' × '+B+' bytes = '+fmtB(perTok)+' per token</p>' +
       '<div class="meters"><div class="meter"><b>'+fmtB(perReq)+'</b><span>per request at '+C.toLocaleString("en-US")+' tokens</span></div>' +
       '<div class="meter"><b style="color:var(--hot)">'+Math.max(0, Math.floor(free/perReq))+'</b><span>requests fit in the '+fmtB(free)+' left on '+M.gpus+' × 80 GB after '+fmtB(M.wBytes)+' of weights</span></div></div>';
   };
   sg.addEventListener("click", e=>{ if(e.target.dataset.k){ m = e.target.dataset.k; draw(); } });
-  [sC,sB].forEach(s=>s.inp.addEventListener("input", draw)); v.append(sg, sC.w, sB.w, out); draw();
+  sB.addEventListener("click", e=>{ if(e.target.dataset.k){ bytes = e.target.dataset.k; draw(); } });
+  sC.inp.addEventListener("input", draw); v.append(sg, sB, sC.w, out); draw();
  },
- "Presets: an 8B-class model (32 layers, 8 KV heads, head size 128) on one 80 GB GPU, and a 70B-class model (80 layers, 8 KV heads, head size 128) on two. The 70B case: about 330 KB per token and 2.7 GB per 8K-token request, so only about 7 such requests fit beside the weights. The levers are exactly the interview topics: fewer KV heads (grouped-query attention), an 8-bit cache (halves it; try bytes = 1), paged allocation so memory isn't wasted on fragments (PagedAttention, in vLLM), and sharing the cache for identical prompt prefixes (prefix caching).");
+ "Presets: an 8B-class model (32 layers, 8 KV heads, head size 128) on one 80 GB GPU, and a 70B-class model (80 layers, 8 KV heads, head size 128) on two. The 70B case: about 330 KB per token and 2.7 GB per 8K-token request, so only about 7 such requests fit beside the weights. The levers are exactly the interview topics: fewer KV heads (grouped-query attention), an 8-bit cache (halves it; try the 8-bit switch), paged allocation so memory isn't wasted on fragments (PagedAttention, in vLLM), and sharing the cache for identical prompt prefixes (prefix caching).");
 
 add("1.6","Why context windows have a limit",
  "Three costs grow with context: KV memory grows in line with it, attention work in prefill grows with its square, and the model only learned positions up to the length it was trained on. Drag the context.",
@@ -520,7 +523,7 @@ function render(){
   $("#back").disabled = cur===0; $("#next").disabled = cur===STEPS.length-1;
   $("#count").textContent = st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : (ci+1) + " / " + content.length;
   renderToc();
-  $("#progress").innerHTML = STEPS.map((_,i)=>'<span class="' + (i<=cur?"on":"") + '"></span>').join("");
+  $("#progress").innerHTML = content.map((_,i)=>'<span class="' + ((ci < 0 || i <= ci) ? "on" : "") + '"></span>').join("");
   $("#chapters").querySelectorAll("button").forEach(b=>b.setAttribute("aria-current", b.dataset.ch===st.ch));
   if(storeCls) setStore(storeCls, storeText);
   lsSave();
@@ -546,6 +549,8 @@ function renderToc(){
       return '<a data-go="' + i + '"' + (i===cur ? ' aria-current="step"' : '') + (seen.has(i) && i!==cur ? ' class="seen"' : '') + '><span class="n">' + n + '</span><span>' + esc(s.title) + '</span></a>';
     }).join("") + '</div>';
   }).join("");
+  const now = host.querySelector('[aria-current="step"]'), box = host.closest(".toc");
+  if(now && box && (now.offsetTop < box.scrollTop + 40 || now.offsetTop > box.scrollTop + box.clientHeight - 60)) box.scrollTop = now.offsetTop - box.clientHeight/2;
 }
 document.addEventListener("click", e=>{ const a = e.target.closest("[data-go]"); if(!a) return; cur = +a.dataset.go; render(); window.scrollTo(0,0); });
 function fromHash(){ const h = location.hash.slice(1); if(!h) return false;
