@@ -2,11 +2,11 @@
 
 Course: LLM Foundations for engineers. Interactive version: index.html
 
-3. **Two kinds of work: talk, then think** (1.4): Attention lets words share information with each other. Then each word, on its own, works with what it now knows: that's the MLP. Switch between them.
-4. **A neuron: a dot product with a threshold** (1.4): An MLP is built from neurons. A neuron scores the word's vector with a dot product (from Basics) and fires only if the score passes its threshold. Slide bank's water-ness.
-5. **The MLP: many neurons write new notes about the word** (1.4): Run several neurons on bank's vector and each one that fires adds a new fact about the word. Slide bank's water-ness.
-6. **The residual stream: a notepad each layer adds to** (1.4): Each word carries a notepad: its vector. Every attention and MLP step adds a note and never erases. Run the layers, then try overwriting instead.
-7. **Stack the blocks: each layer sharpens the guess** (1.4): A model is the same kind of block repeated, each with its own weights. Early blocks work out what words are; later ones what should come next. Drag the depth.
+3. **Two kinds of work: talk, then think** (1.4): Every block does two things in order. Attention lets the words share information. Then each word, on its own, works with what it now knows. Switch between them.
+4. **One neuron is one yes/no question** (1.4): A neuron checks the word for one pattern and answers with a number: positive means yes, zero means no. Flip the two facts and see when this one says yes.
+5. **The MLP: thousands of questions, then add the answers** (1.4): The MLP asks the word thousands of questions at once, keeps the yes answers, and turns each yes into a note added back to the word. Press Run, then switch the sentence.
+6. **The residual stream: a notepad every layer adds to** (1.4): Each word carries one vector through the whole model, its notepad. Every attention and MLP step reads it and adds a note; nothing ever erases. Run the layers, then try overwriting.
+7. **Stack the blocks: each block sharpens the guess** (1.4): A model stacks the same kind of block many times, each with its own weights. Every block adds notes the next one can build on, so the guess for the next word gets sharper with depth. Drag the depth.
 8. **The last vector scores every token in the vocabulary** (1.5): After the last block, the final vector is compared with a row for every vocabulary token (a dot product). Those scores are the logits; softmax turns them into probabilities. Switch the context.
 9. **Temperature: how sharp the choice is** (1.5): Before softmax, the logits are divided by the temperature. Low temperature sharpens toward the top token, high temperature flattens. Drag it.
 10. **Sampling: roll the dice, but cut the tail** (1.5): The next token is drawn at random by these probabilities. Top-p keeps only the most likely tokens that together reach p, so unlikely ones can't be picked. Sample 50 times.

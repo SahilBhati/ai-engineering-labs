@@ -177,6 +177,17 @@ html[data-dir="back"]::view-transition-new(lesson-card){animation-name:ael-in-ba
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){animation:none !important}
   .progress span{transition:none}
 }
+
+/* Explanation panels: one job each */
+.panel{border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--bg); display:flex; flex-direction:column; gap:6px; max-width:80ch}
+.panel p{margin:0}
+.panel-l{font:500 .75rem var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+.panel.analogy{border-left:3px solid var(--accent)}
+.panel.analogy .panel-l{color:var(--accent)}
+.panel.evidence{border-style:dashed}
+.panel .duo{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.panel .duo > div{display:flex; flex-direction:column; gap:4px}
+.panel .duo b{font-size:.875rem}
 .crumbs{font:500 .85rem var(--font-mono);color:var(--muted)}.crumbs a{color:var(--accent)}footer.lesson{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:.875rem}footer.lesson a{color:var(--accent)}@media (min-width:1180px){footer.lesson{grid-column:2;max-width:1120px;margin:0;padding:0 48px 32px}html.toc-collapsed footer.lesson{grid-column:1;max-width:1240px;padding-inline:64px}}</style>
 <script>(function(){var r=document.documentElement;try{var t=localStorage.getItem("ael-theme");if(t)r.dataset.theme=t;else if(r.dataset.defaultTheme)r.dataset.theme=r.dataset.defaultTheme;if(localStorage.getItem("ael-toc")==="0")r.classList.add("toc-collapsed");}catch(e){}})();</script>
 </head>
@@ -259,7 +270,7 @@ function switcher(name, options, cur){ // a two-or-more-button switch; the one o
 }
 
 const STEPS = [];
-const add = (ch, title, say, render, deeper) => STEPS.push({ch, title, say, render, deeper});
+const add = (ch, title, say, render, deeper, x) => STEPS.push({ch, title, say, render, deeper, x: x || {}});
 
 /* ---------- 1.1 Tokenization ---------- */
 add("1.1","Models read numbers, not text",
@@ -783,7 +794,13 @@ function render(){
   card.append(el("span",{class:"step-tag"}, st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : chLabel + " · step " + (ci+1) + " of " + content.length));
   card.append(el("h2",{}, esc(st.title)));
   card.append(el("p",{class:"say"}, esc(st.say)));
+  // Panels, each with one job: what it is, an analogy, then the visual, what's really happening, evidence.
+  const panel = (cls, label, html) => { const d = el("div",{class:"panel " + cls}); d.innerHTML = '<p class="panel-l">' + label + '</p>' + html; return d; };
+  if(st.x.what) card.append(panel("what", "What it is", st.x.what));
+  if(st.x.analogy) card.append(panel("analogy", "Think of it like", st.x.analogy));
   const v = el("div",{class:"visual"}); card.append(v); st.render(v);
+  if(st.x.real) card.append(panel("real", "What's actually happening", st.x.real));
+  if(st.x.evidence) card.append(panel("evidence", "Evidence", st.x.evidence));
   if(st.deeper){ const d = el("details",{class:"deeper"},'<summary>Go deeper</summary><p>' + st.deeper + '</p>'); card.append(d); }
   $("#back").disabled = cur===0; $("#next").disabled = cur===STEPS.length-1;
   $("#count").textContent = st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : (ci+1) + " / " + content.length;
