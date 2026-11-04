@@ -34,7 +34,7 @@ p{margin:0}
 .muted{color:var(--muted)}
 
 /* header */
-header.site{border-bottom:1px solid var(--line); position:sticky; top:0; z-index:10; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(8px)}
+header.site{border-bottom:1px solid var(--line); position:sticky; top:0; z-index:10; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(8px); transition:transform 200ms cubic-bezier(0.2,0,0,1)}
 header.site .wrap{display:flex; align-items:center; gap:28px; height:60px}
 .brand{font-weight:700; color:var(--ink); text-decoration:none; white-space:nowrap}
 .brand span{color:var(--accent)}
@@ -113,7 +113,7 @@ footer.site .wrap{display:flex; flex-wrap:wrap; gap:10px 24px; justify-content:s
 
 /* Desktop layout: sticky side navigation + content. Header stays on top. */
 .layout{display:grid; grid-template-columns:260px minmax(0,1fr)}
-.sidenav{position:sticky; top:60px; align-self:start; height:calc(100vh - 60px); overflow-y:auto; border-right:1px solid var(--line); padding:28px 16px 28px 24px; display:flex; flex-direction:column; gap:24px}
+.sidenav{position:sticky; top:60px; align-self:start; height:calc(100vh - 60px); transition:top 200ms cubic-bezier(0.2,0,0,1), height 200ms cubic-bezier(0.2,0,0,1); overflow-y:auto; border-right:1px solid var(--line); padding:28px 16px 28px 24px; display:flex; flex-direction:column; gap:24px}
 .sidenav .grp{display:flex; flex-direction:column; gap:2px}
 .sidenav .lbl{font:500 .75rem var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 6px 10px}
 .sidenav a, .sidenav .off{display:flex; gap:8px; align-items:baseline; padding:6px 10px; border-radius:6px; font-size:.875rem; line-height:1.35; color:var(--ink); text-decoration:none}
@@ -162,3 +162,17 @@ header.site .wrap{max-width:none; padding-inline:24px}
 /* A concrete result each lesson produces: identity that only this subject has */
 .computes{font:500 .875rem/1.5 var(--font-mono); color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin:0}
 .computes span{display:block; font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:2px}
+
+/* Header and side-nav controls */
+.icon-btn{display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--ink); font-size:1rem; cursor:pointer; transition:border-color 120ms ease, background-color 120ms ease}
+.icon-btn:hover{border-color:var(--muted); background:var(--surface)}
+.header-cta button.btn{cursor:pointer}
+/* Collapsed side nav: content takes the full width */
+html.nav-collapsed .layout{grid-template-columns:minmax(0,1fr)}
+html.nav-collapsed .sidenav{display:none}
+html.nav-collapsed .layout main .wrap{margin-inline:auto}
+html.nav-collapsed .icon-btn{border-color:var(--accent); color:var(--accent)}
+/* Header hides while scrolling down long pages; the side nav moves up with it */
+html.hdr-hidden header.site{transform:translateY(-100%)}
+html.hdr-hidden .sidenav{top:0; height:100vh}
+@media (prefers-reduced-motion: reduce){ header.site, .sidenav{transition:none} }
