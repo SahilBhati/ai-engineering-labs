@@ -916,6 +916,8 @@ function render(){
   const v = el("div",{class:"visual"}); card.append(v); st.render(v);
   if(st.x.real) card.append(panel("real", "What's actually happening", st.x.real));
   if(st.x.evidence) card.append(panel("evidence", "Evidence", st.x.evidence));
+  // Links to other sites open in a new tab, so the lesson stays where it is.
+  card.querySelectorAll('a[href^="http"]').forEach(a=>{ a.target = "_blank"; a.rel = "noopener"; });
   if(st.deeper){ const d = el("details",{class:"deeper"},'<summary>Go deeper</summary><p>' + st.deeper + '</p>'); card.append(d); }
   $("#back").disabled = cur===0; $("#next").disabled = cur===STEPS.length-1;
   $("#count").textContent = st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : (ci+1) + " / " + content.length;
