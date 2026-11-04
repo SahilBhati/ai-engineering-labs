@@ -83,12 +83,15 @@
   inp.addEventListener("input", draw); draw();
   const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if(!reduce){
-    const full = inp.value; let i = 0, stopped = false;
+    // At rest the full sentence and its tokens are visible; then one replay shows text turning into tokens.
+    const full = inp.value; let i = 0, stopped = false, started = false;
     const stop = ()=>{ stopped = true; };
     inp.addEventListener("focus", stop, {once:true}); inp.addEventListener("pointerdown", stop, {once:true});
-    inp.value = ""; draw();
-    (function type(){ if(stopped){ if(i < full.length && inp.value === full.slice(0,i)){ inp.value = full; draw(); } return; }
-      i++; inp.value = full.slice(0, i); draw(); if(i < full.length) setTimeout(type, 45); })();
+    setTimeout(()=>{ if(stopped) return; started = true; outEl.setAttribute("aria-live","off"); inp.value = ""; draw();
+      (function type(){ if(stopped){ inp.value = full; draw(); outEl.setAttribute("aria-live","polite"); return; }
+        i++; inp.value = full.slice(0, i); draw();
+        if(i < full.length) setTimeout(type, 35); else outEl.setAttribute("aria-live","polite"); })();
+    }, 1200);
   }
 })();
 </script>

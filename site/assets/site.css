@@ -47,7 +47,7 @@ nav.site a[aria-current="page"]{color:var(--ink); background:var(--surface); bor
 .header-cta .gh{color:var(--muted); font-size:.875rem; text-decoration:none}
 
 /* buttons */
-.btn{display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:.875rem; transition:border-color 120ms ease, background-color 120ms ease, filter 120ms ease; padding:10px 16px; border-radius:8px; text-decoration:none; border:1px solid var(--line); color:var(--ink); background:transparent; white-space:nowrap}
+.btn{display:inline-flex; align-items:center; gap:8px; font-family:inherit; font-weight:600; font-size:.875rem; transition:border-color 120ms ease, background-color 120ms ease, filter 120ms ease; padding:10px 16px; border-radius:8px; text-decoration:none; border:1px solid var(--line); color:var(--ink); background:transparent; white-space:nowrap}
 .btn:hover{border-color:var(--muted)}
 .btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
 .btn.primary:hover{filter:brightness(1.08)}
@@ -113,7 +113,7 @@ footer.site .wrap{display:flex; flex-wrap:wrap; gap:10px 24px; justify-content:s
 
 /* Desktop layout: sticky side navigation + content. Header stays on top. */
 .layout{display:grid; grid-template-columns:260px minmax(0,1fr)}
-.sidenav{position:sticky; top:60px; align-self:start; height:calc(100vh - 60px); transition:top 200ms cubic-bezier(0.2,0,0,1), height 200ms cubic-bezier(0.2,0,0,1); overflow-y:auto; border-right:1px solid var(--line); padding:28px 16px 28px 24px; display:flex; flex-direction:column; gap:24px}
+.sidenav{position:sticky; top:60px; align-self:start; height:calc(100vh - 60px); overflow-y:auto; border-right:1px solid var(--line); padding:28px 16px 28px 24px; display:flex; flex-direction:column; gap:24px}
 .sidenav .grp{display:flex; flex-direction:column; gap:2px}
 .sidenav .lbl{font:500 .75rem var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 6px 10px}
 .sidenav a, .sidenav .off{display:flex; gap:8px; align-items:baseline; padding:6px 10px; border-radius:6px; font-size:.875rem; line-height:1.35; color:var(--ink); text-decoration:none}
@@ -175,4 +175,6 @@ html.nav-collapsed .icon-btn{border-color:var(--accent); color:var(--accent)}
 /* Header hides while scrolling down long pages; the side nav moves up with it */
 html.hdr-hidden header.site{transform:translateY(-100%)}
 html.hdr-hidden .sidenav{top:0; height:100vh}
-@media (prefers-reduced-motion: reduce){ header.site, .sidenav{transition:none} }
+@media (prefers-reduced-motion: reduce){ header.site{transition:none} }
+
+button{font-family:inherit}
