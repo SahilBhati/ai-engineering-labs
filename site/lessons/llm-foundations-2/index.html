@@ -231,15 +231,16 @@ const STEPS = [];
 const add = (ch, title, say, render, deeper) => STEPS.push({ch, title, say, render, deeper});
 
 /* ---------- 1.4 Transformer block (conceptual) ---------- */
-add("1.4","Where Lesson 1 left off",
- "So far one token travels: text → token ID → embedding row → attention blends earlier tokens. Weights stay frozen; activations are computed per request. Tap each stage.",
+/* ---------- Recap (skippable): Lesson 1 in two steps, and this lesson's question ---------- */
+let nextGuess = null;
+add("R","Where Lesson 1 left off",
+ "One word's journey so far: text → token ID → embedding row → attention blends in earlier words. Tap each stage.",
  v=>{
   let k = "token";
   const STAGES = {
-    token:["Token","“bank” becomes token ID " + 33535 + ": a label, not a quantity."],
-    row:["Row","The ID picks its row in the embedding table: a vector like [0.5, 0.5] (toy numbers). Same row in every sentence."],
-    attn:["Attention","In “The river bank…”, attention blends earlier tokens' values: bank becomes [0.46, 1.70], pulled toward water."],
-    block:["Block","A block = attention + a small network (the MLP), with the result added back to the vector. Models stack dozens of blocks. This lesson opens one."]
+    token:["Token","“bank” becomes token ID 33535: a label, not a quantity."],
+    row:["Row","The ID picks its row in the embedding table: a vector like [0.5, 0.5]. Same row in every sentence."],
+    attn:["Attention","In “The river bank…”, attention blends in earlier words' values: bank becomes [0.46, 1.70], pulled toward water."]
   };
   const sg = seg("Stage", Object.entries(STAGES).map(([key,[l]])=>[key,l]), k);
   const out = el("p",{class:"say"});
@@ -247,56 +248,116 @@ add("1.4","Where Lesson 1 left off",
   sg.addEventListener("click", e=>{ if(e.target.dataset.k){ k = e.target.dataset.k; draw(); } });
   v.append(sg, out); draw();
  },
- "The token ID shown is the toy tokenizer's from Lesson 1. Lesson 1, step 10 is the weights vs activations split; step 16 is the attention calculation that produced [0.46, 1.70].");
+ "Weights (the stored tables) never change while you use the model; activations (like bank's blended vector) are computed fresh for each request. Lesson 1, steps 10 and 16.");
 
-add("1.4","After attention, each token thinks on its own",
- "After attention, each token passes through its own small network, the MLP, whose neurons act as detectors. Slide bank's water-ness and watch which ones fire.",
+add("R","This lesson's question: what comes next?",
+ "The model has read “The river bank …”. What word should come next? Make your guess; by the end of 1.5 you'll see the model's.",
  v=>{
-  const s = slider("mw","bank's water-ness (money-ness fixed at 0.5)",0,3,0.1,1.7);
-  const out = el("div",{class:"visual"});
-  const N = [["water place",[0,1],-1.0],["money place",[1,0],-1.0],["flood risk",[-0.3,1],-1.8]];
+  const opts = ["flooded","account","is","collapsed"];
+  const sg = seg("Your guess", opts.map(o=>[o,o]), nextGuess || "");
+  const out = el("p",{class:"lbl"});
+  const draw = ()=>{ sg.sync(nextGuess || ""); out.textContent = nextGuess ? "Your guess: “" + nextGuess + "”. Keep it in mind." : "Pick one."; };
+  sg.addEventListener("click", e=>{ if(e.target.dataset.k){ nextGuess = e.target.dataset.k; draw(); } });
+  v.append(sg, out); draw();
+ },
+ "This whole lesson follows bank from its blended vector to an actual next word: through the block (1.4), to a score for every word (1.5), and then the cost of doing it again and again (1.6).");
+
+/* ---------- 1.4 The block (conceptual) ---------- */
+add("1.4","Two kinds of work: talk, then think",
+ "Attention lets words share information with each other. Then each word, on its own, works with what it now knows: that's the MLP. Switch between them.",
+ v=>{
+  let m = "talk";
+  const sg = seg("Kind of work", [["talk","Attention: words talk"],["think","MLP: each word thinks alone"]], m);
+  const pic = el("div");
+  const W = ["The","river","bank"], X = [60, 170, 280];
   const draw = ()=>{
-    const x = [0.5, +s.inp.value]; s.set(x[1].toFixed(1));
-    const rows = N.map(([n,w,b])=>{ const pre = w[0]*x[0] + w[1]*x[1] + b, o = Math.max(0, pre);
-      return {n, pre, o, txt: w[0]+"×"+x[0]+" + "+w[1]+"×"+x[1].toFixed(1)+" "+(b<0?"− "+(-b):"+ "+b)}; });
-    out.innerHTML = '<table class="emb"><thead><tr><td>neuron</td><td>score</td><td>=</td><td>output</td></tr></thead><tbody>' +
-      rows.map(r=>'<tr'+(r.o>0?' class="hit"':'')+'><td>'+r.n+'</td><td>'+r.txt+'</td><td>'+r.pre.toFixed(2)+'</td><td>'+r.o.toFixed(2)+'</td></tr>').join("") +
-      '</tbody></table>' + bars(rows.map(r=>[r.n, r.o/2.5, r.o.toFixed(2)]));
+    let s = '<svg viewBox="0 0 340 150" style="max-width:520px" role="img" aria-label="Attention connects words; the MLP processes each word separately"><g style="font:500 13px var(--font-mono)">';
+    if(m === "talk"){
+      s += '<path d="M280 52 C250 10 200 10 170 52" style="stroke:var(--hot);fill:none" stroke-width="3"/><path d="M280 52 C230 -12 110 -12 60 52" style="stroke:var(--hot);fill:none;opacity:.5" stroke-width="1.5"/>';
+      s += '<text x="170" y="140" text-anchor="middle" style="fill:var(--muted)">bank pulls in information from earlier words</text>';
+    } else {
+      X.forEach(x=>{ s += '<path d="M'+x+' 78 V96" style="stroke:var(--muted)"/><rect x="'+(x-30)+'" y="98" width="60" height="26" rx="6" style="fill:var(--bg);stroke:var(--accent)"/><text x="'+x+'" y="116" text-anchor="middle" style="fill:var(--accent)">MLP</text>'; });
+      s += '<text x="170" y="145" text-anchor="middle" style="fill:var(--muted)">same small network, run on each word separately</text>';
+    }
+    W.forEach((w,i)=>{ s += '<rect x="'+(X[i]-36)+'" y="52" width="72" height="26" rx="6" style="fill:var(--surface);stroke:'+(w==="bank"?"var(--hot)":"var(--line)")+'"/><text x="'+X[i]+'" y="70" text-anchor="middle" style="fill:var(--ink)">'+w+'</text>'; });
+    pic.innerHTML = s + '</g></svg>'; sg.sync(m);
+  };
+  sg.addEventListener("click", e=>{ if(e.target.dataset.k){ m = e.target.dataset.k; draw(); } });
+  v.append(sg, pic); draw();
+ },
+ "Backend version: attention is a join across rows (each row looks at the others); the MLP is a map over each row (same function, row by row, no row sees another). One block = one attention step + one MLP step.");
+
+add("1.4","A neuron: a dot product with a threshold",
+ "An MLP is built from neurons. A neuron scores the word's vector with a dot product (from Basics) and fires only if the score passes its threshold. Slide bank's water-ness.",
+ v=>{
+  const s = slider("nw","bank's water-ness",0,3,0.1,1.7);
+  const out = el("div",{class:"visual"});
+  const draw = ()=>{
+    const w = +s.inp.value; s.set(w.toFixed(1));
+    const score = 0*0.5 + 1*w, fire = Math.max(0, score - 1);
+    out.innerHTML = '<p class="mono">water detector: score = [0, 1] · [0.5, '+w.toFixed(1)+'] = '+score.toFixed(1)+' · threshold 1</p>' +
+      '<div class="meters"><div class="meter"><b style="color:'+(fire>0?"var(--hot)":"var(--muted)")+'">'+(fire>0?"fires":"silent")+'</b><span>neuron output: '+fire.toFixed(2)+' (score − threshold, never below 0)</span></div></div>';
   };
   s.inp.addEventListener("input", draw); v.append(s.w, out); draw();
  },
- "Each neuron is a dot product (Basics) plus a bias, then a rule that turns negatives into 0 (ReLU), so it either fires or stays silent. Real MLPs have thousands of neurons per token and nobody labels them; these three are hand-made to show the idea. The MLP holds about two-thirds of a block's parameters, and much of what a model “knows” is thought to live there. Backend version: a bank of learned feature flags evaluated per request.");
+ "“Never below 0” is the ReLU rule. Each neuron's weights are learned in training, like everything else; nobody names them “water detector”. A real MLP has thousands per word and first widens the vector (about 4×), then narrows it back.");
 
-add("1.4","The residual stream: add, don't replace",
- "Each block adds its result to the token's vector instead of overwriting it. Toggle the residual connection and watch how much of the original token survives 12 blocks.",
+add("1.4","The MLP: many neurons write new notes about the word",
+ "Run several neurons on bank's vector and each one that fires adds a new fact about the word. Slide bank's water-ness.",
  v=>{
-  let on = true;
-  const sg = seg("Residual connection", [["off","Residual off"],["on","Residual on"]], "on");
-  const out = el("div");
+  const s = slider("mw","bank's water-ness (money-ness fixed at 0.5)",0,3,0.1,1.7);
+  const out = el("div",{class:"visual"});
+  const N = [["a place by water",[0,1],-1.0],["a money place",[1,0],-1.0],["flood risk",[-0.3,1],-1.8]];
   const draw = ()=>{
-    const rows = []; for(let L=1; L<=12; L++){ const kept = on ? 1 : Math.pow(0.7, L); rows.push(["after "+L, kept, Math.round(kept*100)+"%"]); }
-    out.innerHTML = bars(rows) + '<p class="lbl">' + (on ? "x + f(x): the original is still in the sum after every block." : "x → f(x): each block overwrites; the original fades (illustrative 30% loss per block).") + '</p>';
-    sg.sync(on ? "on" : "off");
+    const x = [0.5, +s.inp.value]; s.set(x[1].toFixed(1));
+    const rows = N.map(([n,w,b])=>{ const o = Math.max(0, w[0]*x[0] + w[1]*x[1] + b); return [n,o]; });
+    const notes = rows.filter(r=>r[1]>0);
+    out.innerHTML = bars(rows.map(([n,o])=>[n, o/2.5, o>0 ? "fires" : "—"])) +
+      '<p class="lbl">New notes added to bank: ' + (notes.length ? notes.map(r=>'<b style="color:var(--hot)">'+r[0]+'</b>').join(", ") : "none yet") + '</p>';
   };
-  sg.addEventListener("click", e=>{ if(e.target.dataset.k){ on = e.target.dataset.k==="on"; draw(); } });
-  v.append(sg, out); draw();
+  s.inp.addEventListener("input", draw); v.append(s.w, out); draw();
  },
- "The stream is the token's vector flowing through every block; attention and the MLP each read it and add something back. It also makes deep models trainable: the gradient nudges from Basics flow straight back through the additions. Before each part, normalization (LayerNorm or RMSNorm) rescales the vector so the numbers don't blow up. Backend version: an append-only event stream that every stage adds to, instead of each stage rewriting the record.");
+ "Much of what a model “knows” (facts, word associations) is thought to live in these neurons. Each neuron is: dot product + bias, then ReLU. These three are hand-made to show the idea; real ones are learned and rarely this readable.");
 
-add("1.4","Stack the blocks: where the parameters live",
- "A model is the same block repeated; each block has about 12 × width² parameters (the weights from Lesson 1), 2 bytes each at 16-bit. Move the width and depth.",
+const NOTES = [["the embedding","word: bank"],["block 1 · attention","next to “river”"],["block 1 · MLP","a place by water"],["block 2 · attention","the sentence is about a flood"],["block 2 · MLP","likely next: a water verb (“flooded”)"]];
+add("1.4","The residual stream: a notepad each layer adds to",
+ "Each word carries a notepad: its vector. Every attention and MLP step adds a note and never erases. Run the layers, then try overwriting instead.",
  v=>{
-  const sd = slider("pd","width (numbers per token)",512,8192,512,4096), sl = slider("pl","layers (blocks)",1,100,1,32);
-  const out = el("div",{class:"meters"});
+  let n = 1, mode = "add";
+  const sg = seg("How layers write", [["add","Add a note (residual)"],["over","Overwrite the notepad"]], mode);
+  const btn = el("button",{class:"ghost"},"Run next layer");
+  const pad = el("div",{class:"vec",style:"white-space:normal;display:flex;flex-direction:column;gap:6px"});
   const draw = ()=>{
-    const d = +sd.inp.value, L = +sl.inp.value; sd.set(d); sl.set(L);
-    const blocks = 12*d*d*L, emb = 128000*d, total = blocks + emb, bytes = total*2;
-    out.innerHTML = '<div class="meter"><b>'+fmtN(total)+'</b><span>parameters (blocks '+fmtN(blocks)+' + embeddings '+fmtN(emb)+')</span></div>' +
-      '<div class="meter"><b>'+fmtB(bytes)+'</b><span>to hold the weights at 16-bit · '+Math.ceil(bytes/80e9)+' × 80 GB GPU</span></div>';
+    const shown = mode === "add" ? NOTES.slice(0, n) : [NOTES[n-1]];
+    pad.innerHTML = shown.map(([src,t],i)=>'<div><span class="lbl">'+src+'</span> · <b'+(i===shown.length-1 && n>1 ? ' style="color:var(--hot)"' : '')+'>'+t+'</b></div>').join("") +
+      (mode === "over" && n > 1 ? '<div class="lbl" style="color:var(--hot)">“word: bank” is gone: later layers can no longer see which word this was.</div>' : '');
+    btn.disabled = n >= NOTES.length; btn.textContent = n >= NOTES.length ? "All layers run" : "Run next layer";
+    sg.sync(mode);
   };
-  [sd,sl].forEach(s=>s.inp.addEventListener("input", draw)); v.append(sd.w, sl.w, out); draw();
+  btn.addEventListener("click", ()=>{ if(n < NOTES.length){ n++; draw(); } });
+  sg.addEventListener("click", e=>{ if(e.target.dataset.k){ mode = e.target.dataset.k; draw(); } });
+  const r = el("div",{class:"row"}); r.append(btn);
+  v.append(sg, r, pad); draw();
  },
- "Where 12 × width² comes from: attention uses 4 width × width matrices (query, key, value, output), and the MLP widens each token 4× and back, which is 8 × width². Embeddings assume a 128k vocabulary. Real models vary (grouped-query attention shrinks the attention part), so treat this as an estimate. Width 4,096 with 32 layers gives about 7 billion parameters and about 14 GB, the size class of common open 7–8B models. For serving, two facts follow: the weights must fit in GPU memory, and generating each token reads all of them once.");
+ "In numbers: new vector = old vector + the layer's output, so nothing is lost. It also makes deep models trainable, because the training nudges (Basics, gradient) flow straight back through the additions. Before each step, normalization rescales the vector so numbers don't blow up. Backend version: middleware that adds fields to the request context instead of replacing the request.");
+
+add("1.4","Stack the blocks: each layer sharpens the guess",
+ "A model is the same kind of block repeated, each with its own weights. Early blocks work out what words are; later ones what should come next. Drag the depth.",
+ v=>{
+  const s = slider("dp","blocks run",1,32,1,1);
+  const out = el("div",{class:"visual"});
+  const W = ["flooded","collapsed","is","account"];
+  const early = [0.12,0.10,0.48,0.30], late = [0.62,0.24,0.08,0.06];
+  const draw = ()=>{
+    const d = +s.inp.value; s.set(d + " of 32");
+    const t = (d-1)/31, e = t*t*(3-2*t);
+    const p = W.map((_,i)=>early[i] + (late[i]-early[i])*e);
+    out.innerHTML = '<p class="lbl">The model\'s next-word guess after ' + d + ' block' + (d>1?'s':'') + ' (illustrative)</p>' +
+      bars(W.map((w,i)=>[w, p[i], Math.round(p[i]*100)+"%"]));
+  };
+  s.inp.addEventListener("input", draw); v.append(s.w, out); draw();
+ },
+ "Real models have dozens of blocks (32 in common 7–8B models). Every block has its own weights, so depth costs memory: about 12 × width² parameters per block, so width 4,096 × 32 blocks ≈ 7 billion parameters ≈ 14 GB at 16-bit. Serving has to hold all of it in GPU memory and read it for every generated token. That's where 1.6 picks up.");
 
 /* ---------- 1.5 Logits and sampling ---------- */
 const VOCAB = [["flooded",[0.2,2.0]],["collapsed",[0.3,1.4]],["account",[2.0,0.1]],["closed",[1.2,0.8]],["the",[0.1,0.1]]];
@@ -314,7 +375,8 @@ add("1.5","The last vector scores every token in the vocabulary",
     out.innerHTML = '<p class="mono">final vector for “bank” = [' + fv.join(", ") + '] (the blends from Lesson 1)</p>' +
       '<table class="emb"><thead><tr><td>next token</td><td>its row</td><td>logit = row · vector</td><td>probability</td></tr></thead><tbody>' +
       VOCAB.map(([t,r],i)=>'<tr'+(p[i]>0.4?' class="hit"':'')+'><td>'+t+'</td><td>['+r.join(", ")+']</td><td>'+lg[i].toFixed(2)+'</td><td>'+(p[i]*100).toFixed(0)+'%</td></tr>').join("") +
-      '</tbody></table>';
+      '</tbody></table>' +
+      (nextGuess ? '<p class="lbl">Your guess: <b>' + esc(nextGuess) + '</b> · the model\'s top pick here: <b style="color:var(--hot)">' + VOCAB[p.indexOf(Math.max(...p))][0] + '</b></p>' : '');
     sg.sync(k);
   };
   sg.addEventListener("click", e=>{ if(e.target.dataset.k){ k = e.target.dataset.k; draw(); } });
@@ -482,9 +544,9 @@ add("1.6","Why context windows have a limit",
 /* ---------- Videos (verified 2026-11-02) ---------- */
 const VIDS = [
   ["Watch","How might LLMs store facts","3Blue1Brown · Deep Learning Ch. 7","https://www.youtube.com/watch?v=9-Jl0dxWQs8",
-   "The MLP part of the block: neurons as detectors and where facts may live.","Steps 1–3"],
+   "The MLP part of the block: neurons as detectors and where facts may live.","Steps 1–5"],
   ["Optional, long","Let's build GPT: from scratch, in code, spelled out","Andrej Karpathy · hands-on code","https://www.youtube.com/watch?v=kCc8FmEb1nY",
-   "Builds a small GPT end to end, including the block, sampling and the generation loop. Useful once you want to see it in code.","Steps 1–9"]
+   "Builds a small GPT end to end, including the block, sampling and the generation loop. Useful once you want to see it in code.","Steps 1–14"]
 ];
 add("V","Videos: build the intuition",
  "Watch the first; the second is for when you want to see it all in code. Links open in YouTube.",
@@ -548,19 +610,20 @@ async function persist(id, body){
 /* ================= stepper ================= */
 let cur = 0;
 try{ const s = JSON.parse(localStorage.getItem(LS) || "{}"); if(Number.isInteger(s.step) && s.step < STEPS.length) cur = s.step; }catch(e){}
-const CHS = [["1.4","1.4 Block"],["1.5","1.5 Sampling"],["1.6","1.6 KV cache"],["V","Videos"],["✓","Questions"]];
+const CHS = [["R","Recap · skippable"],["1.4","1.4 Block"],["1.5","1.5 Sampling"],["1.6","1.6 KV cache"],["V","Videos"],["✓","Questions"]];
 function render(){
   const st = STEPS[cur], card = $("#card");
   card.innerHTML = "";
-  const content = STEPS.filter(s=>s.ch!=="V" && s.ch!=="✓"), ci = content.indexOf(st);
+  const content = STEPS.filter(s=>!["V","✓","R"].includes(s.ch)), ci = content.indexOf(st);
   const chLabel = st.ch==="B" ? "Basics" : "Chapter " + st.ch;
-  card.append(el("span",{class:"step-tag"}, st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : chLabel + " · step " + (ci+1) + " of " + content.length));
+  card.append(el("span",{class:"step-tag"}, st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : st.ch==="R" ? "Recap · skip it if you remember Lesson 1" : chLabel + " · step " + (ci+1) + " of " + content.length));
   card.append(el("h2",{}, esc(st.title)));
   card.append(el("p",{class:"say"}, esc(st.say)));
   const v = el("div",{class:"visual"}); card.append(v); st.render(v);
   if(st.deeper){ const d = el("details",{class:"deeper"},'<summary>Go deeper</summary><p>' + st.deeper + '</p>'); card.append(d); }
+  if(st.ch==="R"){ const sk = el("button",{class:"ghost",id:"skipRecap"},"Skip recap →"); sk.addEventListener("click", ()=>go(STEPS.findIndex(s=>s.ch!=="R"))); card.append(sk); }
   $("#back").disabled = cur===0; $("#next").disabled = cur===STEPS.length-1;
-  $("#count").textContent = st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : (ci+1) + " / " + content.length;
+  $("#count").textContent = st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : st.ch==="R" ? "Recap" : (ci+1) + " / " + content.length;
   renderToc();
   $("#progress").innerHTML = content.map((_,i)=>'<span class="' + ((ci < 0 || i <= ci) ? "on" : "") + '"></span>').join("");
   $("#chapters").querySelectorAll("button").forEach(b=>b.setAttribute("aria-current", b.dataset.ch===st.ch));
@@ -591,9 +654,9 @@ function renderToc(){
   seen.add(cur);
   host.innerHTML = CHS.map(([k,l])=>{
     const items = STEPS.map((s,i)=>[s,i]).filter(([s])=>s.ch===k);
-    const content = STEPS.filter(s=>s.ch!=="V" && s.ch!=="✓");
+    const content = STEPS.filter(s=>!["V","✓","R"].includes(s.ch));
     return '<div class="grp"><p class="gl">' + esc(l) + '</p>' + items.map(([s,i])=>{
-      const n = (k==="V"||k==="✓") ? "" : (content.indexOf(s)+1);
+      const n = (k==="V"||k==="✓"||k==="R") ? "" : (content.indexOf(s)+1);
       return '<a data-go="' + i + '"' + (i===cur ? ' aria-current="step"' : '') + (seen.has(i) && i!==cur ? ' class="seen"' : '') + '><span class="n">' + n + '</span><span>' + esc(s.title) + '</span></a>';
     }).join("") + '</div>';
   }).join("");
