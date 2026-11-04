@@ -4,17 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LLM Foundations 1: Tokens, Embeddings, Attention</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* Layout idea: one step per screen. A big visual you control, two sentences, Next. */
 :root{
   --bg:#f3f5f4; --surface:#ffffff; --ink:#16201e; --muted:#5c6a67;
   --line:#d3dcda; --accent:#0f6e66; --hot:#c2570c; --cool:#2f5fb3;
-  --font-display:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
-  --font-body:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
-  --font-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --font-display:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark){
@@ -448,7 +445,7 @@ function plane(vecs, R, axes){
   const S = 240, C = S/2, k = (C-20)/R, X = x=>C + x*k, Y = y=>C - y*k;
   let g = '<svg viewBox="0 0 ' + S + ' ' + S + '" style="max-width:300px" role="img" aria-label="Vectors drawn as arrows"><defs>' +
     ['hot','cool','accent','ink'].map(c=>'<marker id="m-'+c+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--'+c+')"/></marker>').join("") +
-    '</defs><g font-family="IBM Plex Mono, monospace" font-size="11">' +
+    '</defs><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">' +
     '<line x1="10" y1="'+C+'" x2="'+(S-10)+'" y2="'+C+'" style="stroke:var(--line)"/><line x1="'+C+'" y1="10" x2="'+C+'" y2="'+(S-10)+'" style="stroke:var(--line)"/>' +
     (axes ? '<text x="'+(S-10)+'" y="'+(C+16)+'" text-anchor="end" style="fill:var(--muted)">'+axes[0]+'</text><text x="'+(C+6)+'" y="18" style="fill:var(--muted)">'+axes[1]+'</text>' : '');
   vecs.forEach(([x,y,c,l,dot])=>{
@@ -552,7 +549,7 @@ add("1.3","bank has one row, but two meanings",
   const svg = el("div");
   const draw = ()=>{
     const x = !on ? 0.5 : sent==="river" ? 0.85 : 0.15;
-    svg.innerHTML = '<svg viewBox="0 0 360 90" role="img" aria-label="Meaning meter for bank"><g font-family="IBM Plex Mono, monospace" font-size="12">' +
+    svg.innerHTML = '<svg viewBox="0 0 360 90" role="img" aria-label="Meaning meter for bank"><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">' +
       '<line x1="30" y1="45" x2="330" y2="45" style="stroke:var(--line)" stroke-width="6" stroke-linecap="round"/>' +
       '<text x="30" y="78" style="fill:var(--muted)">money</text><text x="330" y="78" text-anchor="end" style="fill:var(--muted)">water</text>' +
       '<circle cx="' + (30 + 300*x) + '" cy="45" r="11" style="fill:var(--hot)"><title>bank</title></circle>' +
@@ -587,7 +584,7 @@ add("1.3","The three basics, running together",
       toks.map(([t,key],i)=>'<tr'+(w[i]>.5?' class="hit"':'')+'><td>'+t+'</td><td>['+key.join(", ")+']</td><td>1×'+key[0]+' + 1×'+key[1]+' = '+sc[i]+'</td><td>'+(w[i]*100).toFixed(0)+'%</td></tr>').join("") + '</tbody></table>';
     res.textContent = "3. blend → new bank = [" + out.map(x=>x.toFixed(2)).join(", ") + "]   (query stays [1, 1])";
     const x = Math.max(0, Math.min(1, 0.5 + (out[1]-out[0])/6));
-    meter.innerHTML = '<svg viewBox="0 0 360 70" role="img" aria-label="Where bank ends up between money and water"><g font-family="IBM Plex Mono, monospace" font-size="12">' +
+    meter.innerHTML = '<svg viewBox="0 0 360 70" role="img" aria-label="Where bank ends up between money and water"><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">' +
       '<line x1="30" y1="30" x2="330" y2="30" style="stroke:var(--line)" stroke-width="6" stroke-linecap="round"/>' +
       '<text x="30" y="60" style="fill:var(--muted)">money</text><text x="330" y="60" text-anchor="end" style="fill:var(--muted)">water</text>' +
       '<circle cx="'+(30+300*x)+'" cy="30" r="10" style="fill:var(--hot)"/></g></svg>';
@@ -607,7 +604,7 @@ function attW(s,i){ if(s.w[i]) return s.w[i]; const w = new Array(i+1).fill(0); 
   const z=w.reduce((a,b)=>a+b,0); return w.map(x=>x/z); }
 function arcsSVG(toks, sel, w){
   const gap = 360/toks.length, xs = toks.map((_,i)=>gap*i + gap/2);
-  let s = '<svg viewBox="0 0 360 170" role="img" aria-label="Arcs show how much the selected token attends to each earlier token"><g font-family="IBM Plex Mono, monospace" font-size="11">';
+  let s = '<svg viewBox="0 0 360 170" role="img" aria-label="Arcs show how much the selected token attends to each earlier token"><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">';
   for(let j=0;j<=sel;j++){ if(j===sel) continue; const h = 20 + (sel-j)*18, wt = w[j];
     s += '<path d="M' + xs[sel] + ',125 C' + xs[sel] + ',' + (125-h*1.6) + ' ' + xs[j] + ',' + (125-h*1.6) + ' ' + xs[j] + ',125" fill="none" style="stroke:var(--hot)" stroke-width="' + Math.max(1, wt*16).toFixed(1) + '" stroke-linecap="round" opacity="' + (0.35 + wt*0.65).toFixed(2) + '"/>';
     s += '<text x="' + xs[j] + '" y="' + (118 - Math.min(80, h*1.15)) + '" text-anchor="middle" style="fill:var(--hot)">' + wt.toFixed(2) + '</text>'; }
@@ -744,7 +741,7 @@ add("✓","Check yourself",
 function mapSVG(pos, showGroups, picks){
   const X = x=>20 + x*320, Y = y=>230 - y*210;
   const col = {a:"--accent", v:"--cool", f:"--ink", m:"--muted"};
-  let s = '<svg viewBox="0 0 360 250" style="max-width:480px" role="img" aria-label="Words as points; similar words cluster after training"><g font-family="IBM Plex Mono, monospace" font-size="12">' +
+  let s = '<svg viewBox="0 0 360 250" style="max-width:480px" role="img" aria-label="Words as points; similar words cluster after training"><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">' +
     '<rect x="1" y="1" width="358" height="248" rx="8" style="fill:var(--bg);stroke:var(--line)"/>';
   if(picks){ const [a,b] = picks.map(i=>pos[i]); s += '<line x1="' + X(a[0]) + '" y1="' + Y(a[1]) + '" x2="' + X(b[0]) + '" y2="' + Y(b[1]) + '" style="stroke:var(--ink)" stroke-dasharray="4 3"/>'; }
   const LBL = {cat:[-9,-8,"end"], dog:[9,-8,"start"], horse:[-9,14,"end"], car:[-9,-8,"end"], truck:[9,-8,"start"], bus:[-9,14,"end"],
