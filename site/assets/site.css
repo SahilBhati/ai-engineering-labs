@@ -1,6 +1,5 @@
 /* Layout idea: full-width sections split by rules; a wide header and hero, then
    numbered tile grids with shared borders. One teal accent, mono for labels and numbers. */
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
 :root{
   --bg:#f5f7f6; --surface:#ffffff; --ink:#121a18; --muted:#5a6865;
   --line:#dbe3e1; --accent:#0d6b63; --accent-ink:#ffffff; --hot:#b4530b;
@@ -178,3 +177,22 @@ html.hdr-hidden .sidenav{top:0; height:100vh}
 @media (prefers-reduced-motion: reduce){ header.site{transition:none} }
 
 button{font-family:inherit}
+
+/* Smooth, stable navigation: page switches crossfade while header and nav stay put. */
+html{scroll-behavior:smooth; scrollbar-gutter:stable}
+@view-transition{navigation:auto}
+header.site{view-transition-name:site-header}
+.sidenav{view-transition-name:site-nav}
+.layout > main{view-transition-name:site-main}
+::view-transition-old(site-main){animation:120ms cubic-bezier(0.4,0,1,1) both ael-out}
+::view-transition-new(site-main){animation:240ms cubic-bezier(0.2,0,0,1) both ael-rise}
+@keyframes ael-out{to{opacity:0}}
+@keyframes ael-rise{from{opacity:0; transform:translateY(8px)}}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  @view-transition{navigation:none}
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){animation:none !important}
+}
+
+/* Reserve the token area so the typing replay never pushes content around */
+#demo-out{min-height:96px; align-content:flex-start}
