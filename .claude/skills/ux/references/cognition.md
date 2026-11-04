@@ -53,6 +53,9 @@ Help people orient:
 
 ## Cognitive benchmark (score each step or section pass/fail)
 
+C1–C10 check form. C11–C12 check comprehension: a lesson can pass every form
+check and still be unreadable if steps don't connect or skip a building block.
+
 | # | Check | Pass when |
 | --- | --- | --- |
 | C1 | Takeaway first | The first sentence states the idea, not a setup |
@@ -65,6 +68,8 @@ Help people orient:
 | C8 | Orientation | Position, progress and the next action are visible without scrolling |
 | C9 | Concrete first | Mechanisms start with a small worked example |
 | C10 | Consistency | Colors and controls mean the same as on other pages |
+| C11 | Through-line | The step moves the lesson's one running example or question forward |
+| C12 | Prerequisites | Every mechanism or term the step relies on was taught in an earlier step (or a recap) |
 
 Report the pass rate (e.g. "C: 41/50 = 82%"), list the failing checks per step,
 and set a target (≥ 90%). Re-run after each change: this is how the site improves

@@ -75,7 +75,7 @@ async function toggle(id, read){
   b.click(); await sleep(500);
   if(read()!==a0) fail('toggles','#'+id+' did not toggle back');
 }
-await toggle('themeBtn', ()=>root.dataset.theme||'');
+await toggle('themeBtn', ()=>root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));  // effective theme, not the raw attribute
 await toggle('navBtn', ()=>String(root.classList.contains('nav-collapsed')));
 // Collapsing the side nav must give the content real extra width, not just hide the nav.
 { const nb=document.getElementById('navBtn'), w=document.querySelector('main .wrap');
