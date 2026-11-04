@@ -6,6 +6,8 @@
   const get = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
   const set = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} };
   const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Animate a DOM change as a crossfade where supported; plain change otherwise.
+  const smooth = fn => (document.startViewTransition && !reduce) ? document.startViewTransition(fn) : fn();
 
   // Theme: light by default (dark text on light reads better); the choice is remembered.
   const themeBtn = document.getElementById("themeBtn");
@@ -16,7 +18,7 @@
     themeBtn.setAttribute("aria-pressed", String(isDark()));
   }
   if(themeBtn){
-    themeBtn.addEventListener("click", ()=>{ root.dataset.theme = isDark() ? "light" : "dark"; set("ael-theme", root.dataset.theme); syncTheme(); });
+    themeBtn.addEventListener("click", ()=>smooth(()=>{ root.dataset.theme = isDark() ? "light" : "dark"; set("ael-theme", root.dataset.theme); syncTheme(); }));
     syncTheme();
   }
 
@@ -30,7 +32,7 @@
     navBtn.title = collapsed ? "Expand sidebar" : "Collapse sidebar";
   }
   if(navBtn){
-    navBtn.addEventListener("click", ()=>{ root.classList.toggle("nav-collapsed"); set("ael-nav", root.classList.contains("nav-collapsed") ? "0" : "1"); syncNav(); });
+    navBtn.addEventListener("click", ()=>smooth(()=>{ root.classList.toggle("nav-collapsed"); set("ael-nav", root.classList.contains("nav-collapsed") ? "0" : "1"); syncNav(); }));
     syncNav();
   }
 
