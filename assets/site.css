@@ -82,7 +82,7 @@ section.band:last-of-type{border-bottom:0}
 .tile-cta.off{color:var(--muted); pointer-events:none}
 .badge{align-self:flex-start; font:500 .75rem var(--font-mono); letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted)}
 .badge.live{border-color:var(--accent); color:var(--accent)}
-.badge.soon{border-color:var(--hot); color:var(--hot)}
+.badge.soon{border-style:dashed; border-color:var(--muted); color:var(--muted)}
 
 /* hero widget: live tokenizer */
 .demo{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px}
@@ -121,14 +121,14 @@ footer.site .wrap{display:flex; flex-wrap:wrap; gap:10px 24px; justify-content:s
 .sidenav a[aria-current="page"]{background:var(--surface); box-shadow:inset 2px 0 0 var(--accent); color:var(--accent)}
 .sidenav .num{font:500 .72rem var(--font-mono); color:var(--accent)}
 .sidenav .off{color:var(--muted)}
-.sidenav .off em, .sidenav .ext{margin-left:auto; font:500 .75rem var(--font-mono); font-style:normal; text-transform:uppercase; letter-spacing:.08em; color:var(--hot)}
+.sidenav .off em, .sidenav .ext{margin-left:auto; font:500 .75rem var(--font-mono); font-style:normal; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
 .layout main .wrap{max-width:1240px; margin-inline:0; padding-inline:48px}
 header.site .wrap{max-width:none; padding-inline:24px}
 @media (max-width:900px){ .layout{grid-template-columns:1fr} .sidenav{display:none} .layout main .wrap{padding-inline:24px} }
 
 /* Typed labels: what a row is, at a glance (e.g. INTERACTIVE · 19 STEPS · ~25 MIN) */
 .typed{font:500 .75rem var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin:0}
-.typed.soon{color:var(--hot)}
+.typed.soon{color:var(--muted)}
 .muted.small{font-size:.875rem}
 .sidenav .ext{color:var(--muted)}
 
@@ -158,3 +158,7 @@ header.site .wrap{max-width:none; padding-inline:24px}
 .tr-copy .problem{font-size:1.125rem}
 .sample{margin:0; font:400 .875rem/1.6 var(--font-mono); color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:18px 20px; overflow-x:auto; white-space:pre}
 @media (prefers-reduced-motion: reduce){ .btn, .tile-cta, .lb-rows li a{transition:none} }
+
+/* A concrete result each lesson produces: identity that only this subject has */
+.computes{font:500 .875rem/1.5 var(--font-mono); color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin:0}
+.computes span{display:block; font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:2px}

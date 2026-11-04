@@ -123,6 +123,7 @@ textarea{width:100%; min-height:84px; font:15px/1.5 var(--font-body); color:var(
 }
 
 /* Lesson contents sidebar (desktop): where am I, what's next, jump anywhere. */
+.visual > .seg{align-self:flex-start}
 .toc{display:none}
 .toc .grp{display:flex; flex-direction:column; gap:2px}
 .toc .grp + .grp{margin-top:14px}
@@ -303,7 +304,7 @@ add("1.2","A vector is just a list of numbers",
   const a = slider("v1x","first number (money-ness)",-3,3,0.5,2), b = slider("v1y","second number (water-ness)",-3,3,0.5,1);
   const pic = el("div"), out = el("div",{class:"vec"});
   const draw = ()=>{ const x=+a.inp.value, y=+b.inp.value; a.set(x); b.set(y);
-    out.textContent = "[" + x + ", " + y + "]"; pic.innerHTML = plane([[x,y,"hot","v"]],3); };
+    out.textContent = "[" + x + ", " + y + "]"; pic.innerHTML = plane([[x,y,"hot","v"]],3,["money-ness →","water-ness ↑"]); };
   [a,b].forEach(s=>s.inp.addEventListener("input",draw)); v.append(a.w,b.w,out,pic); draw();
  },
  "Real embeddings have thousands of numbers, so you can't draw them, but every rule that follows works the same way with 2 numbers or 4,096. The names money-ness and water-ness are labels for this toy only.");
@@ -404,12 +405,13 @@ add("1.2","Training writes. Using only reads.",
 /* ---------- 1.3 Attention ---------- */
 
 /* ---------- Basics: the four primitives attention is built from ---------- */
-function plane(vecs, R){
+function plane(vecs, R, axes){
   const S = 240, C = S/2, k = (C-20)/R, X = x=>C + x*k, Y = y=>C - y*k;
   let g = '<svg viewBox="0 0 ' + S + ' ' + S + '" style="max-width:300px" role="img" aria-label="Vectors drawn as arrows"><defs>' +
     ['hot','cool','accent','ink'].map(c=>'<marker id="m-'+c+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--'+c+')"/></marker>').join("") +
     '</defs><g font-family="IBM Plex Mono, monospace" font-size="11">' +
-    '<line x1="10" y1="'+C+'" x2="'+(S-10)+'" y2="'+C+'" style="stroke:var(--line)"/><line x1="'+C+'" y1="10" x2="'+C+'" y2="'+(S-10)+'" style="stroke:var(--line)"/>';
+    '<line x1="10" y1="'+C+'" x2="'+(S-10)+'" y2="'+C+'" style="stroke:var(--line)"/><line x1="'+C+'" y1="10" x2="'+C+'" y2="'+(S-10)+'" style="stroke:var(--line)"/>' +
+    (axes ? '<text x="'+(S-10)+'" y="'+(C+16)+'" text-anchor="end" style="fill:var(--muted)">'+axes[0]+'</text><text x="'+(C+6)+'" y="18" style="fill:var(--muted)">'+axes[1]+'</text>' : '');
   vecs.forEach(([x,y,c,l,dot])=>{
     if(dot) g += '<circle cx="'+X(x)+'" cy="'+Y(y)+'" r="7" style="fill:var(--'+c+')"/>';
     else if(Math.hypot(x,y) > 0.01) g += '<line x1="'+C+'" y1="'+C+'" x2="'+X(x)+'" y2="'+Y(y)+'" style="stroke:var(--'+c+')" stroke-width="2.5" marker-end="url(#m-'+c+')"/>';
@@ -464,7 +466,7 @@ add("B","Weighted average: blend by the percentages",
   const draw = ()=>{ const t = +s.inp.value/100; s.set(Math.round(t*100) + "%");
     const r = [0,3], c = [3,0], m = [r[0]*t + c[0]*(1-t), r[1]*t + c[1]*(1-t)];
     out.textContent = (t*100).toFixed(0) + "% × river[0, 3] + " + ((1-t)*100).toFixed(0) + "% × cash[3, 0] = [" + m.map(x=>x.toFixed(2)).join(", ") + "]";
-    pic.innerHTML = plane([[0,3,"cool","river"],[3,0,"cool","cash"],[m[0],m[1],"hot","blend",true]],3); };
+    pic.innerHTML = plane([[0,3,"cool","river"],[3,0,"cool","cash"],[m[0],m[1],"hot","blend",true]],3,["money-ness →","water-ness ↑"]); };
   s.inp.addEventListener("input",draw); v.append(s.w,out,pic); draw();
  },
  "Attention = dot product (score every word) → softmax (scores to percentages) → weighted average (blend). One more basic first: how training sets all these numbers.");
@@ -528,7 +530,7 @@ add("1.3","bank has one row, but two meanings",
 
 
 add("1.3","The three basics, running together",
- "bank asks the same question in every sentence: its query. Each earlier word answers with its key. Score, softmax, blend. Switch the sentence.",
+ "Attention is the three basics in a row: score, softmax, blend. bank asks the same question (its query) in every sentence; each earlier word answers with its key. Switch the sentence.",
  v=>{
   const SENT = {
     river:{label:"The river bank", toks:[["The",[0,0]],["river",[0,3]],["bank",[1,1]]]},
@@ -625,7 +627,9 @@ add("1.3","Cost grows with the square of the context",
  v=>{
   const lab = el("label",{class:"lbl",for:"nS"});
   const s = el("input",{type:"range",id:"nS",min:"2",max:"48",value:"8"});
-  const c = el("canvas",{width:"300",height:"300","aria-label":"Grid of token pairs"});
+  const c = el("canvas",{width:"300",height:"300","aria-label":"Grid of token pairs",style:"width:300px;height:300px;max-width:100%"});
+  const fig = el("div",{style:"display:grid;grid-template-columns:auto 300px;grid-template-rows:auto 300px auto;gap:6px 8px;align-self:flex-start;font:500 .75rem var(--font-mono);color:var(--muted)"});
+  fig.innerHTML = '<span></span><span>tokens it scores →</span><span style="writing-mode:vertical-rl;transform:rotate(180deg);text-align:center">↓ token doing the looking</span>';
   const t = el("div",{class:"meters"});
   const draw = ()=>{
     const n = +s.value; lab.textContent = "tokens: " + n;
@@ -635,7 +639,9 @@ add("1.3","Cost grows with the square of the context",
     t.innerHTML = '<div class="meter"><b>' + (n*n).toLocaleString() + '</b><span>scores for ' + n + ' tokens</span></div>' +
       '<div class="meter"><b>' + ((2*n)*(2*n)).toLocaleString() + '</b><span>scores for ' + (2*n) + ' tokens (4×)</span></div>';
   };
-  s.addEventListener("input", draw); v.append(lab, s, c, el("p",{class:"lbl"},"Rows: the token doing the looking ↓ · columns: the tokens it scores → · teal = scored, grey = later token (not seen)"), t); draw();
+  fig.appendChild(c);
+  fig.insertAdjacentHTML("beforeend", '<span></span><span><span style="display:inline-block;width:10px;height:10px;background:var(--accent);vertical-align:middle"></span> scored &nbsp; <span style="display:inline-block;width:10px;height:10px;background:var(--line);vertical-align:middle"></span> later token, not seen</span>');
+  s.addEventListener("input", draw); v.append(lab, s, fig, t); draw();
  },
  "8,000 tokens → 64 million scores; 16,000 → 256 million; 128,000 → about 16 billion, per head, per layer. Looking only backward removes about half, which doesn't change how it scales. This is why long context is expensive and why token counts (step 4) matter. Backend version: a self-join done as a nested loop.");
 
@@ -702,9 +708,11 @@ function mapSVG(pos, showGroups, picks){
   let s = '<svg viewBox="0 0 360 250" style="max-width:480px" role="img" aria-label="Words as points; similar words cluster after training"><g font-family="IBM Plex Mono, monospace" font-size="12">' +
     '<rect x="1" y="1" width="358" height="248" rx="8" style="fill:var(--bg);stroke:var(--line)"/>';
   if(picks){ const [a,b] = picks.map(i=>pos[i]); s += '<line x1="' + X(a[0]) + '" y1="' + Y(a[1]) + '" x2="' + X(b[0]) + '" y2="' + Y(b[1]) + '" style="stroke:var(--ink)" stroke-dasharray="4 3"/>'; }
-  pos.forEach((p,i)=>{ const pk = picks && picks.includes(i), c = pk ? "--hot" : showGroups ? col[MAPW[i][3]] : "--ink", dy = i % 2 ? -7 : 15;
+  const LBL = {cat:[-9,-8,"end"], dog:[9,-8,"start"], horse:[-9,14,"end"], car:[-9,-8,"end"], truck:[9,-8,"start"], bus:[-9,14,"end"],
+               apple:[9,14,"start"], banana:[-9,-8,"end"], mango:[9,-8,"start"], ran:[-9,-8,"end"], walked:[9,-8,"start"], jumped:[9,14,"start"]};
+  pos.forEach((p,i)=>{ const pk = picks && picks.includes(i), c = pk ? "--hot" : showGroups ? col[MAPW[i][3]] : "--ink", [dx, dy, anc] = LBL[MAPW[i][0]];
     s += '<g data-w="' + i + '" style="cursor:' + (picks ? "pointer" : "default") + '"><circle cx="' + X(p[0]) + '" cy="' + Y(p[1]) + '" r="' + (pk ? 8 : 5) + '" style="fill:var(' + c + ')"/>' +
-      '<text x="' + (X(p[0]) + 9) + '" y="' + (Y(p[1]) + dy) + '" style="fill:var(' + c + ')' + (pk ? ";font-weight:600" : "") + '">' + MAPW[i][0] + '</text></g>'; });
+      '<text x="' + (X(p[0]) + dx) + '" y="' + (Y(p[1]) + dy) + '" text-anchor="' + anc + '" style="fill:var(' + c + ')' + (pk ? ";font-weight:600" : "") + '">' + MAPW[i][0] + '</text></g>'; });
   return s + '</g></svg>';
 }
 
@@ -741,7 +749,7 @@ function render(){
   $("#back").disabled = cur===0; $("#next").disabled = cur===STEPS.length-1;
   $("#count").textContent = st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : (ci+1) + " / " + content.length;
   renderToc();
-  $("#progress").innerHTML = STEPS.map((_,i)=>'<span class="' + (i<=cur?"on":"") + '"></span>').join("");
+  $("#progress").innerHTML = content.map((_,i)=>'<span class="' + ((ci < 0 || i <= ci) ? "on" : "") + '"></span>').join("");
   $("#chapters").querySelectorAll("button").forEach(b=>b.setAttribute("aria-current", b.dataset.ch===st.ch));
   if(storeCls) setStore(storeCls, storeText);
   lsSave();
@@ -767,6 +775,8 @@ function renderToc(){
       return '<a data-go="' + i + '"' + (i===cur ? ' aria-current="step"' : '') + (seen.has(i) && i!==cur ? ' class="seen"' : '') + '><span class="n">' + n + '</span><span>' + esc(s.title) + '</span></a>';
     }).join("") + '</div>';
   }).join("");
+  const now = host.querySelector('[aria-current="step"]'), box = host.closest(".toc");
+  if(now && box && (now.offsetTop < box.scrollTop + 40 || now.offsetTop > box.scrollTop + box.clientHeight - 60)) box.scrollTop = now.offsetTop - box.clientHeight/2;
 }
 document.addEventListener("click", e=>{ const a = e.target.closest("[data-go]"); if(!a) return; cur = +a.dataset.go; render(); window.scrollTo(0,0); });
 function fromHash(){ const h = location.hash.slice(1); if(!h) return false;
