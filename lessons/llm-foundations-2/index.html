@@ -140,23 +140,25 @@ textarea{width:100%; min-height:84px; font:15px/1.5 var(--font-body); color:var(
   .chapters{display:none}
 }
 
-.topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
-.tb-actions{display:flex; gap:6px}
-.tb-actions button{padding:6px 10px; font-size:.8rem}
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:nowrap}
+.topbar h1{flex:1; min-width:0}
+.tb-actions{display:flex; gap:6px; flex:none}
+.tb-actions button{padding:6px 10px; font-size:.8rem; background:transparent; border-color:var(--line); color:var(--muted)}
+.tb-actions button:hover{color:var(--ink); border-color:var(--muted)}
 #tocBtn{display:none}
 @media (min-width:1180px){
   #tocBtn{display:inline-flex}
   html.toc-collapsed .toc{display:none}
   html.toc-collapsed main{margin-left:auto}
 }
-.crumbs{font:500 .85rem var(--font-mono);color:var(--muted)}.crumbs a{color:var(--accent)}footer.lesson{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:.875rem}footer.lesson a{color:var(--accent)}@media (min-width:1180px){footer.lesson{margin-left:calc(max(20px, 50% - 650px) + 300px)}}</style>
+.crumbs{font:500 .85rem var(--font-mono);color:var(--muted)}.crumbs a{color:var(--accent)}footer.lesson{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:.875rem}footer.lesson a{color:var(--accent)}@media (min-width:1180px){footer.lesson{margin-left:calc(max(20px, 50% - 650px) + 300px)}html.toc-collapsed footer.lesson{margin-left:auto}}</style>
 <script>(function(){var r=document.documentElement;try{var t=localStorage.getItem("ael-theme");if(t)r.dataset.theme=t;else if(r.dataset.defaultTheme)r.dataset.theme=r.dataset.defaultTheme;if(localStorage.getItem("ael-toc")==="0")r.classList.add("toc-collapsed");}catch(e){}})();</script>
 </head>
 <body>
 <aside class="toc" aria-label="Lesson contents"><div class="grp"><a class="home" href="../../">← AI Engineering Labs</a><a href="../">All lessons</a></div><div id="tocList"></div></aside>
 <main>
   <nav class="crumbs" aria-label="Breadcrumb"><a href="../../">AI Engineering Labs</a> / <a href="../">Lessons</a></nav>
-  <div class="topbar"><h1>LLM Foundations · Lesson 2: block → sampling → KV cache</h1><span class="tb-actions"><button class="ghost" id="tocBtn" aria-expanded="true">Hide contents</button><button class="ghost" id="themeBtn" aria-pressed="false">Dark mode</button></span></div>
+  <div class="topbar"><h1>LLM Foundations · Lesson 2: block → sampling → KV cache</h1><span class="tb-actions"><button class="ghost" id="tocBtn" aria-expanded="true" aria-label="Hide contents">☰ Contents</button><button class="ghost" id="themeBtn" aria-pressed="false">Dark mode</button></span></div>
   <nav class="chapters" id="chapters" aria-label="Jump to a chapter"></nav>
   <div class="progress" id="progress" aria-hidden="true"></div>
   <section class="card" id="card" aria-live="polite"></section>
@@ -578,7 +580,7 @@ render();
   const dark = ()=> r.dataset.theme ? r.dataset.theme === "dark" : !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
   const syncT = ()=>{ tb.textContent = dark() ? "Light mode" : "Dark mode"; tb.setAttribute("aria-pressed", String(dark())); };
   tb.addEventListener("click", ()=>{ r.dataset.theme = dark() ? "light" : "dark"; store("ael-theme", r.dataset.theme); syncT(); if(typeof render === "function") render(); });
-  const syncC = ()=>{ const c = r.classList.contains("toc-collapsed"); cb.textContent = c ? "Show contents" : "Hide contents"; cb.setAttribute("aria-expanded", String(!c)); };
+  const syncC = ()=>{ const c = r.classList.contains("toc-collapsed"); cb.setAttribute("aria-expanded", String(!c)); cb.setAttribute("aria-label", c ? "Show contents" : "Hide contents"); cb.title = c ? "Show contents" : "Hide contents"; };
   cb.addEventListener("click", ()=>{ r.classList.toggle("toc-collapsed"); store("ael-toc", r.classList.contains("toc-collapsed") ? "0" : "1"); syncC(); });
   syncT(); syncC();
 })();
