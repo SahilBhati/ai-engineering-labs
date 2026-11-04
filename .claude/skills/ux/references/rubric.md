@@ -1,5 +1,8 @@
 # UX rubric
 
+This is the **visual** half. The **cognitive** half is the C1–C10 benchmark
+in `cognition.md`. A page passes only when both pass.
+
 Score each criterion 1–5 from a desktop screenshot (and the page source if
 needed). **Pass:** average ≥ 4 and no criterion below 3.
 
@@ -19,7 +22,8 @@ needed). **Pass:** average ≥ 4 and no criterion below 3.
 ## Report format
 
 ```
-Scores: 1 H 4 · 2 S 3 · 3 A 4 · … · avg 3.7 (fail: Spacing 3, Identity 2)
+Visual: 1 H 4 · 2 S 3 · 3 A 4 · … · avg 3.7 (fail: Spacing 3, Identity 2)
+Cognitive: 41/50 = 82% (fail: C2 words ×4 steps, C3 terms ×3, C8 orientation ×2)
 Top fixes (highest impact first):
 1. <what> → <concrete change, e.g. "section padding 48px → 96px; tokens --space-12">
 2. …
