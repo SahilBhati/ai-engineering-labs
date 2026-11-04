@@ -30,9 +30,9 @@ description: Turns approved items from docs/publish-queue.md into site pages and
      the interactive steps, and add the site header and footer.
    - **docs/** or a tool README: write for a stranger. Pitch first, then install,
      quick start, how it works.
-4. Check: open every changed HTML file's inline script with
-   `node -e "new Function(src)"`. Confirm every link you added resolves. Grep the
-   diff for personal paths (`/Users/`) and stop if any appear.
+4. Check: run the behavior suite `node tools/site-qe/qe.mjs site` (it needs
+   Node 22+ and Chrome). **Any failing check blocks the push**: report it and
+   stop. Then grep the diff for personal paths (`/Users/`) and stop if any appear.
 5. Commit on the branch with a clear message. Set the item's status to
    `ready for review (branch publish/…)` in the queue file in the same commit.
 6. If every changed file is covered by a standing permission: merge the branch
