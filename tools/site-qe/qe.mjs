@@ -10,9 +10,9 @@
 //   node qe.mjs SITE_DIR --json          machine-readable report
 // Exit code 1 if any check fails.
 //
-// Checks: js-errors · cls (<= 0.1 over the first 1.5 s, before any interaction) · h-overflow · pinned (sticky/fixed stay put to the end of the
+// Checks: width-use (no narrow centered column with big empty sides) · js-errors · cls (<= 0.1 over the first 1.5 s, before any interaction) · h-overflow · pinned (sticky/fixed stay put to the end of the
 // page) · fonts (controls use the body font) · names (buttons have accessible names) · toggles
-// (#themeBtn #navBtn #tocBtn change state + aria, and toggle back) · lesson-walk (every step of a
+// (#themeBtn #navBtn #tocBtn change state + aria, and toggle back; collapsing the nav widens the content) · lesson-walk (every step of a
 // #next stepper renders without errors, Next above the fold) · links (internal hrefs resolve) ·
 // reduced-motion (nothing animating after interactions when reduced motion is on).
 import { spawn } from "node:child_process";
@@ -41,6 +41,11 @@ document.querySelectorAll('button, input, select, textarea').forEach(el=>{
   if(f !== bodyFont && !/mono|courier|menlo|consolas/i.test(f)) fail('fonts', (el.id||el.tagName.toLowerCase())+' uses '+f+' (body: '+bodyFont+')');
 });
 document.querySelectorAll('button').forEach(b=>{ if(!(b.getAttribute('aria-label')||b.textContent.trim()||b.title)) fail('names','button without a name: '+b.outerHTML.slice(0,80)); });
+// width-use: on desktop, content shouldn't sit in a narrow centered column with large unused space on both sides.
+pass('width-use');
+{ const col = document.querySelector('main .wrap') || document.querySelector('main');
+  if(col && innerWidth >= 1280){ const r = col.getBoundingClientRect(), right = innerWidth - r.right;
+    if(r.left > 300 && right > 300) fail('width-use', 'content is a '+Math.round(r.width)+'px column with '+Math.round(r.left)+'px left and '+Math.round(right)+'px right unused at '+innerWidth+'px'); } }
 pass('pinned');
 const pinned = [...document.querySelectorAll('body *')].filter(el=>{ const p=getComputedStyle(el).position, r=el.getBoundingClientRect(); return (p==='sticky'||p==='fixed') && r.width>0 && r.height>0; });
 const H = root.scrollHeight - innerHeight;
@@ -72,6 +77,13 @@ async function toggle(id, read){
 }
 await toggle('themeBtn', ()=>root.dataset.theme||'');
 await toggle('navBtn', ()=>String(root.classList.contains('nav-collapsed')));
+// Collapsing the side nav must give the content real extra width, not just hide the nav.
+{ const nb=document.getElementById('navBtn'), w=document.querySelector('main .wrap');
+  if(nb && w && nb.offsetParent!==null && innerWidth>=1200){
+    const before=w.getBoundingClientRect().width; nb.click(); await sleep(500);
+    const after=w.getBoundingClientRect().width; nb.click(); await sleep(500);
+    if(after - before < 150) fail('toggles','#navBtn collapsed the nav but content only grew '+Math.round(after-before)+'px ('+Math.round(before)+' → '+Math.round(after)+')');
+  } }
 await toggle('tocBtn', ()=>String(root.classList.contains('toc-collapsed')));
 const next=document.getElementById('next');
 if(next){
