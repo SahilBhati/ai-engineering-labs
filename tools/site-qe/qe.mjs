@@ -10,7 +10,7 @@
 //   node qe.mjs SITE_DIR --json          machine-readable report
 // Exit code 1 if any check fails.
 //
-// Checks: width-use (no narrow centered column with big empty sides) · js-errors · cls (<= 0.1 over the first 1.5 s, before any interaction) · h-overflow · pinned (sticky/fixed stay put to the end of the
+// Checks: ext-links (external links open in a new tab) · width-use (no narrow centered column with big empty sides) · js-errors · cls (<= 0.1 over the first 1.5 s, before any interaction) · h-overflow · pinned (sticky/fixed stay put to the end of the
 // page) · fonts (controls use the body font) · names (buttons have accessible names) · toggles
 // (#themeBtn #navBtn #tocBtn change state + aria, and toggle back; collapsing the nav widens the content) · lesson-walk (every step of a
 // #next stepper renders without errors, Next above the fold) · links (internal hrefs resolve) ·
@@ -42,6 +42,10 @@ document.querySelectorAll('button, input, select, textarea').forEach(el=>{
 });
 document.querySelectorAll('button').forEach(b=>{ if(!(b.getAttribute('aria-label')||b.textContent.trim()||b.title)) fail('names','button without a name: '+b.outerHTML.slice(0,80)); });
 // width-use: on desktop, content shouldn't sit in a narrow centered column with large unused space on both sides.
+// ext-links: links to other sites open in a new tab, so readers never lose their place here.
+pass('ext-links');
+document.querySelectorAll('a[href]').forEach(a=>{ let u; try{ u=new URL(a.getAttribute('href'), location.href); }catch(e){ return; }
+  if(/^https?:$/.test(u.protocol) && u.origin!==location.origin && !(a.target==='_blank' && /noopener/.test(a.rel))) fail('ext-links', 'opens in the same tab: '+u.href.slice(0,80)); });
 pass('width-use');
 { const col = document.querySelector('main .wrap') || document.querySelector('main');
   if(col && innerWidth >= 1280){ const r = col.getBoundingClientRect(), right = innerWidth - r.right;
