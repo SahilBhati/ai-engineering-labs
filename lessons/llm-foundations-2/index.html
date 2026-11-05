@@ -715,7 +715,7 @@ add("1.6","Generation is a loop: one token per pass",
   const r = el("div",{class:"row"}); r.append(btn, rst, sc);
   v.append(toks, r, grid, cnt); draw(); drawGrid(n, -1);
  },
- "Each pass runs the whole stack of blocks. Without reuse, pass k reprocesses all k earlier tokens, even though their keys and values haven't changed (a token only looks backward, so later tokens can't change earlier ones). The next steps show what gets reused.");
+ "Each pass runs the whole stack of blocks. Without reuse, pass k reprocesses the prompt and every token generated so far, even though their keys and values haven't changed (a token only looks backward, so later tokens can't change earlier ones). The next steps show what gets reused.");
 
 add("1.6","Without a cache, work grows with the square of the length",
  "Recomputing every earlier token on every pass adds up fast. Move the prompt and output lengths and compare.",
@@ -782,7 +782,7 @@ add("1.6","The KV cache: compute keys and values once, keep them",
     pic.innerHTML = g + '</g></svg>';
     const toks = seq.length - (n ? 1-slide : 0), frac = toks/MAXT;
     mem.innerHTML = '<div class="lbl">KV cache for this request: '+seq.length+' tokens × '+fmtB(KVTOK)+' = '+fmtB(seq.length*KVTOK)+(n?' · <b style="color:var(--hot)">+'+fmtB(KVTOK)+' per token</b>':'')+' (70B-class, 16-bit, all 80 layers; 3 drawn)</div>' +
-      '<div style="height:14px;border:1px solid var(--line);border-radius:4px;background:var(--bg);overflow:hidden;margin-top:4px"><div style="height:100%;width:'+(frac*100).toFixed(1)+'%;background:var(--accent)"></div></div>'
+      '<div style="height:14px;border:1px solid var(--line);border-radius:4px;background:var(--bg);overflow:hidden;margin-top:4px"><div style="height:100%;width:'+(frac*100).toFixed(1)+'%;background:var(--accent)"></div></div>' +
       '<div class="lbl" style="margin-top:4px">Bar scale: full = '+MAXT+' tokens ('+fmtB(MAXT*KVTOK)+'), not GPU memory. At real sizes the same request grows to '+fmtB(8192*KVTOK)+' at 8,192 tokens and '+fmtB(131072*KVTOK)+' at 131,072.</div>';
   };
   const draw = ()=>{
@@ -861,7 +861,7 @@ add("1.6","Prefill and decode are two different jobs",
     const c = calc(), c1 = calc("1"); sp.set(c.p.toLocaleString("en-US")); so.set(c.n.toLocaleString("en-US")); sb.sync(mode);
     derive.innerHTML = '<div><b>decode:</b> each tick reads every weight once. Per GPU: '+fmtB(c.wb/GPUS)+' ÷ 3.35 TB/s = <b>'+(c.wb/GPUS/BW*1000).toFixed(1)+' ms</b> minimum per tick, plus the cache reads.</div>' +
       '<div><b>prefill:</b> 2 operations per parameter per token = '+(2*PARAMS/1e9)+' billion per token ÷ (2 × ~989 trillion/s) = <b>'+(2*PARAMS/(GPUS*FLOPS)*1e6).toFixed(0)+' µs</b> per token at best.</div>' +
-      '<div><b>memory:</b> each request reserves cache for its full '+(c.p+c.n).toLocaleString("en-US")+' tokens = '+fmtB(c.reqKV)+'. Room under the 92% line: 2 × 80 GB × 0.92 − '+fmtB(c.wb)+' = '+fmtB(c.free)+' → <b>'+c.fit+'</b> fit.</div>' +
+      '<div><b>memory:</b> we budget each request its full '+(c.p+c.n).toLocaleString("en-US")+' tokens (worst case) = '+(c.reqKV/1e9).toFixed(2)+' GB. vLLM actually allocates pages as a request grows, so more can start, at the risk of pre-empting some later. Room under the 92% line: 2 × 80 GB × 0.92 − '+fmtB(c.wb)+' = '+fmtB(c.free)+' → <b>'+c.fit+'</b> fit.</div>' +
       '<div class="lbl">70B-class, 16-bit math and cache, 2 H100 SXM GPUs. These are physical floors; real kernels are slower, and prefill attention adds more as prompts grow.</div>';
     if(!c.B){
       out.innerHTML = '<div class="meter"><b>0</b><span>requests fit: this one needs '+fmtB(c.reqKV)+' of cache, only '+fmtB(c.free)+' is free</span></div><div class="meter"><b>—</b><span>no decode possible on this setup</span></div>';
@@ -873,7 +873,7 @@ add("1.6","Prefill and decode are two different jobs",
         '<div class="meter"><b>'+Math.round(c.tps).toLocaleString("en-US")+'</b><span>tokens per second across all users'+(mode!=="1" && c1.B ? ' · <span style="color:var(--hot);font-weight:600">'+up.toFixed(1)+'× batch 1</span>' : '')+'</span></div>' +
         '<div class="meter"><b>'+c.dec.toFixed(1)+' s</b><span>decode time for '+c.n.toLocaleString("en-US")+' tokens</span></div>';
       note.innerHTML = mode === "1" ? 'One user: every '+(c.tick*1000).toFixed(1)+' ms tick reads all '+fmtB(c.wb)+' of weights to make one token, and the GPU\'s math sits nearly idle. Try “max that fits”.'
-        : mode === "max" ? fmtB(c.free)+' free ÷ '+fmtB(c.reqKV)+' per request = <b>'+c.B+'</b> users. Each tick still reads the weights once, shared by all; the tick grows from '+(c1.tick*1000).toFixed(1)+' to '+(c.tick*1000).toFixed(1)+' ms while throughput rises '+up.toFixed(1)+'×. KV memory, not math, caps the batch.'
+        : mode === "max" ? fmtB(c.free)+' free ÷ '+(c.reqKV/1e9).toFixed(2)+' GB per request = '+(c.free/c.reqKV).toFixed(2)+' → <b>'+c.B+'</b> users. Each tick still reads the weights once, shared by all; the tick grows from '+(c1.tick*1000).toFixed(1)+' to '+(c.tick*1000).toFixed(1)+' ms while throughput rises '+up.toFixed(1)+'×. KV memory, not math, caps the batch.'
         : '8-bit weights take 70 GB, leaving '+fmtB(c.free)+' for caches: <b>'+c.B+'</b> users. Each tick reads half the weight bytes, so '+c.B+' users get a '+(c.tick*1000).toFixed(1)+' ms tick: '+up.toFixed(1)+'× batch 1 at 16-bit. (Prefill math kept at 16-bit here.)';
     }
     frame(1);
