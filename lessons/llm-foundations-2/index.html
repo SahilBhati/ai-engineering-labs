@@ -246,26 +246,39 @@ const add = (ch, title, say, render, deeper, x) => STEPS.push({ch, title, say, r
 /* ---------- Recap (skippable): Lesson 1 in two steps, and this lesson's question ---------- */
 let nextGuess = null;
 add("R","Where Lesson 1 left off",
- "One word's journey so far: text → token ID → embedding row → attention blends in earlier words. Tap each stage.",
+ "One word's journey so far: text → token ID → embedding row → query, key, value → attention blends in earlier words. Tap each stage.",
  v=>{
   let k = "token";
   const STAGES = {
     token:["Token","“bank” becomes token ID 33535: a label, not a quantity."],
     row:["Row","The ID picks its row in the embedding table: a vector like [0.5, 0.5]. Same row in every sentence."],
+    qkv:["Q, K, V","Each word's vector is turned into three smaller vectors. Several heads do this separately, each with its own three."],
     attn:["Attention","In “The river bank…”, attention blends in earlier words' values: bank becomes [0.46, 1.70], pulled toward water."]
   };
   const sg = seg("Stage", Object.entries(STAGES).map(([key,[l]])=>[key,l]), k);
-  const out = el("p",{class:"say"});
-  const draw = ()=>{ out.innerHTML = '<b style="color:var(--hot)">' + STAGES[k][0] + ':</b> ' + esc(STAGES[k][1]); sg.sync(k); };
+  const out = el("p",{class:"say"}), pic = el("div");
+  const QKV = [["q","query","what I'm looking for"],["k","key","what I match on"],["v","value","what I hand over"]];
+  const draw = ()=>{
+    out.innerHTML = '<b style="color:var(--hot)">' + STAGES[k][0] + ':</b> ' + esc(STAGES[k][1]); sg.sync(k);
+    if(k !== "qkv"){ pic.innerHTML = ""; return; }
+    // bank's vector fans out into three chips: q (asks), k (gets matched), v (gets handed over)
+    let s = '<svg viewBox="0 0 560 150" style="max-width:560px" role="img" aria-label="bank\'s vector splits into a query, a key and a value"><g style="font:500 12px var(--font-mono)">';
+    s += '<rect x="10" y="58" width="96" height="30" rx="6" style="fill:var(--surface);stroke:var(--hot)"/><text x="58" y="78" text-anchor="middle" style="fill:var(--ink)">bank</text>';
+    QKV.forEach(([c,name,role],i)=>{ const y = 14 + i*46;
+      s += '<path d="M106 73 C150 73 150 '+(y+15)+' 196 '+(y+15)+'" style="stroke:var(--line);fill:none" stroke-width="1.5"/>';
+      s += '<rect x="196" y="'+y+'" width="34" height="30" rx="6" style="fill:var(--bg);stroke:var(--accent)"/><text x="213" y="'+(y+20)+'" text-anchor="middle" style="fill:var(--accent);font-weight:600">'+c+'</text>';
+      s += '<text x="242" y="'+(y+13)+'" style="fill:var(--ink)">'+name+'</text><text x="242" y="'+(y+27)+'" style="fill:var(--muted)">'+role+'</text>'; });
+    pic.innerHTML = s + '</g></svg>';
+  };
   sg.addEventListener("click", e=>{ if(e.target.dataset.k){ k = e.target.dataset.k; draw(); } });
-  v.append(sg, out); draw();
+  v.append(sg, out, pic); draw();
  },
  "Weights (the stored tables) never change while you use the model; activations (like bank's blended vector) are computed fresh for each request. Lesson 1, steps 10 and 16.");
 
 add("R","This lesson's question: what comes next?",
  "The model has read “The river bank …”. What word should come next? Make your guess; by the end of 1.5 you'll see the model's.",
  v=>{
-  const opts = ["flooded","account","is","collapsed"];
+  const opts = ["flooded","collapsed","is","account","closed"];
   const sg = seg("Your guess", opts.map(o=>[o,o]), nextGuess || "");
   const out = el("p",{class:"lbl"});
   const draw = ()=>{ sg.sync(nextGuess || ""); out.textContent = nextGuess ? "Your guess: “" + nextGuess + "”. Keep it in mind." : "Pick one."; };
@@ -296,8 +309,9 @@ function nnSVG(cols, edges, prog, opts){
   cols.forEach((c,ci)=> c.nodes.forEach((n,i)=>{
     const x = colX[ci], y = yOf(ci,i), r = colReveal(ci), lit = Math.min(1, n.a) * r;
     s += '<circle cx="'+x+'" cy="'+y+'" r="15" style="fill:var(--ink);fill-opacity:'+lit.toFixed(2)+';stroke:'+(lit>0.05?'var(--ink)':'var(--line)')+'" stroke-width="1.5"/>';
-    if(n.v !== undefined && r > 0.5) s += '<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" style="fill:'+(lit>0.5?'var(--surface)':'var(--muted)')+'">'+n.v+'</text>';
-    const right = ci === cols.length-1, lx = right ? x+24 : (ci===0 ? x-24 : x), anchor = right ? 'start' : (ci===0 ? 'end' : 'middle'), ly = ci===0||right ? y+4 : y+30;
+    if(n.v !== undefined && r > 0.5) s += '<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" style="'+(lit>0.6?'fill:var(--surface)':'fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:3px')+'">'+n.v+'</text>';
+    // middle-column labels sit just above their node (opts.midAbove) so they never collide with the next node's label
+    const right = ci === cols.length-1, lx = right ? x+24 : (ci===0 ? x-24 : x), anchor = right ? 'start' : (ci===0 ? 'end' : 'middle'), ly = ci===0||right ? y+4 : (opts && opts.midAbove ? y-19 : y+30);
     // halo keeps labels readable where they cross connection lines
     s += '<text x="'+lx+'" y="'+ly+'" text-anchor="'+anchor+'" style="paint-order:stroke;stroke:var(--surface);stroke-width:4px;fill:'+(lit>0.05?(right?'var(--hot)':'var(--ink)'):'var(--muted)')+(right&&lit>0.05?';font-weight:600':'')+'">'+n.label+'</text>';
   }));
@@ -336,7 +350,7 @@ add("1.4","Two kinds of work: talk, then think",
   v.append(sg, pic); draw();
  },
  "A model repeats this block dozens of times. Attention and the MLP alternate, always in this order.",
- {what: "<p>A <b>block</b> is one round of <b>attention</b> (words exchange information) followed by an <b>MLP</b> (each word processes what it now has). You met attention in Lesson 1; the next three steps open up the MLP.</p>",
+ {what: "<p>A <b>block</b> is one round of <b>attention</b> (words exchange information) followed by an <b>MLP</b> (each word processes what it now has). You met attention in Lesson 1; the next two steps open up the MLP, then the residual stream.</p>",
   analogy: duo("A team meeting, then desk work. In the meeting everyone shares what they know (attention). Then each person goes back to their desk and works through it alone, using their own expertise (MLP).",
                 "A JOIN, then a MAP. Attention is like a join: each row looks at the other rows. The MLP is like <code>rows.map(f)</code>: the same function applied to every row independently, with no row seeing another."),
   real: "<p>Attention is the only place where words see each other. The MLP uses the same weights for every word and runs on all of them in parallel, which is why it's cheap to batch on a GPU.</p>"});
@@ -377,31 +391,51 @@ const MLP_N = [
 add("1.4","The MLP: thousands of questions, then add the answers",
  "The MLP asks the word thousands of questions at once, keeps the yes answers, and turns each yes into a note added back to the word. Press Run, then switch the sentence.",
  v=>{
-  let sent = "river", stop = ()=>{};
-  const IN = {river:[1,0,1], cash:[0,1,1]}, LAB = ["river nearby","money nearby","this word is bank"];
+  let sent = "river", word = "bank", stop = ()=>{};
+  // facts about the word being processed; "other" = the sentence's first content word (river / Cash)
+  const IN = {river:{bank:[1,0,1], other:[1,0,0]}, cash:{bank:[0,1,1], other:[0,1,0]}}, OTHER = {river:"river", cash:"Cash"};
+  const LAB = ["river in context","money in context","this word is bank"];
   const sg = seg("Sentence", [["river","The river bank…"],["cash","Cash at the bank…"]], sent);
+  const sw = el("div",{class:"row"});
   const run = el("button",{class:"ghost"},"Run the MLP ▶");
-  const pic = el("div"), notes = el("div",{class:"vec",style:"white-space:normal"});
+  const pic = el("div"), notes = el("div",{class:"vec",style:"white-space:normal;display:flex;flex-wrap:wrap;gap:6px;align-items:center"});
+  function syncWord(){
+    sw.innerHTML = '<span class="lbl">run on:</span>';
+    const ws = seg("Run on which word", [["bank","bank"],["other",OTHER[sent]]], word);
+    ws.addEventListener("click", e=>{ if(e.target.dataset.k){ word = e.target.dataset.k; play(); } });
+    sw.append(ws);
+  }
   function play(){
-    const x = IN[sent], act = MLP_N.map(([,w,b])=>Math.max(0, w[0]*x[0]+w[1]*x[1]+w[2]*x[2]+b));
-    const cols = [{title:"1 · the word's facts", nodes:LAB.map((l,i)=>({label:l, a:x[i], v:x[i]}))},
-                  {title:"2 · questions (neurons)", nodes:MLP_N.map(([q],j)=>({label:q, a:act[j]>0?1:0, v:act[j].toFixed(1)}))},
-                  {title:"3 · notes written back", nodes:MLP_N.map(([,,,note],j)=>({label:note, a:act[j]>0?1:0}))}];
+    syncWord();
+    const x = IN[sent][word], act = MLP_N.map(([,w,b])=>Math.max(0, w[0]*x[0]+w[1]*x[1]+w[2]*x[2]+b));
+    const mx = Math.max(...act) || 1, wname = word === "bank" ? "bank" : OTHER[sent];
+    // brightness is proportional to the activation (0.5 glows half as bright as 1.0)
+    const cols = [{title:"1 · facts about “"+wname+"”", nodes:LAB.map((l,i)=>({label:l, a:x[i], v:x[i]}))},
+                  {title:"2 · questions (neurons)", nodes:MLP_N.map(([q],j)=>({label:q, a:act[j]/mx, v:act[j].toFixed(1)}))},
+                  {title:"3 · notes written back", nodes:MLP_N.map(([,,,note],j)=>({label:note, a:act[j]/mx}))}];
     const edges = [];
     MLP_N.forEach(([,w],j)=> w.forEach((wi,i)=>{ if(wi) edges.push([0,i,j,wi]); }));
     MLP_N.forEach((_,j)=> edges.push([1,j,j,1]));
     sg.sync(sent); notes.innerHTML = '<span class="lbl">running…</span>';
-    stop(); stop = animate(p => { pic.innerHTML = nnSVG(cols, edges, p, {width:820, left:160, right:230}); }, 2200, ()=>{
+    stop(); stop = animate(p => { pic.innerHTML = nnSVG(cols, edges, p, {width:820, left:160, right:230, midAbove:true}); }, 2200, ()=>{
+      // fired notes slide into the word's vector chip
       const fired = MLP_N.filter((_,j)=>act[j]>0);
-      notes.innerHTML = '<span class="lbl">notes added to bank\'s vector:</span> ' + fired.map(n=>'<b style="color:var(--hot)">'+n[3]+'</b>').join(" · ");
+      notes.innerHTML = '<span class="chip" style="border-color:var(--accent);color:var(--accent)">'+esc(wname)+'\'s vector</span>';
+      fired.forEach((n,i)=>{
+        const b = el("span",{class:"chip",style:"border-color:var(--hot);color:var(--hot);transition:transform 400ms cubic-bezier(0.2,0,0,1) "+(i*150)+"ms, opacity 400ms cubic-bezier(0.2,0,0,1) "+(i*150)+"ms"}, "+ " + esc(n[3]));
+        if(!reduceMotion){ b.style.transform = "translateX(60px)"; b.style.opacity = "0"; }
+        notes.append(b);
+        if(!reduceMotion) requestAnimationFrame(()=>requestAnimationFrame(()=>{ b.style.transform = "none"; b.style.opacity = "1"; }));
+      });
+      if(!fired.length) notes.append(el("span",{class:"lbl"},"no question fired, so nothing is added"));
     });
   }
   run.addEventListener("click", play);
   sg.addEventListener("click", e=>{ if(e.target.dataset.k){ sent = e.target.dataset.k; play(); } });
   const r = el("div",{class:"row"}); r.append(sg, run);
-  v.append(r, pic, notes, el("p",{class:"lbl"},"Brightness = how strongly a neuron fires. Blue lines = positive weights. Each question also has a bias (−1 or −0.5) that sets its threshold.")); play();
+  v.append(r, sw, pic, notes, el("p",{class:"lbl"},"Brightness = how strongly a neuron fires (0.5 glows half as bright as 1.0). Blue lines = positive weights. Each question also has a bias (−1 or −0.5) that sets its threshold. Switch “run on”: the same weights, run on each word separately, write different notes.")); play();
  },
- "Real MLPs ask about 4× as many questions as the vector has numbers (4,096 numbers → ~16,000 questions), then fold the answers back into 4,096. The activation is often a smooth cousin of ReLU (GELU or SwiGLU).",
+ "Real MLPs ask about 3.5–4× as many questions as the vector has numbers (e.g. 14,336 for 4,096 in Llama 3 8B), then fold the answers back into 4,096. The activation is often a smooth cousin of ReLU (GELU or SwiGLU).",
  {what: "<p><b>MLP = multi-layer perceptron</b>: a small neural network with two layers of neurons, applied to each word separately. <b>Layer 1</b> asks thousands of yes/no-style questions about the word (widen). <b>Layer 2</b> turns the yes answers into notes and adds them back to the word's vector (narrow).</p>",
   analogy: duo("A doctor's intake checklist. Hundreds of questions (fever? cough? recent travel?). Each yes adds a line to the chart (“possible flu”). The chart grows; nothing on it is erased.",
                 "A fraud rules engine. Thousands of rules check each transaction on its own; every rule that matches attaches a signal to it. Downstream systems read the signals, not the raw rules."),
@@ -410,15 +444,25 @@ add("1.4","The MLP: thousands of questions, then add the answers",
 
 const NOTES = [["the embedding","word: bank"],["block 1 · attention","next to “river”"],["block 1 · MLP","it's a riverside"],["block 2 · attention","the sentence is about a flood"],["block 2 · MLP","likely next: a water verb (“flooded”)"]];
 add("1.4","The residual stream: a notepad every layer adds to",
- "Each word carries one vector through the whole model, its notepad. Every attention and MLP step reads it and adds a note; nothing ever erases. Run the layers, then try overwriting.",
+ "Each word carries one vector through the whole model, its notepad. Every attention and MLP step reads it and adds a note; nothing is lost by default. Run the layers, then try overwriting.",
  v=>{
-  let n = 1, mode = "add";
+  let n = 1, mode = "add", stop = ()=>{};
   const sg = seg("How layers write", [["add","Add a note (residual)"],["over","Overwrite instead"]], mode);
   const btn = el("button",{class:"ghost"},"Run next layer");
-  const pic = el("div");
+  const pic = el("div"), strip = el("div");
   const pad = el("div",{class:"vec",style:"white-space:normal;display:flex;flex-direction:column;gap:6px"});
-  const draw = ()=>{
-    // the stream: one horizontal line, layers read from it (down) and add back (+)
+  // 8 of bank's numbers (a stand-in for 4,096). Each layer writes a delta (a nudge); some entries are negative.
+  const V0 = [0.6,-0.2,0.1,0,0.3,-0.1,0,0.2];
+  const DELTA = [null,
+    [0,0.3,0,0.4,0,0,0.1,0],          // b1 attn: next to "river"
+    [0,0,0.5,0.2,0,0,0,0.1],          // b1 MLP: riverside
+    [-0.1,0,0,0,0,0.6,0.3,-0.2],      // b2 attn: flood (cancels part of an earlier note)
+    [0,-0.3,0,0,0.4,0,0.3,0]];        // b2 MLP: water verb (cancels block 1's nudge on cell 2)
+  const vecAt = (k, m) => { if(m === "over") return k === 1 ? V0.slice() : DELTA[k-1].slice();
+    const v = V0.slice(); for(let i=1;i<k;i++) DELTA[i].forEach((d,j)=>v[j]+=d); return v; };
+  const cellCol = x => x >= 0 ? 'var(--cool)' : 'var(--neg)';
+  const cells = (vals, x, y, w, h) => vals.map((val,j)=>'<rect x="'+(x+j*w)+'" y="'+y+'" width="'+(w-2)+'" height="'+h+'" rx="2" style="fill:'+cellCol(val)+';fill-opacity:'+Math.min(1,Math.abs(val)).toFixed(2)+';stroke:var(--line)"/>').join("");
+  const drawPic = (fall) => { // fall: 0..1 position of the delta strip dropping onto the + node (null = none)
     const L = ["attn","MLP","attn","MLP"];
     let s = '<svg viewBox="0 0 640 110" style="max-width:760px" role="img" aria-label="The residual stream runs through every layer; each layer reads and adds back"><g style="font:500 11px var(--font-mono)">';
     s += '<line x1="20" y1="70" x2="620" y2="70" style="stroke:var(--accent)" stroke-width="4"/><text x="20" y="98" style="fill:var(--accent)">residual stream (bank\'s vector) →</text>';
@@ -426,21 +470,37 @@ add("1.4","The residual stream: a notepad every layer adds to",
       s += '<rect x="'+(cx-34)+'" y="8" width="68" height="26" rx="6" style="fill:'+(cur?'var(--hot)':'var(--surface)')+';stroke:'+(done?'var(--hot)':'var(--line)')+'"/><text x="'+cx+'" y="25" text-anchor="middle" style="fill:'+(cur?'var(--surface)':'var(--ink)')+'">'+(i<2?'b1':'b2')+' '+l+'</text>';
       s += '<path d="M'+(cx-14)+' 70 V36" style="stroke:var(--line)"/><path d="M'+(cx+14)+' 36 V64" style="stroke:'+(done?'var(--hot)':'var(--line)')+'"/>';
       s += '<circle cx="'+(cx+14)+'" cy="70" r="7" style="fill:var(--surface);stroke:'+(done?'var(--hot)':'var(--line)')+'"/><text x="'+(cx+14)+'" y="74" text-anchor="middle" style="fill:'+(done?'var(--hot)':'var(--muted)')+'">'+(mode==="add"?'+':'=')+'</text>'; });
+    if(fall !== null && n > 1){ // the layer's delta strip drops from its box onto the + node
+      const cx = 120 + (n-2)*130 + 14, y = 38 + fall*24;
+      s += '<g style="opacity:'+(1 - Math.max(0, fall-0.8)*5).toFixed(2)+'">' + cells(DELTA[n-1], cx-28, y, 7, 7) + '</g>';
+    }
     pic.innerHTML = s + '</g></svg>';
+  };
+  const drawStrip = (vals) => {
+    strip.innerHTML = '<svg viewBox="0 0 640 46" style="max-width:760px" role="img" aria-label="bank\'s vector as 8 cells; blue = positive, red = negative, brightness = size"><g style="font:500 11px var(--font-mono)">' +
+      '<text x="0" y="12" style="fill:var(--muted)">bank\'s vector (8 of its 4,096 numbers) · blue = positive, red = negative</text>' + cells(vals, 0, 20, 40, 22) +
+      vals.map((val,j)=>'<text x="'+(j*40+19)+'" y="35" text-anchor="middle" style="fill:'+(Math.abs(val)>0.5?'var(--surface)':'var(--ink)')+'">'+(Math.round(val*10)/10).toFixed(1)+'</text>').join("") + '</g></svg>';
+  };
+  const drawText = ()=>{
     const shown = mode === "add" ? NOTES.slice(0, n) : [NOTES[n-1]];
     pad.innerHTML = '<span class="lbl">bank\'s notepad now holds:</span>' + shown.map(([src,t],i)=>'<div><span class="lbl">'+src+'</span> · <b'+(i===shown.length-1 && n>1 ? ' style="color:var(--hot)"' : '')+'>'+t+'</b></div>').join("") +
       (mode === "over" && n > 1 ? '<div class="lbl" style="color:var(--hot)">“word: bank” is gone. Later layers can no longer tell which word this was.</div>' : '');
     btn.disabled = n >= NOTES.length; btn.textContent = n >= NOTES.length ? "All layers run" : "Run next layer";
     sg.sync(mode);
   };
-  btn.addEventListener("click", ()=>{ if(n < NOTES.length){ n++; draw(); } });
+  const draw = ()=>{ stop(); drawPic(null); drawStrip(vecAt(n, mode)); drawText(); };
+  btn.addEventListener("click", ()=>{ if(n >= NOTES.length) return;
+    const from = vecAt(n, mode); n++; const to = vecAt(n, mode); drawText(); stop();
+    stop = animate(p => { const f = Math.min(1, p/0.5), m = Math.max(0, (p-0.5)/0.5);
+      drawPic(p < 1 ? f : null); drawStrip(from.map((x,j)=>x + (to[j]-x)*m)); }, 600);
+  });
   sg.addEventListener("click", e=>{ if(e.target.dataset.k){ mode = e.target.dataset.k; draw(); } });
   const r = el("div",{class:"row"}); r.append(sg, btn);
-  v.append(r, pic, pad); draw();
+  v.append(r, pic, pad, strip, el("p",{class:"lbl"},"Always the same size: 4,096 numbers. A note is a nudge in a direction, not a new line. Layers can write negative nudges that cancel earlier notes (watch cell 2), but nothing is lost by default.")); draw();
  },
  "Before each read, the vector is rescaled (normalization) so the numbers stay in a sane range as notes pile up.",
  {what: "<p>The <b>residual stream</b> is the word's vector as it travels through the model. “Residual” means each layer's output is <b>added</b> to what was already there (a “residual connection”), instead of replacing it.</p>",
-  analogy: duo("A shared document passed down a line of reviewers. Each one reads it and adds comments in the margin. Nobody deletes anything, so the last reviewer sees every earlier comment, and the original text.",
+  analogy: duo("A shared document passed down a line of reviewers. Each one reads it and adds comments in the margin. Nobody deletes anything by default (a reviewer can only write a correction), so the last reviewer sees every earlier comment, and the original text.",
                 "Middleware on a request: every handler reads the request context and attaches fields (<code>ctx.user</code>, <code>ctx.locale</code>), instead of building a new request and dropping the old fields."),
   real: "<p>In numbers: <code>x = x + attention(x)</code>, then <code>x = x + MLP(x)</code>, in every block. Because of the additions, the final vector is literally the original embedding plus every layer's contribution. It also lets training nudges flow straight back to early layers.</p>",
   evidence: '<p>Anthropic\'s interpretability work describes the residual stream as a communication channel: every layer reads from it with a projection and writes back by adding, so the stream is the sum of all previous layers\' outputs plus the original embedding. <a href="https://transformer-circuits.pub/2021/framework/">Elhage et al., A Mathematical Framework for Transformer Circuits (2021) ↗</a></p>'});
@@ -450,13 +510,15 @@ add("1.4","Stack the blocks: each block sharpens the guess",
  v=>{
   const s = slider("dp","blocks run",1,32,1,1);
   const stack = el("div"), out = el("div",{class:"visual"});
-  const W = ["flooded","collapsed","is","account"];
-  const early = [0.12,0.10,0.48,0.30], late = [0.62,0.24,0.08,0.06];
+  const play = el("button",{class:"ghost"},"▶ Play blocks 1 → 32");
+  // the same five words as the recap and 1.5; the end state is exactly 1.5's softmax for “The river bank…”
+  const W = VOCAB.map(([w])=>w);
+  const early = [0.10,0.08,0.45,0.22,0.15], late = softmax(logitsFor(CTX.river.v));
   const STAGE = [[1,6,"early blocks","what kind of word is this?"],[7,20,"middle blocks","what does it mean here?"],[21,32,"late blocks","what should come next?"]];
   let shown = 1, stop = ()=>{};
   const drawStack = (d) => {
-    const bw = 18, gap = 4, x0 = 20, top = 22, h = 96;
-    let g = '<svg viewBox="0 0 '+(x0*2 + 32*(bw+gap))+' 170" style="max-width:820px;width:100%" role="img" aria-label="32 vertical blocks side by side, each attention then MLP, with the residual stream running through"><g style="font:500 11px var(--font-mono)">';
+    const bw = 18, gap = 4, x0 = 56, top = 22, h = 96;
+    let g = '<svg viewBox="0 0 '+(x0 + 32*(bw+gap) + 16)+' 170" style="max-width:820px;width:100%" role="img" aria-label="32 vertical blocks side by side, each attention then MLP, with the residual stream running through"><g style="font:500 11px var(--font-mono)">';
     const sy = top + h/2, px = x0 + (d-1)*(bw+gap) + bw/2;
     g += '<line x1="'+(x0-10)+'" y1="'+sy+'" x2="'+(x0+32*(bw+gap))+'" y2="'+sy+'" style="stroke:var(--accent);opacity:.35" stroke-width="3"/>';
     g += '<line x1="'+(x0-10)+'" y1="'+sy+'" x2="'+px+'" y2="'+sy+'" style="stroke:var(--accent)" stroke-width="3"/>';
@@ -467,16 +529,23 @@ add("1.4","Stack the blocks: each block sharpens the guess",
     g += '<circle cx="'+px+'" cy="'+sy+'" r="7" style="fill:var(--hot)"/>';
     STAGE.forEach(([a,b,t])=>{ const xa = x0+(a-1)*(bw+gap), xb = x0+b*(bw+gap)-gap, on = d >= a;
       g += '<path d="M'+xa+' 130 H'+xb+'" style="stroke:'+(on?'var(--ink)':'var(--line)')+'"/><text x="'+((xa+xb)/2)+'" y="150" text-anchor="middle" style="fill:'+(on?'var(--ink)':'var(--muted)')+'">'+t+'</text>'; });
-    stack.innerHTML = g + '<text x="'+(x0-10)+'" y="'+(sy-8)+'" style="fill:var(--accent)"></text></g></svg>';
+    stack.innerHTML = g + '</g></svg>';
+  };
+  const drawBars = (dc) => { // dc: continuous depth 1..32
+    const d = Math.round(dc), t = (dc-1)/31, e = t*t*(3-2*t), pr = W.map((_,i)=>early[i] + (late[i]-early[i])*e);
+    const st = STAGE.find(([a,b])=>d>=a && d<=b);
+    out.innerHTML = '<p class="lbl">After block ' + d + ' (' + st[2] + ': ' + st[3] + '), reading the model\'s guess for the next word. To read a guess mid-model, apply the final scoring step (next chapter) to the stream after block ' + d + '.</p>' + bars(W.map((w,i)=>[w, pr[i], Math.round(pr[i]*100)+"%"]));
   };
   const draw = ()=>{
     const d = +s.inp.value; s.set(d + " of 32");
     const from = shown; stop(); stop = animate(p => drawStack(from + (d - from)*p), 350, ()=>{ shown = d; });
-    const t = (d-1)/31, e = t*t*(3-2*t), pr = W.map((_,i)=>early[i] + (late[i]-early[i])*e);
-    const st = STAGE.find(([a,b])=>d>=a && d<=b);
-    out.innerHTML = '<p class="lbl">After block ' + d + ' (' + st[2] + ': ' + st[3] + '), reading the model\'s guess for the next word:</p>' + bars(W.map((w,i)=>[w, pr[i], Math.round(pr[i]*100)+"%"]));
+    drawBars(d);
   };
-  s.inp.addEventListener("input", draw); v.append(s.w, stack, out); drawStack(1); draw();
+  play.addEventListener("click", ()=>{ stop();
+    stop = animate(p => { const dc = 1 + 31*p; s.inp.value = Math.round(dc); s.set(Math.round(dc) + " of 32"); drawStack(dc); drawBars(dc); }, 3000, ()=>{ shown = 32; });
+  });
+  const prow = el("div",{class:"row"}); prow.append(play);
+  s.inp.addEventListener("input", draw); v.append(s.w, prow, stack, out); drawStack(1); draw();
  },
  "The percentages here are illustrative, shaped like what researchers see when they read a real model's guess after each block.",
  {what: "<p>A <b>transformer</b> = embedding → <b>N blocks</b> (each: attention + MLP on the residual stream) → scoring every word. Common 7–8B models use 32 blocks. The blocks have the same shape but <b>different weights</b>, so each learns a different job.</p>",
@@ -486,25 +555,31 @@ add("1.4","Stack the blocks: each block sharpens the guess",
   evidence: '<p>The <b>logit lens</b>: apply the model\'s final scoring step to the residual stream after <i>each</i> block, and you can read its next-word guess at every depth. Early blocks guess vaguely; the right word rises as blocks accumulate. <a href="https://www.greaterwrong.com/posts/AcKRB8wDpdaN6v6ru/interpreting-gpt-the-logit-lens">nostalgebraist, interpreting GPT: the logit lens (2020) ↗</a></p>'});
 
 /* ---------- 1.5 Logits and sampling ---------- */
-const VOCAB = [["flooded",[0.2,2.0]],["collapsed",[0.3,1.4]],["account",[2.0,0.1]],["closed",[1.2,0.8]],["the",[0.1,0.1]]];
+const VOCAB = [["flooded",[0.2,2.0]],["collapsed",[0.3,1.4]],["is",[0.5,0.6]],["account",[2.0,0.1]],["closed",[1.2,0.8]]];
 const CTX = {river:{label:"The river bank…", v:[0.46,1.70]}, money:{label:"cash at the bank…", v:[2.29,0.25]}};
 function logitsFor(v){ return VOCAB.map(([,r])=>r[0]*v[0] + r[1]*v[1]); }
 
 add("1.5","The last vector scores every token in the vocabulary",
  "After the last block, the final vector is compared with a row for every vocabulary token (a dot product). Those scores are the logits; softmax turns them into probabilities. Switch the context.",
  v=>{
-  let k = "river";
+  let k = "river", stop = ()=>{};
   const sg = seg("Context", [["river","The river bank…"],["money","cash at the bank…"]], k);
   const out = el("div",{class:"visual"});
-  const draw = ()=>{
-    const fv = CTX[k].v, lg = logitsFor(fv), p = softmax(lg);
-    out.innerHTML = '<p class="mono">final vector for “bank” = [' + fv.join(", ") + '] (the blends from Lesson 1)</p>' +
-      '<table class="emb"><thead><tr><td>next token</td><td>its row</td><td>logit = row · vector</td><td>probability</td></tr></thead><tbody>' +
-      VOCAB.map(([t,r],i)=>'<tr'+(p[i]>0.4?' class="hit"':'')+'><td>'+t+'</td><td>['+r.join(", ")+']</td><td>'+lg[i].toFixed(2)+'</td><td>'+(p[i]*100).toFixed(0)+'%</td></tr>').join("") +
+  const ROW_MS = 200, BAR_MS = 600, N = VOCAB.length;
+  const frame = (t) => { // t: ms since start. Rows light up one by one (dot product), then softmax bars grow.
+    const fv = CTX[k].v, lg = logitsFor(fv), p = softmax(lg), top = p.indexOf(Math.max(...p));
+    const done = Math.floor(t/ROW_MS), grow = Math.max(0, Math.min(1, (t - N*ROW_MS)/BAR_MS));
+    out.innerHTML = '<p class="mono">final vector for “bank” after all 32 blocks = [' + fv.join(", ") + '] (a 2-number stand-in for 4,096)</p>' +
+      '<table class="emb"><thead><tr><td>next token</td><td>its row</td><td>logit = row · vector</td></tr></thead><tbody>' +
+      VOCAB.map(([w,r],i)=>{ const act = i === done && done < N, fin = i < done;
+        const cell = act ? r[0]+'×'+fv[0]+' + '+r[1]+'×'+fv[1] : fin ? lg[i].toFixed(2) : '·';
+        return '<tr'+(act?' class="hit"':'')+'><td>'+w+'</td><td>['+r.join(", ")+']</td><td>'+cell+'</td></tr>'; }).join("") +
       '</tbody></table>' +
-      (nextGuess ? '<p class="lbl">Your guess: <b>' + esc(nextGuess) + '</b> · the model\'s top pick here: <b style="color:var(--hot)">' + VOCAB[p.indexOf(Math.max(...p))][0] + '</b></p>' : '');
+      '<p class="lbl">softmax → probabilities</p>' + bars(VOCAB.map(([w],i)=>[w, p[i]*grow, grow ? (p[i]*grow*100).toFixed(0)+'%' : ''])) +
+      (grow >= 1 && nextGuess ? '<p class="lbl">Your guess: <b>' + esc(nextGuess) + '</b> · the model\'s top pick here: <b style="color:var(--hot)">' + VOCAB[top][0] + '</b></p>' : '');
     sg.sync(k);
   };
+  const draw = ()=>{ const total = N*ROW_MS + BAR_MS; stop(); stop = animate(p => frame(p*total), total); };
   sg.addEventListener("click", e=>{ if(e.target.dataset.k){ k = e.target.dataset.k; draw(); } });
   v.append(sg, out); draw();
  },
@@ -529,10 +604,13 @@ add("1.5","Temperature: how sharp the choice is",
 add("1.5","Sampling: roll the dice, but cut the tail",
  "The next token is drawn at random by these probabilities. Top-p keeps only the most likely tokens that together reach p, so unlikely ones can't be picked. Sample 50 times.",
  v=>{
-  const st = slider("st","temperature",0.1,2,0.05,1.2), sp = slider("sp","top-p",0.5,1,0.05,1);
+  const st = slider("st","temperature",0.1,2,0.05,1.2), sp = slider("sp","top-p",0.5,1,0.05,0.9);
   const btn = el("button",{},"Sample 50 tokens");
-  const out = el("div"), hist = el("div");
+  const out = el("div"), hist = el("div"), runs = el("div",{class:"visual",style:"gap:4px"});
   const lg = logitsFor(CTX.river.v);
+  // illustrative continuations: what the rest of the sentence might look like after each first pick
+  const CONTS = {flooded:"flooded after the storm", collapsed:"collapsed into the water", is:"is muddy", account:"account was frozen", closed:"closed for repairs"};
+  let stop = ()=>{};
   const dist = ()=>{
     const T = +st.inp.value, P = +sp.inp.value; st.set(T.toFixed(2)); sp.set(P.toFixed(2));
     const p = softmax(lg.map(x=>x/T)), order = p.map((x,i)=>i).sort((a,b)=>p[b]-p[a]);
@@ -541,36 +619,82 @@ add("1.5","Sampling: roll the dice, but cut the tail",
     return p.map((x,i)=>keep.has(i) ? x/z : 0);
   };
   const draw = ()=>{ const q = dist(); out.innerHTML = '<p class="lbl">probabilities after top-p</p>' + bars(VOCAB.map(([t],i)=>[q[i]===0 ? t+" ✕" : t, q[i], q[i]===0 ? "cut" : (q[i]*100).toFixed(0)+"%"])); };
+  // histogram: each draw is a chip that falls into its word's bin and stacks (5 per row)
+  const BW = 100, CW = 16, CH = 9, TOP = 24, FLOOR = 150;
+  const drawHist = (picks, t) => { // t: ms since start; draw i starts at i*40 ms and falls for 240 ms
+    let g = '<svg viewBox="0 0 '+(BW*VOCAB.length)+' 176" style="max-width:560px" role="img" aria-label="50 draws falling into one bin per word"><g style="font:500 11px var(--font-mono)">';
+    const cnt = VOCAB.map(()=>0);
+    picks.forEach((w,i)=>{ const f = Math.max(0, Math.min(1, (t - i*40)/240)); if(f <= 0) return;
+      const slot = cnt[w]++, x = w*BW + 8 + (slot%5)*(CW+2), yEnd = FLOOR - (Math.floor(slot/5)+1)*(CH+2), y = TOP + (yEnd-TOP)*f*f;
+      g += '<rect x="'+x+'" y="'+y.toFixed(1)+'" width="'+CW+'" height="'+CH+'" rx="2" style="fill:'+(f<1?'var(--hot)':'var(--accent)')+'"/>'; });
+    VOCAB.forEach(([w],i)=>{ g += '<line x1="'+(i*BW+4)+'" y1="'+FLOOR+'" x2="'+(i*BW+BW-4)+'" y2="'+FLOOR+'" style="stroke:var(--line)" stroke-width="2"/><text x="'+(i*BW+BW/2)+'" y="168" text-anchor="middle" style="fill:var(--ink)">'+w+' '+cnt[i]+'</text>'; });
+    hist.innerHTML = '<p class="lbl">50 draws (each chip is one draw)</p>' + g + '</g></svg>';
+  };
   btn.addEventListener("click", ()=>{
-    const q = dist(), cnt = q.map(()=>0);
-    for(let n=0; n<50; n++){ let r = Math.random(), i = 0; while(i < q.length-1 && (r -= q[i]) > 0) i++; cnt[i]++; }
-    hist.innerHTML = '<p class="lbl">50 draws</p>' + bars(VOCAB.map(([t],i)=>[t, cnt[i]/50, cnt[i]+"×"]));
+    const q = dist(), picks = [];
+    for(let n=0; n<50; n++){ let r = Math.random(), i = 0; while(i < q.length-1 && (r -= q[i]) > 0) i++; picks.push(i); }
+    runs.innerHTML = ""; stop();
+    const total = 49*40 + 240;
+    stop = animate(p => drawHist(picks, p*total), total, ()=>{
+      runs.innerHTML = '<p class="lbl">Three runs of the same prompt, using the first three draws (continuations illustrative):</p>' +
+        picks.slice(0,3).map((w,i)=>'<div class="mono">run '+(i+1)+': The river bank <b style="color:var(--hot)">'+esc(VOCAB[w][0])+'</b>'+esc(CONTS[VOCAB[w][0]].slice(VOCAB[w][0].length))+' …</div>').join("") +
+        '<p class="lbl">One pick at the first step, and every later token builds on it.</p>';
+    });
   });
-  [st,sp].forEach(s=>s.inp.addEventListener("input", ()=>{ hist.innerHTML = ""; draw(); }));
-  v.append(st.w, sp.w, out, btn, hist); draw();
+  [st,sp].forEach(s=>s.inp.addEventListener("input", ()=>{ stop(); hist.innerHTML = ""; runs.innerHTML = ""; draw(); }));
+  const brow = el("div",{class:"row"}); brow.append(btn);
+  v.append(st.w, sp.w, out, brow, hist, runs); draw();
  },
  "Top-k is the blunter cousin: keep the k best tokens. Sampling happens once per token, so a long answer is hundreds of dice rolls, and one unlucky pick can steer everything after it. Backend version: weighted random load balancing that drops low-weight backends before choosing.");
 
 /* ---------- 1.6 Generation and the KV cache (deep) ---------- */
 const PROMPT = ["The","river","bank"], CONT = ["flooded","after","heavy","rain","last","night","."];
 add("1.6","Generation is a loop: one token per pass",
- "The model only ever predicts one next token. To write more, it appends that token and runs again. Press Generate 1 token and watch how much work each pass repeats.",
+ "The model only ever predicts one next token. To write more, it appends that token and runs again. Press Generate 1 token and watch how much work each pass repeats; then turn the cache on.",
  v=>{
-  let n = 0;
-  const toks = el("div",{class:"chips"}), cnt = el("div",{class:"meters"});
+  let n = 1, cache = "off", stop = ()=>{};
+  const toks = el("div",{class:"chips"}), cnt = el("div",{class:"meters"}), grid = el("div");
   const btn = el("button",{class:"ghost"},"Generate 1 token"), rst = el("button",{class:"ghost"},"Reset");
+  const sc = seg("KV cache", [["off","KV cache: off"],["on","KV cache: on"]], cache);
+  const P = PROMPT.length, ALL = PROMPT.concat(CONT), CELL = 46, X0 = 64;
+  // Pass k (1-based) runs on positions 0 .. P+k-2. Pass 1: the prompt, all new. Pass k ≥ 2: the token made by pass k−1 is new;
+  // every earlier position is recomputed (no cache) or read from the cache (cache on).
+  const drawGrid = (rows, partial) => { // rows fully drawn; partial = cells drawn so far in row `rows` (0-based), or -1
+    const H = 34 + CONT.length*26 + 30;
+    let g = '<svg viewBox="0 0 '+(X0 + ALL.length*CELL + 4)+' '+H+'" style="max-width:600px" role="img" aria-label="Passes by positions: each pass reprocesses every earlier token"><g style="font:500 10px var(--font-mono)">';
+    ALL.forEach((t,j)=>{ g += '<text x="'+(X0+j*CELL+CELL/2)+'" y="16" text-anchor="middle" style="fill:'+(j<P+n?'var(--ink)':'var(--muted)')+'">'+esc(t)+'</text>'; });
+    for(let k=0;k<=rows && k<CONT.length;k++){
+      const len = P + k, shown = k < rows ? len : partial; if(shown < 0) break;
+      g += '<text x="'+(X0-8)+'" y="'+(40+k*26)+'" text-anchor="end" style="fill:var(--muted)">pass '+(k+1)+'</text>';
+      for(let j=0;j<shown;j++){
+        const isNew = k===0 || j===len-1, x = X0+j*CELL+2, y = 26+k*26;
+        const style = isNew ? 'fill:var(--accent);fill-opacity:.75' : cache==="off" ? 'fill:var(--neg);fill-opacity:.6' : 'fill:var(--accent);fill-opacity:.12;stroke:var(--accent);stroke-dasharray:3 2';
+        g += '<rect x="'+x+'" y="'+y+'" width="'+(CELL-4)+'" height="20" rx="3" style="'+style+'"/>';
+        if(!isNew && cache==="on") g += '<text x="'+(x+(CELL-4)/2)+'" y="'+(y+14)+'" text-anchor="middle" style="fill:var(--muted)">read</text>';
+      }
+    }
+    const ly = H - 10;
+    g += '<rect x="'+X0+'" y="'+(ly-10)+'" width="12" height="12" rx="2" style="fill:var(--accent);fill-opacity:.75"/><text x="'+(X0+18)+'" y="'+ly+'" style="fill:var(--muted)">computed for the first time</text>';
+    g += cache==="off" ? '<rect x="'+(X0+210)+'" y="'+(ly-10)+'" width="12" height="12" rx="2" style="fill:var(--neg);fill-opacity:.6"/><text x="'+(X0+228)+'" y="'+ly+'" style="fill:var(--muted)">recomputed, unchanged</text>'
+                       : '<rect x="'+(X0+210)+'" y="'+(ly-10)+'" width="12" height="12" rx="2" style="fill:var(--accent);fill-opacity:.12;stroke:var(--accent);stroke-dasharray:3 2"/><text x="'+(X0+228)+'" y="'+ly+'" style="fill:var(--muted)">read from the cache</text>';
+    grid.innerHTML = g + '</g></svg>';
+  };
   const draw = ()=>{
     const seq = PROMPT.concat(CONT.slice(0,n));
-    toks.innerHTML = seq.map((t,i)=>'<span class="chip'+(i>=PROMPT.length?' sel':'')+'">'+esc(t)+'</span>').join("");
-    let nocache = 0; for(let i=0;i<=n;i++) nocache += PROMPT.length + i;
-    const cache = PROMPT.length + n;
-    cnt.innerHTML = '<div class="meter"><b>'+nocache+'</b><span>token positions processed, recomputing everything each pass</span></div>' +
-      '<div class="meter"><b>'+cache+'</b><span>token positions processed, reusing past work</span></div>';
-    btn.disabled = n >= CONT.length;
+    toks.innerHTML = seq.map((t,i)=>'<span class="chip'+(i>=P?' sel':'')+'">'+esc(t)+'</span>').join("");
+    let total = 0; for(let k=0;k<n;k++) total += P + k;
+    const fresh = P + n - 1;
+    cnt.innerHTML = '<div class="meter"><b>'+total+'</b><span>token positions processed, recomputing everything each pass</span></div>' +
+      '<div class="meter"><b>'+fresh+'</b><span>token positions computed with a cache (the rest are reads)</span></div>';
+    btn.disabled = n >= CONT.length; sc.sync(cache);
   };
-  btn.addEventListener("click", ()=>{ n++; draw(); }); rst.addEventListener("click", ()=>{ n = 0; draw(); });
-  const r = el("div",{class:"row"}); r.append(btn, rst);
-  v.append(toks, r, cnt); draw();
+  btn.addEventListener("click", ()=>{ if(n >= CONT.length) return; n++; draw(); stop();
+    const len = P + n - 1; // fill the new row left → right, ~120 ms per cell
+    stop = animate(p => drawGrid(n-1, Math.min(len, Math.floor(p*len)+1)), len*120); });
+  rst.addEventListener("click", ()=>{ stop(); n = 1; draw(); drawGrid(n, -1); });
+  sc.addEventListener("click", e=>{ if(e.target.dataset.k){ cache = e.target.dataset.k; stop(); draw(); drawGrid(n, -1); } });
+  const r = el("div",{class:"row"}); r.append(btn, rst, sc);
+  v.append(toks, r, grid, cnt); draw(); drawGrid(n, -1);
  },
  "Each pass runs the whole stack of blocks. Without reuse, pass k reprocesses all k earlier tokens, even though their keys and values haven't changed (a token only looks backward, so later tokens can't change earlier ones). The next steps show what gets reused.");
 
@@ -578,36 +702,79 @@ add("1.6","Without a cache, work grows with the square of the length",
  "Recomputing every earlier token on every pass adds up fast. Move the prompt and output lengths and compare.",
  v=>{
   const sp = slider("qp","prompt tokens",100,8000,100,2000), so = slider("qo","output tokens",10,2000,10,500);
-  const out = el("div",{class:"meters"});
+  const wrap = el("div",{style:"display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start"});
+  const tri = el("div",{style:"flex:1 1 280px;min-width:0"}), out = el("div",{style:"flex:1 1 260px;display:flex;flex-direction:column;gap:10px"});
+  wrap.append(tri, out);
   const draw = ()=>{
     const p = +sp.inp.value, n = +so.inp.value; sp.set(p); so.set(n);
-    const nocache = n*p + n*(n-1)/2, cache = p + n;
-    out.innerHTML = '<div class="meter"><b>'+fmtN(nocache)+'</b><span>positions processed without a cache</span></div>' +
-      '<div class="meter"><b>'+fmtN(cache)+'</b><span>with a cache · '+Math.round(nocache/cache)+'× less</span></div>';
+    const nocache = n*p + n*(n-1)/2, cache = p + n, reads = n*p + n*n/2;
+    // the same passes × positions picture as the last step, scaled: x = positions (prompt + output), y = passes
+    const W = 300, H = 186, L = 34, T = 8, sx = (W-L-8)/(p+n), sy = (H-T-42)/n;
+    const X = t => (L + t*sx).toFixed(1), Y = k => (T + k*sy).toFixed(1);
+    let g = '<svg viewBox="0 0 '+W+' '+H+'" style="max-width:420px" role="img" aria-label="Work without a cache: a rectangle for the prompt plus a triangle for the output"><g style="font:500 10px var(--font-mono)">';
+    g += '<polygon points="'+X(0)+','+Y(0)+' '+X(p)+','+Y(0)+' '+X(p+n)+','+Y(n)+' '+X(0)+','+Y(n)+'" style="fill:var(--neg);fill-opacity:.45"/>';
+    g += '<line x1="'+X(p)+'" y1="'+Y(0)+'" x2="'+X(p+n)+'" y2="'+Y(n)+'" style="stroke:var(--accent)" stroke-width="3"/>';
+    g += '<line x1="'+X(0)+'" y1="'+Y(0)+'" x2="'+X(p)+'" y2="'+Y(0)+'" style="stroke:var(--accent)" stroke-width="3"/>';
+    g += '<text x="'+X(0)+'" y="'+(H-22)+'" style="fill:var(--muted)">positions → (prompt '+p+' + output '+n+')</text>';
+    g += '<text transform="translate('+(L-10)+' '+Y(n/2)+') rotate(-90)" text-anchor="middle" style="fill:var(--muted)">← passes</text>';
+    g += '<text x="'+X(p/2)+'" y="'+Y(n*0.55)+'" text-anchor="middle" style="fill:var(--ink)">red = recomputed</text>';
+    g += '<text x="'+X(0)+'" y="'+(H-4)+'" style="fill:var(--accent)">teal = new work (with a cache, only this)</text>';
+    tri.innerHTML = g + '</g></svg>';
+    out.innerHTML = '<div class="meter"><b>'+fmtN(nocache)+'</b><span>positions computed without a cache (red + teal)</span></div>' +
+      '<div class="meter"><b>'+fmtN(cache)+'</b><span>positions computed with a cache (teal only) · '+Math.round(nocache/cache)+'× less</span></div>' +
+      '<div class="meter"><b>'+fmtN(Math.round(reads))+'</b><span>cache entries read with a cache: n·prompt + n²/2. The red area doesn\'t vanish; it becomes reads.</span></div>';
   };
-  [sp,so].forEach(s=>s.inp.addEventListener("input", draw)); v.append(sp.w, so.w, out); draw();
+  [sp,so].forEach(s=>s.inp.addEventListener("input", draw));
+  v.append(sp.w, so.w, wrap, el("p",{},"The cache removes the repeated projection and MLP work. Attention still reads every cached key and value on every step, so each new token costs a little more than the last.")); draw();
  },
  "Without a cache: output token k reprocesses the prompt plus k earlier outputs, so the total is n × prompt + n²/2. With a cache, each token is processed once: prompt + n. Backend version: recomputing a running total from scratch on every request versus keeping the running total.");
 
 add("1.6","The KV cache: compute keys and values once, keep them",
  "Earlier tokens' keys and values never change, so the model stores them. Each new token computes only its own query, key and value, then reads the rest from the cache. Step through.",
  v=>{
-  let n = 0; const LAYERS = 3;
-  const grid = el("div",{class:"scroll"}), cnt = el("p",{class:"counter"});
+  let n = 0, stop = ()=>{}; const LAYERS = 3;
+  const KVTOK = 2*80*8*128*2; // bytes per token, 70B-class at 16-bit: 2 (K,V) × 80 layers × 8 KV heads × 128 × 2 bytes
+  const pic = el("div"), mem = el("div"), cnt = el("p",{class:"counter"});
   const btn = el("button",{class:"ghost"},"Generate 1 token"), rst = el("button",{class:"ghost"},"Reset");
+  const MAXT = PROMPT.length + CONT.length, RH = 18, TOP = 40, GX = [86, 306, 526];
+  const clamp = x => Math.max(0, Math.min(1, x)), ph = (p,a,b) => clamp((p-a)/(b-a));
+  const frame = (p) => { // p: 0..1 through one decode step (~1.5 s); n = 0 is the prompt (prefill)
+    const seq = PROMPT.concat(CONT.slice(0,n)), last = seq.length-1, H = TOP + MAXT*RH + 8;
+    const qA = n ? ph(p,0,0.2) : 0, slide = n ? ph(p,0.15,0.45) : 1, score = ph(p,0.45,0.75), pulse = ph(p,0.7,1);
+    let g = '<svg viewBox="0 0 720 '+H+'" style="max-width:760px" role="img" aria-label="Three layers, each a stack of cached key and value slots; the new token adds one K and V to every layer"><g style="font:500 10px var(--font-mono)">';
+    GX.forEach((gx,l)=>{ g += '<text x="'+(gx+68)+'" y="14" text-anchor="middle" style="fill:var(--muted)">layer '+(l+1)+'</text><text x="'+(gx+44+22)+'" y="30" text-anchor="middle" style="fill:var(--muted)">K</text><text x="'+(gx+92+22)+'" y="30" text-anchor="middle" style="fill:var(--muted)">V</text>'; });
+    seq.forEach((t,i)=>{ const y = TOP + i*RH, isNew = n ? i===last : true, dy = isNew && n ? (1-slide)*30 : 0, op = isNew && n ? slide : 1;
+      g += '<text x="70" y="'+(y+12)+'" text-anchor="end" style="fill:'+(isNew?'var(--ink)':'var(--muted)')+'">'+esc(t)+'</text>';
+      GX.forEach(gx=>{
+        ['K','V'].forEach((c,ci)=>{ const x = gx+44+ci*48, vpulse = c==='V' && n && pulse > 0 && pulse < 1;
+          g += '<g style="opacity:'+op.toFixed(2)+'" transform="translate(0 '+dy.toFixed(1)+')"><rect x="'+x+'" y="'+y+'" width="44" height="'+(RH-3)+'" rx="3" style="fill:'+(isNew?'var(--accent)':'var(--surface)')+';fill-opacity:'+(isNew?.75:1)+';stroke:'+(vpulse?'var(--hot)':isNew?'var(--accent)':'var(--line)')+'" stroke-width="'+(vpulse?1+Math.sin(Math.PI*pulse)*2:1)+'"/>' +
+            '<text x="'+(x+22)+'" y="'+(y+11)+'" text-anchor="middle" style="fill:'+(isNew?'var(--surface)':'var(--muted)')+'">'+c.toLowerCase()+(i+1)+'</text></g>'; });
+      });
+    });
+    if(n){ const y = TOP + last*RH;
+      GX.forEach(gx=>{
+        // q chip for the new token; its scores flash to every cached K; the V's then flow into the output
+        if(score > 0 && score < 1) seq.forEach((_,i)=>{ g += '<line x1="'+(gx+30)+'" y1="'+(y+7)+'" x2="'+(gx+44)+'" y2="'+(TOP+i*RH+7)+'" style="stroke:var(--hot);opacity:'+Math.sin(Math.PI*score).toFixed(2)+'" stroke-width="1"/>'; });
+        if(pulse > 0) seq.forEach((_,i)=>{ g += '<line x1="'+(gx+136)+'" y1="'+(TOP+i*RH+7)+'" x2="'+(gx+158)+'" y2="'+(y+7)+'" style="stroke:var(--accent);opacity:'+(pulse<1?Math.sin(Math.PI*pulse):0.25).toFixed(2)+'" stroke-width="1"/>'; });
+        g += '<rect x="'+gx+'" y="'+y+'" width="28" height="'+(RH-3)+'" rx="3" style="fill:var(--hot);opacity:'+qA.toFixed(2)+'"/><text x="'+(gx+14)+'" y="'+(y+11)+'" text-anchor="middle" style="fill:var(--surface);opacity:'+qA.toFixed(2)+'">q</text>';
+        g += '<circle cx="'+(gx+164)+'" cy="'+(y+7)+'" r="6" style="fill:var(--accent);fill-opacity:'+pulse.toFixed(2)+';stroke:var(--accent)"/>';
+      });
+    }
+    pic.innerHTML = g + '</g></svg>';
+    const toks = seq.length - (n ? 1-slide : 0), frac = toks/MAXT;
+    mem.innerHTML = '<div class="lbl">KV cache for this request: '+seq.length+' tokens × '+fmtB(KVTOK)+' = '+fmtB(seq.length*KVTOK)+(n?' · <b style="color:var(--hot)">+'+fmtB(KVTOK)+' per token</b>':'')+' (70B-class, 16-bit, all 80 layers; 3 drawn)</div>' +
+      '<div style="height:14px;border:1px solid var(--line);border-radius:4px;background:var(--bg);overflow:hidden;margin-top:4px"><div style="height:100%;width:'+(frac*100).toFixed(1)+'%;background:var(--accent)"></div></div>';
+  };
   const draw = ()=>{
-    const seq = PROMPT.concat(CONT.slice(0,n)), last = seq.length-1;
-    let h = '<table class="emb"><thead><tr><td>token</td>'; for(let l=1;l<=LAYERS;l++) h += '<td>layer '+l+' K,V</td>'; h += '</tr></thead><tbody>';
-    seq.forEach((t,i)=>{ const isNew = n>0 ? i===last : true;
-      h += '<tr'+(isNew?' class="hit"':'')+'><td>'+esc(t)+'</td>'; for(let l=1;l<=LAYERS;l++) h += '<td>'+(isNew ? 'computed now' : 'read from cache')+'</td>'; h += '</tr>'; });
-    grid.innerHTML = h + '</tbody></table>';
+    const seq = PROMPT.concat(CONT.slice(0,n));
     cnt.textContent = n===0 ? "First pass: all "+PROMPT.length+" prompt tokens computed at once, in parallel." :
       "This step: 1 token × "+LAYERS+" layers computed · "+(seq.length-1)+" tokens × "+LAYERS+" layers read from cache.";
     btn.disabled = n >= CONT.length;
   };
-  btn.addEventListener("click", ()=>{ n++; draw(); }); rst.addEventListener("click", ()=>{ n = 0; draw(); });
+  btn.addEventListener("click", ()=>{ if(n >= CONT.length) return; n++; draw(); stop(); stop = animate(frame, 1500); });
+  rst.addEventListener("click", ()=>{ stop(); n = 0; draw(); frame(1); });
   const r = el("div",{class:"row"}); r.append(btn, rst);
-  v.append(r, grid, cnt); draw();
+  v.append(r, pic, mem, cnt, el("p",{class:"lbl"},"Orange q = the new token's query (never cached). Orange lines = its scores against every cached key. Teal = the new token's key and value, appended to every layer.")); draw(); frame(1);
  },
  "Queries aren't cached: only the newest token asks a question each step. The cache grows by one row per token, per layer, and lives in GPU memory for as long as the request runs. So each decode step does little math but reads a lot of memory: all the weights plus the whole cache, to produce one token. That's why decode is limited by memory bandwidth. Backend version: write-once memoization keyed by position, in an append-only store.");
 
@@ -615,55 +782,139 @@ add("1.6","Prefill and decode are two different jobs",
  "The prompt is processed in one parallel pass (prefill), which sets the time to first token. Then tokens come out one at a time (decode), which sets the speed per token. Move the lengths.",
  v=>{
   const sp = slider("fp","prompt tokens",100,32000,100,4000), so = slider("fo","output tokens",10,2000,10,400);
-  const out = el("div",{class:"visual"});
-  const PRE = 10000, DEC = 40;
-  const draw = ()=>{
-    const p = +sp.inp.value, n = +so.inp.value; sp.set(p); so.set(n);
-    const ttft = p/PRE, dec = n/DEC, tot = ttft + dec;
-    out.innerHTML = '<div style="display:flex;height:22px;border-radius:6px;overflow:hidden;border:1px solid var(--line)">' +
-      '<div style="width:'+(ttft/tot*100)+'%;background:var(--accent);color:var(--surface);font:500 .75rem var(--font-mono);padding:3px 6px;white-space:nowrap;overflow:hidden;min-width:64px;flex:none">prefill</div><div style="width:'+(dec/tot*100)+'%;background:var(--muted);color:var(--surface);font:500 .75rem var(--font-mono);padding:3px 6px;white-space:nowrap;overflow:hidden;flex:1;min-width:0">decode</div></div>' +
-      '<div class="meters"><div class="meter"><b>'+ttft.toFixed(2)+' s</b><span>time to first token (prefill)</span></div>' +
-      '<div class="meter"><b>'+dec.toFixed(1)+' s</b><span>decode, at '+(1000/DEC)+' ms per token</span></div></div>' +
-      '<p class="lbl">Toy rates for one request on one GPU: prefill 10,000 tokens/s, decode 40 tokens/s. Real numbers depend on the model and hardware.</p>';
+  let batch = "1", stop = ()=>{};
+  const sb = seg("Batch", [["1","batch 1"],["32","32 users"]], batch);
+  const play = el("button",{class:"ghost"},"▶ Run the request");
+  const derive = el("div",{class:"vec",style:"white-space:normal;font-size:.82rem;display:flex;flex-direction:column;gap:4px"});
+  const tl = el("div"), gauges = el("div"), out = el("div",{class:"meters"}), note = el("p",{class:"lbl"});
+  // 70B-class at 16-bit on 2 × H100 SXM (NVIDIA spec: 3.35 TB/s memory bandwidth, 1,979 TFLOPS BF16 with sparsity = ~989 dense, each)
+  const GPUS = 2, BW = 3.35e12, FLOPS = 1979e12/2, PARAMS = 70e9, WB = 140e9, KVTOK = 2*80*8*128*2;
+  const calc = ()=>{
+    const p = +sp.inp.value, n = +so.inp.value, B = +batch, ctx = p + n/2;
+    const preTok = 2*PARAMS/(GPUS*FLOPS), ttft = p*preTok;              // compute-bound: 2 FLOPs per parameter per token
+    const tick = (WB + B*ctx*KVTOK)/(GPUS*BW), dec = n*tick;            // memory-bound: read all weights + every user's cache per step
+    const preMem = WB/(ttft*GPUS*BW), decCompute = 2*PARAMS*B/(tick*GPUS*FLOPS);
+    return {p, n, B, ctx, ttft, tick, dec, preMem, decCompute, kvAll: B*(p+n)*KVTOK};
   };
-  [sp,so].forEach(s=>s.inp.addEventListener("input", draw)); v.append(sp.w, so.w, out); draw();
+  const gauge = (label, f, txt) => '<div class="bar" style="grid-template-columns:150px 1fr 54px"><span>'+label+'</span><div class="t"><div class="f" style="width:'+(Math.min(1,f)*100).toFixed(1)+'%;background:var(--accent)"></div></div><span class="n">'+txt+'</span></div>';
+  const frame = (t) => { // t: 0..1 playhead; first 30% of the animation = prefill, the rest = decode
+    const c = calc(), W = 640, preW = Math.max(70, Math.min(320, W*c.ttft/(c.ttft+c.dec))), ticks = Math.min(40, c.n), each = Math.ceil(c.n/ticks);
+    const inPre = t < 0.3, dT = Math.max(0, (t-0.3)/0.7), lit = Math.floor(dT*ticks + 1e-9);
+    let g = '<svg viewBox="0 0 '+(W+10)+' 84" style="max-width:760px" role="img" aria-label="Prefill is one wide block; decode is a tick per read of all the weights"><g style="font:500 10px var(--font-mono)">';
+    g += '<rect x="0" y="10" width="'+preW+'" height="34" rx="4" style="fill:var(--accent);fill-opacity:'+(inPre||t>=1?0.85:0.35)+'"/><text x="6" y="31" style="fill:var(--surface)">prefill</text>';
+    const dx = preW + 8, step = (W - dx)/ticks;
+    for(let i=0;i<ticks;i++){ const on = i < lit; g += '<rect x="'+(dx + i*step)+'" y="10" width="'+Math.max(2, step-3).toFixed(1)+'" height="34" rx="2" style="fill:'+(on?'var(--cool)':'var(--bg)')+';stroke:var(--line)"/>'; }
+    g += '<text x="0" y="62" style="fill:var(--accent)">prefill: all '+c.p.toLocaleString("en-US")+' prompt tokens in one pass</text>';
+    g += '<text x="0" y="78" style="fill:var(--muted)">decode (blue ticks): one tick = one read of all '+fmtB(WB)+' of weights'+(each>1?' (each tick drawn = '+each+' tokens)':'')+'</text>';
+    g += '<line x1="'+(t<0.3 ? preW*t/0.3 : dx + (W-dx)*dT)+'" y1="4" x2="'+(t<0.3 ? preW*t/0.3 : dx + (W-dx)*dT)+'" y2="48" style="stroke:var(--hot)" stroke-width="2"/>';
+    tl.innerHTML = g + '</g></svg>';
+    gauges.innerHTML = '<p class="lbl">'+(inPre ? 'Now: prefill' : 'Now: decode')+'</p><div class="bars">' +
+      (inPre ? gauge("GPU math in use", 1, "~100%") + gauge("memory bandwidth", c.preMem, (c.preMem*100).toFixed(0)+"%")
+             : gauge("GPU math in use", c.decCompute, (c.decCompute*100).toFixed(1)+"%") + gauge("memory bandwidth", 1, "100%")) + '</div>';
+  };
+  const draw = ()=>{
+    const c = calc(); sp.set(c.p); so.set(c.n); sb.sync(batch);
+    derive.innerHTML = '<div><b>decode:</b> each step reads every weight once. Per GPU: '+fmtB(WB/GPUS)+' ÷ 3.35 TB/s = <b>'+(WB/GPUS/BW*1000).toFixed(1)+' ms</b> minimum per token, plus the cache reads.</div>' +
+      '<div><b>prefill:</b> 2 operations per parameter per token = '+(2*PARAMS/1e9)+' billion per token ÷ (2 × ~989 trillion/s) = <b>'+(2*PARAMS/(GPUS*FLOPS)*1e6).toFixed(0)+' µs</b> per token at best.</div>' +
+      '<div class="lbl">70B-class, 16-bit, split over 2 H100 SXM GPUs. These are physical floors; real kernels are slower, and prefill attention adds more as prompts grow.</div>';
+    out.innerHTML = '<div class="meter"><b>'+c.ttft.toFixed(2)+' s</b><span>time to first token (prefill floor)</span></div>' +
+      '<div class="meter"><b>'+(c.tick*1000).toFixed(1)+' ms</b><span>per decode step ('+(c.B>1?c.B+' users share it':'one user')+')</span></div>' +
+      '<div class="meter"><b>'+Math.round(c.B/c.tick).toLocaleString("en-US")+'</b><span>tokens per second across all users</span></div>' +
+      '<div class="meter"><b>'+c.dec.toFixed(1)+' s</b><span>decode time for '+c.n+' tokens</span></div>';
+    note.innerHTML = c.B > 1 ? 'With '+c.B+' users, every tick still reads the weights once, shared by all; only their caches add reads, so a tick grows from '+(calc1().tick*1000).toFixed(1)+' to '+(c.tick*1000).toFixed(1)+' ms while throughput rises '+((c.B/c.tick)/(1/calc1().tick)).toFixed(1)+'× (continuous batching). Memory check: their caches need '+fmtB(c.kvAll)+', far more than the ~20 GB left beside 16-bit weights (next step).'
+                             : 'One user: the GPU spends almost every tick waiting on memory. Switch to 32 users.';
+    frame(1);
+  };
+  const calc1 = ()=>{ const b = batch; batch = "1"; const c = calc(); batch = b; return c; };
+  play.addEventListener("click", ()=>{ stop(); stop = animate(frame, 3000); });
+  sb.addEventListener("click", e=>{ if(e.target.dataset.k){ batch = e.target.dataset.k; stop(); draw(); } });
+  [sp,so].forEach(s=>s.inp.addEventListener("input", ()=>{ stop(); draw(); }));
+  const r = el("div",{class:"row"}); r.append(sb, play);
+  v.append(sp.w, so.w, derive, r, tl, gauges, out, note); draw();
  },
  "Prefill is compute-bound: thousands of tokens' worth of math in parallel. Decode is memory-bound: one token's math per full read of the weights and cache. That's why serving systems batch many users' decode steps together, sharing each read of the weights (continuous batching). The metrics interviewers use: TTFT (time to first token), TPOT or ITL (time per output token), and throughput (tokens per second across all users).");
 
 add("1.6","How big is the KV cache?",
  "The KV cache, not the weights, often decides how many users fit on a GPU. Each layer stores one key and one value per KV head (a group of heads sharing them) for every token.",
  v=>{
-  let m = "70b";
+  let m = "70b", stop = ()=>{}, shownGB = null;
   const MODELS = {"8b":{label:"8B-class", L:32, H:8, D:128, wBytes:16e9, gpus:1}, "70b":{label:"70B-class", L:80, H:8, D:128, wBytes:140e9, gpus:2}};
   const sg = seg("Model", [["8b","8B-class · 1 GPU"],["70b","70B-class · 2 GPUs"]], m);
   let bytes = "2";
   const sC = slider("kc","context per request (tokens)",1024,131072,1024,8192), sB = seg("Bytes per number", [["2","16-bit cache"],["1","8-bit cache"]], bytes);
-  const out = el("div",{class:"visual"});
+  const out = el("div",{class:"visual"}), pic = el("div");
+  const CAP = 0.92, DEMAND = 16, PX = 3; // vLLM's default gpu_memory_utilization; 16 requests waiting; 3 px per GB
+  // the real-world caveat, computed from the same formula (70B-class, 16-bit cache, 8K context, 2 × 80 GB)
+  const per8k = 2*80*8*128*2*8192, capFree = 2*80e9*CAP - 140e9;
+  const caveat = el("div",{class:"panel",style:"max-width:none"}, '<p class="panel-l">Real servers keep less for the cache</p><p>vLLM\'s default <code>gpu_memory_utilization</code> is 0.92: it uses at most 92% of each GPU (the dashed line). At startup it also runs a test pass to measure peak <b>activation</b> memory (the scratch space a forward pass needs), and that comes out of the same budget. For 70B at 16-bit on 2 × 80 GB: '+fmtB(2*80e9*CAP)+' − 140 GB of weights = '+fmtB(capFree)+', room for at most <b>'+Math.floor(capFree/per8k)+'</b> of these 8K requests, fewer once activations are counted. So in practice teams shrink the weights (8-bit: 70 GB; 4-bit: 35 GB) or spread the model over more GPUs.</p><p class="lbl"><a href="https://docs.vllm.ai/en/stable/configuration/engine_args.html">vLLM engine arguments ↗</a></p>');
+  const drawPic = (M, reqGB) => {
+    const gW = 120, top = 24, h = 80*PX, bot = top + h, wGB = M.wBytes/1e9/M.gpus, tile = reqGB/M.gpus; // tensor parallel: each GPU holds half the KV heads
+    const capY = bot - 80*CAP*PX, room = 80*CAP - wGB, fit = Math.max(0, Math.min(DEMAND, Math.floor(room/tile + 1e-9))), queued = DEMAND - fit;
+    let g = '<svg viewBox="0 0 660 '+(bot+40)+'" style="max-width:760px" role="img" aria-label="GPU memory: weights at the bottom, one tile per request above, requests that do not fit are queued"><g style="font:500 10px var(--font-mono)">';
+    for(let k=0;k<M.gpus;k++){ const x = 30 + k*170;
+      g += '<text x="'+(x+gW/2)+'" y="14" text-anchor="middle" style="fill:var(--muted)">GPU '+(k+1)+' · 80 GB</text>';
+      g += '<rect x="'+x+'" y="'+top+'" width="'+gW+'" height="'+h+'" rx="4" style="fill:var(--bg);stroke:var(--ink)"/>';
+      g += '<rect x="'+x+'" y="'+(bot - wGB*PX)+'" width="'+gW+'" height="'+(wGB*PX)+'" style="fill:var(--muted);fill-opacity:.45"/><text x="'+(x+gW/2)+'" y="'+(bot - wGB*PX/2 + 4)+'" text-anchor="middle" style="fill:var(--ink)">weights '+wGB+' GB</text>';
+      for(let i=0;i<fit;i++){ const y1 = bot - wGB*PX - (i+1)*tile*PX;
+        g += '<rect x="'+(x+2)+'" y="'+y1.toFixed(1)+'" width="'+(gW-4)+'" height="'+Math.max(1, tile*PX-1).toFixed(1)+'" style="fill:var(--accent);fill-opacity:.7"/>'; }
+      g += '<line x1="'+(x-6)+'" y1="'+capY+'" x2="'+(x+gW+6)+'" y2="'+capY+'" style="stroke:var(--ink)" stroke-dasharray="4 3"/>';
+    }
+    g += '<text x="'+(30 + M.gpus*170 - 44)+'" y="'+(capY+4)+'" style="fill:var(--muted)">92%</text>';
+    const qx = 30 + M.gpus*170 + 10;
+    g += '<text x="'+qx+'" y="'+(top+10)+'" style="fill:'+(queued?'var(--neg)':'var(--muted)')+'">'+(queued ? queued+' of '+DEMAND+' requests queued (no room)' : 'all '+DEMAND+' requests fit')+'</text>';
+    for(let i=0;i<queued;i++) g += '<rect x="'+(qx + (i%8)*18)+'" y="'+(top + 22 + Math.floor(i/8)*18)+'" width="14" height="14" rx="2" style="fill:var(--neg);fill-opacity:.75"/>';
+    g += '<text x="'+qx+'" y="'+(top+80)+'" style="fill:var(--muted)">teal tile = one request\'s cache</text><text x="'+qx+'" y="'+(top+94)+'" style="fill:var(--muted)">('+fmtB(reqGB*1e9)+(M.gpus>1?', half on each GPU)':')')+'</text>';
+    g += '<text x="30" y="'+(bot+22)+'" style="fill:var(--muted)">16 requests waiting · tiles fill up to the dashed 92% line</text>';
+    pic.innerHTML = g + '</g></svg>';
+  };
   const draw = ()=>{
     const M = MODELS[m], C = +sC.inp.value, B = +bytes; sC.set(C.toLocaleString("en-US")); sB.sync(bytes); sg.sync(m);
-    const perTok = 2*M.L*M.H*M.D*B, perReq = perTok*C, free = M.gpus*80e9 - M.wBytes;
+    const perTok = 2*M.L*M.H*M.D*B, perReq = perTok*C, free = M.gpus*80e9 - M.wBytes, freeCap = M.gpus*80e9*CAP - M.wBytes;
     out.innerHTML = '<p class="mono">2 (K and V) × '+M.L+' layers × '+M.H+' KV heads × '+M.D+' × '+B+' bytes = '+fmtB(perTok)+' per token</p>' +
       '<div class="meters"><div class="meter"><b>'+fmtB(perReq)+'</b><span>per request at '+C.toLocaleString("en-US")+' tokens</span></div>' +
-      '<div class="meter"><b style="color:var(--hot)">'+Math.max(0, Math.floor(free/perReq))+'</b><span>requests fit in the '+fmtB(free)+' left on '+M.gpus+' × 80 GB after '+fmtB(M.wBytes)+' of weights</span></div></div>';
+      '<div class="meter"><b style="color:var(--hot)">'+Math.max(0, Math.floor(freeCap/perReq))+'</b><span>requests fit under the 92% line ('+Math.max(0, Math.floor(free/perReq))+' if every byte of the '+fmtB(free)+' beside the weights were used)</span></div></div>';
+    const to = perReq/1e9, from = shownGB === null ? to : shownGB; stop();
+    stop = animate(p => { shownGB = from + (to-from)*p; drawPic(M, shownGB); }, 300);
   };
   sg.addEventListener("click", e=>{ if(e.target.dataset.k){ m = e.target.dataset.k; draw(); } });
   sB.addEventListener("click", e=>{ if(e.target.dataset.k){ bytes = e.target.dataset.k; draw(); } });
-  sC.inp.addEventListener("input", draw); v.append(sg, sB, sC.w, out); draw();
+  sC.inp.addEventListener("input", draw); v.append(sg, sB, sC.w, out, pic, caveat); draw();
  },
- "Presets: an 8B-class model (32 layers, 8 KV heads, head size 128) on one 80 GB GPU, and a 70B-class model (80 layers, 8 KV heads, head size 128) on two. The 70B case: about 330 KB per token and 2.7 GB per 8K-token request, so only about 7 such requests fit beside the weights. The levers are exactly the interview topics: fewer KV heads (grouped-query attention), an 8-bit cache (halves it; try the 8-bit switch), paged allocation so memory isn't wasted on fragments (PagedAttention, in vLLM), and sharing the cache for identical prompt prefixes (prefix caching).");
+ "Presets: an 8B-class model (32 layers, 8 KV heads, head size 128) on one 80 GB GPU, and a 70B-class model (80 layers, 8 KV heads, head size 128) on two. The 70B case: about 328 KB per token and 2.7 GB per 8K-token request: about 7 fit beside the weights in theory, at most 2 under vLLM's default 92% cap. The levers are exactly the interview topics: fewer KV heads (grouped-query attention), an 8-bit cache (halves it; try the 8-bit switch), paged allocation so memory isn't wasted on fragments (PagedAttention, in vLLM), and sharing the cache for identical prompt prefixes (prefix caching).");
 
 add("1.6","Why context windows have a limit",
  "Three costs grow with context: KV memory grows in line with it, attention work in prefill grows with its square, and the model only learned positions up to the length it was trained on. Drag the context.",
  v=>{
   const s = slider("cw","context length (tokens)",1024,1048576,1024,131072);
-  const out = el("div",{class:"meters"});
+  const out = el("div",{class:"meters"}), cap = el("div"), ruler = el("div");
+  const KVTOK = 2*80*8*128*2, MAXC = 1048576, CAPB = 2*80e9, WB = 140e9, TRAINED = 131072; // TRAINED: an example trained length
   const draw = ()=>{
     const C = +s.inp.value; s.set(C.toLocaleString("en-US"));
-    const kv = 2*80*8*128*2*C, pairs = C*C/2;
+    const kv = KVTOK*C, pairs = C*C/2;
     out.innerHTML = '<div class="meter"><b>'+fmtB(kv)+'</b><span>KV cache for one request (70B-class, 16-bit)</span></div>' +
       '<div class="meter"><b>'+fmtN(pairs)+'</b><span>attention scores in prefill, per head per layer</span></div>';
+    // capacity bar: 2 × 80 GB. Weights (grey) + this request's cache (teal); anything past capacity is red.
+    const W = 640, SCALE = (W-20)/(WB + KVTOK*MAXC), X = b => (10 + b*SCALE).toFixed(1), used = WB + kv;
+    let g = '<svg viewBox="0 0 '+W+' 70" style="max-width:760px" role="img" aria-label="GPU memory bar: weights plus cache against 2 × 80 GB"><g style="font:500 10px var(--font-mono)">';
+    g += '<rect x="10" y="18" width="'+(W-20)+'" height="22" rx="3" style="fill:var(--bg);stroke:var(--line)"/>';
+    g += '<rect x="10" y="18" width="'+(WB*SCALE).toFixed(1)+'" height="22" style="fill:var(--muted);fill-opacity:.45"/>';
+    g += '<rect x="'+X(WB)+'" y="18" width="'+(Math.min(kv, Math.max(0, CAPB-WB))*SCALE).toFixed(1)+'" height="22" style="fill:var(--accent);fill-opacity:.75"/>';
+    if(used > CAPB) g += '<rect x="'+X(CAPB)+'" y="18" width="'+((used-CAPB)*SCALE).toFixed(1)+'" height="22" style="fill:var(--neg);fill-opacity:.75"/>';
+    g += '<line x1="'+X(CAPB)+'" y1="16" x2="'+X(CAPB)+'" y2="48" style="stroke:var(--ink)" stroke-width="2"/><text x="'+X(CAPB)+'" y="60" text-anchor="middle" style="fill:var(--ink)">2 × 80 GB = 160 GB</text>';
+    g += '<text x="12" y="12" style="fill:var(--muted)">weights 140 GB + this request\'s cache</text>';
+    if(used > CAPB) g += '<text x="'+(W-10)+'" y="12" text-anchor="end" style="fill:var(--neg)">'+fmtB(used-CAPB)+' over capacity</text>';
+    cap.innerHTML = g + '</g></svg>';
+    // position ruler: positions the model was trained on, then untrained territory
+    const RX = c => (10 + c/MAXC*(W-20)).toFixed(1);
+    let r = '<svg viewBox="0 0 '+W+' 64" style="max-width:760px" role="img" aria-label="Position ruler: trained range, then untrained positions"><g style="font:500 10px var(--font-mono)">';
+    r += '<rect x="10" y="20" width="'+(RX(TRAINED)-10)+'" height="12" style="fill:var(--accent);fill-opacity:.35"/><rect x="'+RX(TRAINED)+'" y="20" width="'+(W-10-RX(TRAINED))+'" height="12" style="fill:var(--neg);fill-opacity:.15"/>';
+    r += '<text x="'+(+RX(TRAINED)+6)+'" y="14" style="fill:var(--ink)">trained length (example: 131,072)</text><text x="'+(W-10)+'" y="14" text-anchor="end" style="fill:var(--neg)">untrained positions</text>';
+    r += '<line x1="'+RX(TRAINED)+'" y1="14" x2="'+RX(TRAINED)+'" y2="38" style="stroke:var(--ink)"/>';
+    r += '<path d="M'+RX(C)+' 34 l-6 10 h12 z" style="fill:var(--hot)"/><text x="'+RX(C)+'" y="60" text-anchor="'+(C/MAXC>0.8?'end':C/MAXC<0.1?'start':'middle')+'" style="fill:var(--hot)">'+C.toLocaleString("en-US")+(C>TRAINED?' · never seen in training':'')+'</text>';
+    ruler.innerHTML = r + '</g></svg>';
   };
-  s.inp.addEventListener("input", draw); v.append(s.w, out); draw();
+  s.inp.addEventListener("input", draw);
+  v.append(s.w, out, cap, el("p",{},"1M tokens of 70B-class cache ≈ "+fmtB(KVTOK*MAXC)+": more than both GPUs together, before the 140 GB of weights."), ruler); draw();
  },
  "Long-context models extend the trained range (RoPE scaling and long-context training) and cut the costs (grouped-query attention, smarter attention kernels), but memory and compute still grow with length. That's why serving systems cap context per tier, and why a 1M-token request costs far more than a short one. This is the bridge to 1.9, inference economics.");
 
