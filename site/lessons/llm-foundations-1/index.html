@@ -445,7 +445,7 @@ add("1.2","Each ID picks a row",
   const side = el("div",{class:"side"}); side.append(tbl, colBox);
   v.append(chipsEl, side, vec); draw(); drawCol(1);
  },
- "Rows = vocabulary size (set by the tokenizer). Row width = a design choice, like 768 in a small model or 4,096 in a mid-size 7–8B model; the largest use 16,384. 100,000 × 4,096 is about 410 million numbers. bank reads the same row in “The river bank flooded” and “I deposited cash at the bank”: the table has no idea of context. Its first two numbers sit halfway, [0.50, 0.50]. Why not feed the ID itself? IDs are labels, not quantities. 1001 and 1002 are unrelated, like auto-increment keys, so arithmetic on them is meaningless.");
+ "Rows = vocabulary size (set by the tokenizer). Row width = a design choice, like 768 in a small model or 4,096 in a mid-size 7–8B model; the largest use about 16–18k. 100,000 × 4,096 is about 410 million numbers. bank reads the same row in “The river bank flooded” and “I deposited cash at the bank”: the table has no idea of context. Its first two numbers sit halfway, [0.50, 0.50]. Why not feed the ID itself? IDs are labels, not quantities. 1001 and 1002 are unrelated, like auto-increment keys, so arithmetic on them is meaningless.");
 
 add("1.2","Training moves similar words together",
  "Training pulls words used in similar sentences close together. Rows start random; every correction nudges them. Drag the slider and watch bank land between water and money.",
@@ -500,7 +500,7 @@ add("1.2","Position: order changes meaning",
     out.innerHTML = on ? 'bank [0.5, 0.5] + slot ' + slot + ' [' + SLOT[slot].map(f).join(", ") + '] = <b style="color:var(--hot)">[' + sum.map(f).join(", ") + ']</b>'
                        : 'bank [0.5, 0.5] + nothing = <b style="color:var(--hot)">[0.5, 0.5]</b> in both orders';
     note.textContent = on ? "Flip the order: bank moves to slot " + (1 - slot) + ", a different slot vector is added, and the orange sum changes. Attention now sees different inputs."
-                          : "Flip the order: nothing changes. Attention compares contents, not places, so it can't tell “river bank” from “bank river”.";
+                          : "Flip the order: nothing changes. Attention compares contents, not places, so it can't tell “river bank” from “bank river” (apart from the weak hint in the panel below).";
     posSw.sync(on ? "on" : "off"); ordSw.sync(order);
   };
   const run = ()=>{ stop(); stop = on ? animate(p=>draw(ease(p)), 600) : (draw(1), ()=>{}); };
@@ -626,7 +626,7 @@ add("B","Weighted average: blend by the percentages",
  "Attention = dot product (score every word) → softmax (scores to percentages) → weighted average (blend). One more basic first: how training sets all these numbers.");
 
 add("B","Gradient: how training nudges each number",
- "Training nudges each number in proportion to what it's multiplied by. To score “flooded” as the next word, bank's row is multiplied by flooded's output row [1, 3]. Target 2; now −1.3. Press Train step.",
+ "Training nudges each number in proportion to what it's multiplied by. To score “flooded” as the next word, bank's row meets flooded's output row [1, 3] (really via the layers, skipped here). Target 2; now −1.3. Press Train step.",
  v=>{
   const START_ROW = [0.2,-0.5], TARGET = 2, LR = 0.05;
   let row = START_ROW.slice(), hist = [], last = [0,0], prev = null, stop = ()=>{};
@@ -668,7 +668,7 @@ add("B","Gradient: how training nudges each number",
   const r = el("div",{class:"row"}); r.append(btn, rst);
   v.append(eqp, grid, tbl, sc, arrows, r, hs); draw();
  },
- "Where does flooded's output row come from? The model ends with a second learned table, one row per token, and scores each possible next token by a dot product with that row; Lesson 2 covers it. Nudge = step size × how far off the score is × what the number is multiplied by. A number multiplied by 0 has no influence, so it never moves. Nobody picks a number: every number used in a prediction gets its own nudge, all calculated in one pass (backpropagation). Repeat over billions of sentences and the rows, every other learned table you'll meet in 1.3, everything, settle into useful values. That's all training is. Backend version: 4,096 config knobs, each adjusted in proportion to how sensitive the output is to it, measured all at once.");
+ "Where does flooded's output row come from? The model ends with a second learned table, one row per token, and scores each possible next token by a dot product with that row; Lesson 2 covers it. In a real model it's dotted with bank's final vector after all the layers, not the raw row; this toy skips the layers, and the nudge flows back through them to the row. Nudge = step size × how far off the score is × what the number is multiplied by. A number multiplied by 0 has no influence, so it never moves. Nobody picks a number: every number used in a prediction gets its own nudge, all calculated in one pass (backpropagation). Repeat over billions of sentences and the rows, every other learned table you'll meet in 1.3, everything, settle into useful values. That's all training is. Backend version: 4,096 config knobs, each adjusted in proportion to how sensitive the output is to it, measured all at once.");
 
 // The two toy sentences used in 1.3. Keys = values here; bank's query is [1, 1].
 const SENT = {
@@ -756,7 +756,7 @@ add("1.3","The three basics, running together",
     s2 += '<text x="268" y="58" text-anchor="middle" style="fill:var(--muted)">→ sum →</text><text x="315" y="14" text-anchor="middle" font-weight="600" style="fill:var(--hot)">new bank</text>' +
       neurons(sum, 3, 315, 40, 34, 12) + '<text x="170" y="135" text-anchor="middle" style="fill:var(--muted)">brightness = size of each number</text>';
     cols.innerHTML = s2 + '</g></svg>';
-    res.textContent = "3. blend → new bank = [" + sum.map(x2=>x2.toFixed(2)).join(", ") + "]   (query stays [1, 1])";
+    res.textContent = "3. blend → new bank = [" + sum.map(x2=>x2.toFixed(2)).join(", ") + "]   (query stays [1, 1]). Real models add this blend to bank's own vector instead of replacing it (residual connection, next lesson).";
     const filled = ph < 3 ? 0 : Math.hypot(sum[0], sum[1]) / Math.max(1e-9, Math.hypot(out[0], out[1])), mx = 0.5 + (x - 0.5)*filled;
     meter.innerHTML = '<svg viewBox="0 0 360 70" style="max-width:440px" role="img" aria-label="Where bank ends up between money and water"><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">' +
       '<line x1="30" y1="30" x2="330" y2="30" style="stroke:var(--line)" stroke-width="6" stroke-linecap="round"/>' +
@@ -772,7 +772,7 @@ add("1.3","The three basics, running together",
   seg.addEventListener("click", e=>{ if(e.target.dataset.k){ k = e.target.dataset.k; stop(); ph = 0; frame(0, 1); } });
   const ctl = el("div",{class:"row"}); ctl.append(seg, next, replay);
   const side = el("div",{class:"side"}); side.append(pic, cols);
-  v.append(ctl, el("p",{class:"mono"},"bank's row [0.5, 0.5] × W_Q (a 2×2 learned matrix, here [[2, 0], [0, 2]]) = query [1, 1]"),
+  v.append(ctl, el("p",{class:"mono"},"bank's row [0.5, 0.5] × W_Q (a 2×2 learned matrix, here [[2, 0], [0, 2]]) = query [1, 1]. Keys and values here are picked by hand to keep the numbers small."),
     el("p",{class:"lbl"},"query [1, 1] = “is anyone here about money or water?” Orange q = bank's query; blue = each word's key (bank's own key is also [1, 1]); teal = value pieces, tip to tail; orange dot = new bank."),
     phase, tblBox, side, res, meter); frame(0, 1);
  },
@@ -857,7 +857,7 @@ add("1.3","Several heads: one blend per need",
       pic.innerHTML = svgHead + flow(wa, 290, p) + flow(wb, 380, p) + inCols() + outCol(wa, 290, "head A", p) + outCol(wb, 380, "head B", p) + '</g></svg>';
       out.innerHTML = '<p class="mono">head A (setting?): 80% river → ' + f2(blend(wa)) + ' · head B (grammar?): 80% the → ' + f2(blend(wb)) + '</p>' +
         '<p class="mono">joined: ' + f2(blend(wa).concat(blend(wb))) + '  → × W_O → one vector for bank</p>' +
-        '<p class="lbl">Two separate output columns, each clean: A keeps river\'s pattern, B keeps the\'s. Each head has its own softmax, so each can put 80% on its own word. W_O is a learned matrix that mixes the joined head outputs back to the model\'s width.</p>';
+        '<p class="lbl">Two separate output columns, each clean: A keeps river\'s pattern, B keeps the\'s. Each head has its own softmax, so each can put 80% on its own word. W_O is a learned matrix that mixes the joined outputs so the heads\' findings can combine. (Toy: real heads each output 1/h of the width, so joined they are already the model\'s width.)</p>';
     }
     sl.w.style.display = mode==="one" ? "" : "none";
     seg.querySelectorAll("button").forEach(b2=>b2.setAttribute("aria-pressed", b2.dataset.m===mode));
@@ -1072,7 +1072,7 @@ const PANELS = {
                  "A per-row weight vector over earlier rows, like a learned, content-based window function."),
     real: "<p>A word only looks backward (the reason comes with training, in 1.7). Real models learn these weights; the ones shown are hand-picked to illustrate the pattern.</p>"},
   "Several heads: one blend per need": {
-    what: "<p>A <b>head</b> is one complete copy of attention with its own query, key and value matrices. <b>Multi-head attention</b> runs several heads side by side, joins their outputs, and multiplies by <b>W_O</b>, a learned matrix that mixes the joined head outputs back to the model's width.</p>",
+    what: "<p>A <b>head</b> is one complete copy of attention with its own query, key and value matrices. <b>Multi-head attention</b> runs several heads side by side, joins their outputs, and multiplies by <b>W_O</b>, a learned square matrix that mixes the joined outputs (already the model's full width, e.g. 32 heads × 128 = 4,096) so the heads' findings can combine.</p>",
     analogy: DUO("Asking several specialists the same question at once (a geographer, a grammarian) instead of one generalist who has to average their views.",
                  "Fanning one request out to several specialised indexes in parallel, then merging the responses."),
     real: "<p>Heads split the width rather than adding to it: 32 heads × 128 numbers = 4,096. Each head gets its own softmax, so it can focus sharply on its own target.</p>",
