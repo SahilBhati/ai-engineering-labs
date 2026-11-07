@@ -31,7 +31,10 @@ description: Turns approved items from docs/publish-queue.md into site pages and
      quick start, how it works.
 4. Check: run the behavior suite `node tools/site-qe/qe.mjs site` (it needs
    Node 22+ and Chrome). **Any failing check blocks the push**: report it and
-   stop. Then grep the diff for personal paths (`/Users/`) and stop if any appear.
+   stop. Then grep the diff for personal paths (`/Users/`) and for second-person
+   references to the owner's own plans (`your gateway`, `your project`, `your
+   interview`, `your job`); stop if any appear. Lessons are written for one
+   learner first, so these slip through.
 5. Commit on the branch with a clear message. Set the item's status to
    `ready for review (branch publish/…)` in the queue file in the same commit.
 6. If every changed file is covered by a standing permission: merge the branch
