@@ -4,8 +4,9 @@
 rules router for fixed commands, and Claude Code as the brain for
 everything else. Dangerous actions need a spoken yes.**
 
-Status: **scaffold.** The interfaces and a fake end-to-end turn exist, with
-no real audio and no real brain yet.
+Status: **scaffold + audio.** The interfaces, a fake end-to-end turn, and
+real audio adapters (wake word, speech-to-text, text-to-speech) exist. No
+real router or brain yet.
 
 ## Shape
 
@@ -36,6 +37,8 @@ each turn's latency can be broken down by stage.
 | `hark/events.py` | Turn events: started, transcribed, routed, tool call requested/decided, confirmation asked/answered, answered, stage timed, ended. |
 | `hark/turn.py` | `TurnRunner`: runs one turn through the ports and times each stage. |
 | `hark/stubs/` | A fake adapter for every port. |
+| `hark/audio/` | Real `WakeWord` (openWakeWord), `SpeechToText` (whisper.cpp server) and `TextToSpeech` (Kokoro server) adapters on one shared mic and speaker. `engine.py` is the only module in Hark that imports Pipecat. |
+| `bench/lane_a.py` | Wake-word cost and accuracy, STT latency with and without the vocabulary prompt, idle CPU. |
 | `tests/` | A fake turn as text, through every stub, asserting the event sequence and stage timings. |
 
 Real adapters (audio, router, brain, gate, event log) each live in their
@@ -46,8 +49,23 @@ audio adapters do.
 ## Run the tests
 
 ```bash
-uv run pytest
+uv run pytest              # no audio needed; hardware tests are skipped
+uv run pytest --hardware   # also mic, speaker and the local servers
 ```
 
-Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/). No runtime
-dependencies yet.
+Requires macOS, Python 3.12+, [uv](https://docs.astral.sh/uv/) and
+PortAudio (`brew install portaudio`). One test fails if any module outside
+`hark/audio/` imports Pipecat.
+
+## Try the audio
+
+Needs a whisper.cpp server on `127.0.0.1:2022` and a Kokoro server on
+`127.0.0.1:8880` (both OpenAI-compatible; settings in `hark/audio/config.py`,
+or a TOML file with an `[audio]` table).
+
+```bash
+uv run python -m hark.audio --once   # say "hey jarvis", then a sentence; hear it back
+```
+
+The first run downloads the openWakeWord models. The terminal needs
+microphone permission (System Settings → Privacy & Security → Microphone).
