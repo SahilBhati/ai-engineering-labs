@@ -8,6 +8,8 @@ Events come from tests/fixtures/claude_stream.jsonl with @TEXT@ and
     pid           answer with this process's pid
     unknown       add event types the parser has never seen
     error         end with an is_error result
+    tool:CMD      ask the PreToolUse hook from --settings about Bash(CMD), as
+                  Claude Code does, then answer "Ran CMD." or the block reason
     anything else answer with the prompt text itself
 
 Set FAKE_ARGV_FILE to record the argv, FAKE_CWD_FILE the working directory.
@@ -15,6 +17,7 @@ Set FAKE_ARGV_FILE to record the argv, FAKE_CWD_FILE the working directory.
 
 import json
 import os
+import subprocess
 import sys
 import time
 import uuid
@@ -52,6 +55,23 @@ def replay(text: str, *, unknown: bool = False, error: bool = False) -> None:
             emit(json.dumps({"type": "stream_event", "event": {"type": "brand_new"}}))
 
 
+def run_hook(command: str) -> str:
+    """Run the settings file's PreToolUse hook the way Claude Code does."""
+    settings = json.loads(Path(sys.argv[sys.argv.index("--settings") + 1]).read_text())
+    hook = settings["hooks"]["PreToolUse"][0]["hooks"][0]
+    call = {"tool_name": "Bash", "tool_input": {"command": command}, "session_id": SESSION}
+    try:
+        done = subprocess.run(
+            hook["command"], shell=True, input=json.dumps(call), capture_output=True,
+            text=True, timeout=hook["timeout"],
+        )  # fmt: skip
+    except subprocess.TimeoutExpired:
+        return "Blocked: the hook timed out."
+    if done.returncode == 0 and '"allow"' in done.stdout:
+        return f"Ran {command}."
+    return done.stderr.strip() or "Blocked."
+
+
 def main() -> None:
     if path := os.environ.get("FAKE_ARGV_FILE"):
         Path(path).write_text(json.dumps(sys.argv[1:]))
@@ -69,6 +89,8 @@ def main() -> None:
             replay(str(os.getpid()))
         elif prompt == "unknown":
             replay("fine.", unknown=True)
+        elif prompt.startswith("tool:"):
+            replay(run_hook(prompt.removeprefix("tool:")))
         elif prompt == "error":
             replay("boom", error=True)
         else:

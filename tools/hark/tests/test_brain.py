@@ -70,6 +70,22 @@ def test_normal_turn_and_flags(tmp_path, monkeypatch):
     assert Path(cwd_file.read_text()).resolve() == tmp_path.resolve()
 
 
+def test_env_reaches_the_child_on_top_of_the_inherited_one(tmp_path, monkeypatch):
+    # The fake writes its cwd to FAKE_CWD_FILE: proof the variable got through.
+    cwd_file = tmp_path / "cwd.txt"
+    monkeypatch.delenv("FAKE_CWD_FILE", raising=False)
+
+    async def go():
+        brain = make(tmp_path, env={"FAKE_CWD_FILE": str(cwd_file)})
+        try:
+            return await ask(brain, "hi")
+        finally:
+            await brain.aclose()
+
+    assert run(go()).spoken == "hi"  # PATH etc. still inherited, or the child wouldn't start
+    assert cwd_file.exists()
+
+
 def test_one_process_serves_many_turns(tmp_path):
     async def go():
         brain = make(tmp_path)
