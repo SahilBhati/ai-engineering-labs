@@ -32,3 +32,6 @@ htmlcov/
 
 # Publish staging (sources copied in for /publish; never committed)
 publish-staging/
+
+# Personal agent rules (private paths)
+CLAUDE.local.md
