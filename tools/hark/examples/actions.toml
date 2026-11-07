@@ -1,0 +1,29 @@
+# Example Hark actions config. Copy to ~/.config/hark/actions.toml and
+# replace the placeholders. Keep your real file out of the repo: it holds
+# personal URLs.
+#
+# Each [[resource]] becomes one action. Give exactly one of url, app, path.
+# phrases: what you'd say. Add a few rephrasings; the router matches
+# close variants, not open-ended ones.
+
+[[resource]]
+name = "project_github"
+spoken = "the project GitHub page"
+url = "https://github.com/example-user/example-repo"
+phrases = [
+    "open my project GitHub page",
+    "open project github",
+    "open the project repo",
+]
+
+[[resource]]
+name = "calendar"
+spoken = "Calendar"
+app = "Calendar"
+phrases = ["open calendar", "open my calendar"]
+
+[[resource]]
+name = "downloads"
+spoken = "Downloads"
+path = "~/Downloads"
+phrases = ["open downloads", "open my downloads folder"]
