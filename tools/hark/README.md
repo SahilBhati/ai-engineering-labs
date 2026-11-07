@@ -36,6 +36,9 @@ each turn's latency can be broken down by stage.
 | `hark/ports/` | One `Protocol` per component: `WakeWord`, `SpeechToText`, `TextToSpeech`, `Router`, `ActionRegistry` (+ `Action`), `Brain`, `SafetyGate`, `EventBus`. No implementations. |
 | `hark/events.py` | Turn events: started, transcribed, routed, tool call requested/decided, confirmation asked/answered, answered, stage timed, ended. |
 | `hark/turn.py` | `TurnRunner`: runs one turn through the ports and times each stage. |
+| `hark/router/` | `RulesRouter`: normalises the text, vetoes destructive or negated commands, scores it against every action's phrases, and returns `FastAction` at or above 0.85, else `ToBrain`. Stdlib only, under 10 ms. |
+| `hark/actions/` | `Registry` and `OpenResource`: open a URL, app or path by name with macOS `open` (R4). |
+| `examples/actions.toml` | Example resources config with placeholder entries. |
 | `hark/stubs/` | A fake adapter for every port. |
 | `hark/audio/` | Real `WakeWord` (openWakeWord), `SpeechToText` (whisper.cpp server) and `TextToSpeech` (Kokoro server) adapters on one shared mic and speaker. `engine.py` is the only module in Hark that imports Pipecat. |
 | `bench/lane_a.py` | Wake-word cost and accuracy, STT latency with and without the vocabulary prompt, idle CPU. |
@@ -45,6 +48,14 @@ Real adapters (audio, router, brain, gate, event log) each live in their
 own package behind a port and are tested on their own, without audio or the
 other parts. Hark's own logic never imports the audio framework; only the
 audio adapters do.
+
+## Configure resources
+
+Copy `examples/actions.toml` to `~/.config/hark/actions.toml` and fill in
+your own URLs, apps and paths. That file stays outside the repo because it
+holds personal links. Each resource becomes one action; add a few
+phrasings per resource, because the router matches close variants, not
+open-ended requests.
 
 ## Run the tests
 
