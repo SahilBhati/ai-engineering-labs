@@ -256,7 +256,7 @@ function chipHTML(tok, showId=true){ return '<span class="chip' + (tok.unk?" unk
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]); }
 
 /* ================= embedding map data ================= */
-// Two clusters: money on the left, water on the right, bank in between (the same axis as 1.3's meaning meter).
+// Two clusters: money on the left, water on the right, bank in between (the same axis as 1.4's meaning meter).
 const MAPW = [
   ["cash",.16,.66,"m"],["deposit",.26,.52,"m"],["loan",.12,.40,"m"],
   ["river",.84,.66,"w"],["stream",.74,.52,"w"],["lake",.88,.40,"w"],
@@ -320,7 +320,7 @@ add("M","The whole machine, then zoom in",
     });
     s += '<g transform="translate(' + cx.toFixed(1) + ',136)"><rect x="' + (-cw/2).toFixed(1) + '" y="-12" width="' + cw.toFixed(1) + '" height="24" rx="6" style="fill:var(--hot)"/>' +
       '<text y="4" text-anchor="middle" style="fill:var(--surface)" font-weight="600">' + esc(label) + '</text></g>';
-    s += '<path d="M80,170 v8 H400 v-8" fill="none" style="stroke:var(--accent)" stroke-width="1.5"/><text x="240" y="198" text-anchor="middle" style="fill:var(--accent)" font-weight="600">Lesson 1 (this one): 1.1 · 1.2 · 1.3</text>' +
+    s += '<path d="M80,170 v8 H400 v-8" fill="none" style="stroke:var(--accent)" stroke-width="1.5"/><text x="240" y="198" text-anchor="middle" style="fill:var(--accent)" font-weight="600">Lesson 1 (this one): 1.1–1.4</text>' +
       '<path d="M416,170 v8 H740 v-8" fill="none" style="stroke:var(--muted)" stroke-width="1.5"/><text x="578" y="198" text-anchor="middle" style="fill:var(--muted)">Lesson 2: MLP, layers, picking a token</text>';
     pic.innerHTML = s + '</g></svg>';
   };
@@ -362,7 +362,7 @@ add("1.1","Choose the size of the pieces",
   inp.addEventListener("input", draw);
   v.append(seg, inp, out, meters); draw();
  },
- "Characters: the sequence gets long, and attention compares every token with every earlier one, so cost grows with the <em>square</em> of length (you'll see this near the end of 1.3). Words: a word not in the list becomes <code>[UNKNOWN]</code> and the model learns nothing about it, and rare words barely get trained. Subwords: any text can be built from known pieces.");
+ "Characters: the sequence gets long, and attention compares every token with every earlier one, so cost grows with the <em>square</em> of length (you'll see this near the end of 1.4). Words: a word not in the list becomes <code>[UNKNOWN]</code> and the model learns nothing about it, and rare words barely get trained. Subwords: any text can be built from known pieces.");
 
 add("1.1","The model never sees letters",
  "The model sees token IDs, not letters, so it can't reliably count the r's in “strawberry”. Switch to what it actually receives.",
@@ -477,7 +477,7 @@ add("1.2","Close means similar, and that is how it generalizes",
   };
   v.append(svg, out); draw();
  },
- "Everything after the embedding is built from smooth functions (multiply, add, softmax, gentle curves), so small input changes give small output changes. That means what the model learns from “the river flooded” carries over to “the stream flooded”. bank sits between the clusters; 1.3 shows how its sentence pulls it to one side. That is generalization. Real models usually measure the angle between vectors (cosine similarity) rather than straight distance; the idea is the same.");
+ "Everything after the embedding is built from smooth functions (multiply, add, softmax, gentle curves), so small input changes give small output changes. That means what the model learns from “the river flooded” carries over to “the stream flooded”. bank sits between the clusters; 1.4 shows how its sentence pulls it to one side. That is generalization. Real models usually measure the angle between vectors (cosine similarity) rather than straight distance; the idea is the same.");
 
 add("1.2","Position: order changes meaning",
  "Embeddings say what a token is, not where. Without position, “river bank” and “bank river” give bank the identical vector. Turn position on: a learned slot vector is added, so order changes the sum.",
@@ -537,7 +537,7 @@ add("1.2","Training writes. Using only reads.",
  },
  "Two kinds of numbers. <b>Weights</b> (the embedding table and every other learned number) change only during training. <b>Activations</b> are computed fresh for every request, then thrown away. RoPE works on the copy, never on the table. Backend version: weights are read-only database rows; activations are values computed in a SELECT, never an UPDATE.");
 
-/* ---------- 1.3 Attention ---------- */
+/* ---------- 1.4 Attention ---------- */
 
 /* ---------- Basics: the four primitives attention is built from ---------- */
 function plane(vecs, R, axes){
@@ -564,7 +564,7 @@ function slider(id, label, min, max, stepv, val){
   return {w, inp, set:(t)=>{ lab.textContent = label + ": " + t; }};
 }
 
-add("B","Dot product: how well two lists match",
+add("1.3","Dot product: how well two lists match",
  "A dot product scores how well two lists match: multiply matching positions, then add. Same direction scores high, a right angle 0, opposite negative. Pick a B, or move it.",
  v=>{
   const s3 = slider("d3","B first",-3,3,0.5,0), s4 = slider("d4","B second",-3,3,0.5,3), A = [1,1];
@@ -584,13 +584,13 @@ add("B","Dot product: how well two lists match",
   [s3,s4].forEach(s=>s.inp.addEventListener("input",draw));
   pre.addEventListener("click", e=>{ const w = e.target.dataset.w; if(!w) return; const k = PRE.find(x=>x[0]===w)[1]; s3.inp.value = k[0]; s4.inp.value = k[1]; draw(); });
   const grid = el("div",{class:"meters"}); grid.append(s3.w,s4.w);
-  v.append(el("p",{class:"lbl"},"A = bank's query [1, 1]: what bank is looking for. B = another word's key: what that word offers to match on. Both are made in 1.3; here, just the arithmetic. In “The river bank” the scores come out the 0, river 3, bank 2."),
+  v.append(el("p",{class:"lbl"},"A = bank's query [1, 1]: what bank is looking for. B = another word's key: what that word offers to match on. Both are made in 1.4; here, just the arithmetic. In “The river bank” the scores come out the 0, river 3, bank 2."),
     pre, grid, out, pic,
     el("p",{class:"lbl"},"The dot product grows with both alignment and length; divide by the lengths and you get cosine similarity, the angle-only version.")); draw();
  },
  "This is the closeness idea from 1.2 turned into one number. Attention uses it to answer “how relevant is that word to me?”");
 
-add("B","Softmax: turn scores into percentages",
+add("1.3","Softmax: turn scores into percentages",
  "Softmax turns any scores into positive shares that add up to 100%; bigger scores take a much bigger share. These are bank's scores from the dot product step: the 0, river 3, bank 2.",
  v=>{
   const names = ["the","river","bank"], init = [0,3,2];
@@ -605,10 +605,10 @@ add("B","Softmax: turn scores into percentages",
  },
  "How: raise e (≈2.718) to each score, then divide each by the total. Raising to a power makes every share positive and stretches the gaps, so the winner wins clearly but losers keep a little. Why add up to 100%: the next step is an average, and an average needs shares that sum to 1.");
 
-add("B","Weighted average: blend by the percentages",
+add("1.3","Weighted average: blend by the percentages",
  "Mix vectors using the softmax shares as the recipe: 70.5% river, 25.9% bank, 3.5% the. Slide river's share and watch the blend move.",
  v=>{
-  // Shares from the softmax step (scores 0, 3, 2), unrounded so the blend matches 1.3 exactly.
+  // Shares from the softmax step (scores 0, 3, 2), unrounded so the blend matches 1.4 exactly.
   const ex = [0,3,2].map(Math.exp), z = ex.reduce((a,b)=>a+b,0), W0 = ex.map(x=>x/z);
   const s = el("input",{type:"range",id:"wa",min:"0",max:(100*(1-W0[0])).toFixed(2),step:"any",value:(100*W0[1]).toString()});
   const lab = el("label",{class:"lbl",for:"wa"});
@@ -621,11 +621,11 @@ add("B","Weighted average: blend by the percentages",
   const reset = el("button",{class:"ghost",style:"align-self:flex-start"},"Back to the softmax shares");
   reset.addEventListener("click", ()=>{ s.value = (100*W0[1]).toString(); draw(); });
   s.addEventListener("input",draw); v.append(lab,s,out,pic,reset,
-    el("p",{class:"lbl"},"At the softmax shares the blend is [0.26, 2.38]: mostly river, so it points toward water. You'll meet this exact vector again in 1.3.")); draw();
+    el("p",{class:"lbl"},"At the softmax shares the blend is [0.26, 2.38]: mostly river, so it points toward water. You'll meet this exact vector again in 1.4.")); draw();
  },
  "Attention = dot product (score every word) → softmax (scores to percentages) → weighted average (blend). One more basic first: how training sets all these numbers.");
 
-add("B","Gradient: how training nudges each number",
+add("1.3","Gradient: how training nudges each number",
  "Training nudges each number in proportion to what it's multiplied by. To score “flooded” as the next word, bank's row meets flooded's output row [1, 3] (really via the layers, skipped here). Target 2; now −1.3. Press Train step.",
  v=>{
   const START_ROW = [0.2,-0.5], TARGET = 2, LR = 0.05;
@@ -668,9 +668,9 @@ add("B","Gradient: how training nudges each number",
   const r = el("div",{class:"row"}); r.append(btn, rst);
   v.append(eqp, grid, tbl, sc, arrows, r, hs); draw();
  },
- "Where does flooded's output row come from? The model ends with a second learned table, one row per token, and scores each possible next token by a dot product with that row; Lesson 2 covers it. In a real model it's dotted with bank's final vector after all the layers, not the raw row; this toy skips the layers, and the nudge flows back through them to the row. Nudge = step size × how far off the score is × what the number is multiplied by. A number multiplied by 0 has no influence, so it never moves. Nobody picks a number: every number used in a prediction gets its own nudge, all calculated in one pass (backpropagation). Repeat over billions of sentences and the rows, every other learned table you'll meet in 1.3, everything, settle into useful values. That's all training is. Backend version: 4,096 config knobs, each adjusted in proportion to how sensitive the output is to it, measured all at once.");
+ "Where does flooded's output row come from? The model ends with a second learned table, one row per token, and scores each possible next token by a dot product with that row; Lesson 2 covers it. In a real model it's dotted with bank's final vector after all the layers, not the raw row; this toy skips the layers, and the nudge flows back through them to the row. Nudge = step size × how far off the score is × what the number is multiplied by. A number multiplied by 0 has no influence, so it never moves. Nobody picks a number: every number used in a prediction gets its own nudge, all calculated in one pass (backpropagation). Repeat over billions of sentences and the rows, every other learned table you'll meet in 1.4, everything, settle into useful values. That's all training is. Backend version: 4,096 config knobs, each adjusted in proportion to how sensitive the output is to it, measured all at once.");
 
-// The two toy sentences used in 1.3. Keys = values here; bank's query is [1, 1].
+// The two toy sentences used in 1.4. Keys = values here; bank's query is [1, 1].
 const SENT = {
   river:{label:"The river bank", toks:[["The",[0,0]],["river",[0,3]],["bank",[1,1]]]},
   cash:{label:"cash at the bank", toks:[["cash",[3,0]],["at",[0,0]],["the",[0,0]],["bank",[1,1]]]}
@@ -682,7 +682,7 @@ function attend(toks){ // score → softmax → blend, plus where the blend land
   const out = [0,1].map(d=>toks.reduce((s2,[,key],i)=>s2 + w[i]*key[d], 0));
   return {sc, w, out, x: Math.max(0, Math.min(1, 0.5 + (out[1]-out[0])/6))};
 }
-add("1.3","bank has one row, but two meanings",
+add("1.4","bank has one row, but two meanings",
  "Attention shifts bank's meaning to fit its sentence; its row never changes. Switch attention on, then change the sentence.",
  v=>{
   let sent = "river", on = false, x = 0.5, stop = ()=>{};
@@ -717,7 +717,7 @@ add("1.3","bank has one row, but two meanings",
 
 
 
-add("1.3","The three basics, running together",
+add("1.4","The three basics, running together",
  "Attention is the three basics in a row: score, softmax, blend. bank asks the same question (its query) in every sentence; each earlier word answers with its key. Step through, then switch the sentence.",
  v=>{
   let k = "river", ph = 0, stop = ()=>{};
@@ -798,8 +798,8 @@ function arcsSVG(toks, sel, w){
   s += '<text x="' + (last ? 358 : xs[sel]) + '" y="162" text-anchor="' + (last ? 'end' : 'middle') + '" style="fill:var(--muted)" font-size="10">self ' + w[sel].toFixed(2) + '</text>';
   return s + '</g></svg>';
 }
-add("1.3","Who does each token listen to?",
- "Each token blends earlier tokens; arc thickness shows how much. Tap any word. Later words are greyed: a token only looks backward (why comes in 1.7).",
+add("1.4","Who does each token listen to?",
+ "Each token blends earlier tokens; arc thickness shows how much. Tap any word. Later words are greyed: a token only looks backward (why comes in 3.1).",
  v=>{
   let k = "A";
   const seg = el("div",{class:"seg",role:"group","aria-label":"Sentence"},'<button data-k="A">River</button><button data-k="B">Money</button>');
@@ -820,7 +820,7 @@ add("1.3","Who does each token listen to?",
  },
  "The weights for one token always add up to 1: it's a blend. Tap “flooded”: it leans on “bank” (what flooded?) and “river”. Weights here are hand-picked to show the idea; a real model learns them and spreads them over many heads and layers.");
 
-add("1.3","Several heads: one blend per need",
+add("1.4","Several heads: one blend per need",
  "A head is one copy of attention with its own softmax. One head's shares must add to 100%, so it can't focus sharply on two words at once. bank needs “river” (setting) and “the” (grammar). Compare.",
  v=>{
   let mode = "one", stop = ()=>{};
@@ -868,7 +868,7 @@ add("1.3","Several heads: one blend per need",
  },
  "A head is one complete copy of the attention calculation with its own W_Q, W_K, W_V. Heads run at the same time on the same words, independently. Heads split the width rather than adding to it: a model 4,096 wide with 32 heads gives each head 128 numbers, so 32 heads cost about the same as one wide head. Nobody assigns each head's question: they start from different random matrices and gradient nudges each toward whatever helps. The weights here are hand-picked to show the idea. Backend version: fan out one request to several specialized indexes in parallel, then merge the responses.");
 
-add("1.3","Cost grows with the square of the context",
+add("1.4","Cost grows with the square of the context",
  "Every token scores every token it can see. Drag the slider: double the tokens, about four times the work.",
  v=>{
   const lab = el("label",{class:"lbl",for:"nS"});
@@ -902,7 +902,7 @@ const VIDS = [
   ["Watch first","Transformers, the tech behind LLMs","3Blue1Brown · Deep Learning Ch. 5 · ~27 min","https://www.youtube.com/watch?v=wjZofJX0v4M",
    "The whole system map, then embeddings: the embedding matrix, directions that carry meaning, and the dot product.","Steps 6–12"],
   ["Watch second","Attention in transformers, step-by-step","3Blue1Brown · Deep Learning Ch. 6 · ~26 min","https://www.youtube.com/watch?v=eMlx5fFNoYc",
-   "Query, key, value, softmax and multiple heads, animated. It also covers the mask, which this course saves for 1.7.","Steps 16–19"],
+   "Query, key, value, softmax and multiple heads, animated. It also covers the mask, which this course saves for 3.1.","Steps 16–19"],
   ["Then","Gradient descent, how neural networks learn","3Blue1Brown · Deep Learning Ch. 2","https://www.youtube.com/watch?v=IHZwWFHWa-w",
    "Training as rolling downhill on an error surface: every number moves in the direction that reduces the error.","Step 15"],
   ["Then","Backpropagation, intuitively","3Blue1Brown · Deep Learning Ch. 3 · ~12–15 min","https://www.youtube.com/watch?v=Ilg3gGewQ5U",
@@ -1048,7 +1048,7 @@ const PANELS = {
     what: "<p>A <b>weighted average</b> mixes several vectors, each multiplied by its share; the shares come from softmax.</p>",
     analogy: DUO("Mixing paint: 70% blue and 30% yellow lands between the two, closer to blue.",
                  "A blended score in a ranking system: <code>0.7 × signalA + 0.3 × signalB</code>."),
-    real: "<p>Dot product (score every word) → softmax (scores to shares) → weighted average (blend) is all of attention. You'll see the three run together in 1.3.</p>"},
+    real: "<p>Dot product (score every word) → softmax (scores to shares) → weighted average (blend) is all of attention. You'll see the three run together in 1.4.</p>"},
   "Gradient: how training nudges each number": {
     what: "<p>A <b>gradient</b> says, for each number, how much the error would change if that number moved a little. Training moves every number a small step in the direction that reduces the error.</p>",
     analogy: DUO("Adjusting a recipe after tasting: too salty, so cut the salt most, because salt had the biggest effect on the taste.",
@@ -1070,7 +1070,7 @@ const PANELS = {
     what: "<p>The <b>attention weights</b> (the softmax shares) say how much each word draws from each earlier word. They always add up to 1 per word.</p>",
     analogy: DUO("Each person in a meeting deciding how much to weigh each earlier speaker.",
                  "A per-row weight vector over earlier rows, like a learned, content-based window function."),
-    real: "<p>A word only looks backward (the reason comes with training, in 1.7). Real models learn these weights; the ones shown are hand-picked to illustrate the pattern.</p>"},
+    real: "<p>A word only looks backward (the reason comes with training, in 3.1). Real models learn these weights; the ones shown are hand-picked to illustrate the pattern.</p>"},
   "Several heads: one blend per need": {
     what: "<p>A <b>head</b> is one complete copy of attention with its own query, key and value matrices. <b>Multi-head attention</b> runs several heads side by side, joins their outputs, and multiplies by <b>W_O</b>, a learned square matrix that mixes the joined outputs (already the model's full width, e.g. 32 heads × 128 = 4,096) so the heads' findings can combine.</p>",
     analogy: DUO("Asking several specialists the same question at once (a geographer, a grammarian) instead of one generalist who has to average their views.",
@@ -1105,12 +1105,12 @@ async function persist(id, body){
 /* ================= stepper ================= */
 let cur = 0;
 try{ const s = JSON.parse(localStorage.getItem(LS) || "{}"); if(Number.isInteger(s.step) && s.step < STEPS.length) cur = s.step; }catch(e){}
-const CHS = [["M","Overview"],["1.1","1.1 Tokens"],["1.2","1.2 Embeddings"],["B","Basics"],["1.3","1.3 Attention"],["V","Videos"],["✓","Questions"]];
+const CHS = [["M","Overview"],["1.1","1.1 Tokens"],["1.2","1.2 Embeddings"],["1.3","1.3 Basics"],["1.4","1.4 Attention"],["V","Videos"],["✓","Questions"]];
 function render(){
   const st = STEPS[cur], card = $("#card");
   card.innerHTML = "";
   const content = STEPS.filter(s=>s.ch!=="V" && s.ch!=="✓"), ci = content.indexOf(st);
-  const chLabel = st.ch==="B" ? "Basics" : st.ch==="M" ? "Overview" : "Chapter " + st.ch;
+  const chLabel = st.ch==="M" ? "Overview" : "Chapter " + st.ch;
   card.append(el("span",{class:"step-tag"}, st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : chLabel + " · step " + (ci+1) + " of " + content.length));
   card.append(el("h2",{}, esc(st.title)));
   card.append(el("p",{class:"say"}, esc(st.say)));
