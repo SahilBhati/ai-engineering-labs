@@ -1,0 +1,17 @@
+[project]
+name = "hark"
+version = "0.0.1"
+description = "Voice control for the Mac: wake word, local speech, a rules router and Claude Code as the brain."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
