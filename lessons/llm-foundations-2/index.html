@@ -253,7 +253,7 @@ add("R","Where Lesson 1 left off",
     token:["Token","“bank” becomes token ID 33535: a label, not a quantity."],
     row:["Row","The ID picks its row in the embedding table: a vector like [0.5, 0.5]. Same row in every sentence."],
     qkv:["Q, K, V","Each word's vector is turned into three smaller vectors. Several heads do this separately, each with its own three."],
-    attn:["Attention","In “The river bank…”, attention blends in earlier words' values: bank becomes [0.46, 1.70], pulled toward water."]
+    attn:["Attention","In “The river bank…”, attention blends in earlier words' values: bank becomes [0.26, 2.38], pulled toward water."]
   };
   const sg = seg("Stage", Object.entries(STAGES).map(([key,[l]])=>[key,l]), k);
   const out = el("p",{class:"say"}), pic = el("div");
@@ -574,7 +574,7 @@ add("1.4","Stack the blocks: each block sharpens the guess",
 
 /* ---------- 1.5 Logits and sampling ---------- */
 const VOCAB = [["flooded",[0.2,2.0]],["collapsed",[0.3,1.4]],["is",[0.5,0.6]],["account",[2.0,0.1]],["closed",[1.2,0.8]]];
-const CTX = {river:{label:"The river bank…", v:[0.40,2.10]}, money:{label:"cash at the bank…", v:[2.29,0.25]}};
+const CTX = {river:{label:"The river bank…", v:[0.20,2.70]}, money:{label:"cash at the bank…", v:[2.60,0.20]}};
 function logitsFor(v){ return VOCAB.map(([,r])=>r[0]*v[0] + r[1]*v[1]); }
 
 add("1.5","The last vector scores every token in the vocabulary",
@@ -588,7 +588,7 @@ add("1.5","The last vector scores every token in the vocabulary",
     const fv = CTX[k].v, lg = logitsFor(fv), p = softmax(lg), top = p.indexOf(Math.max(...p));
     const done = Math.floor(t/ROW_MS), grow = Math.max(0, Math.min(1, (t - N*ROW_MS)/BAR_MS));
     out.innerHTML = '<p class="mono">final vector for “bank” after all 32 blocks = [' + fv.map(x=>x.toFixed(2)).join(", ") + '] (a 2-number stand-in for 4,096)</p>' +
-      (k === "river" ? '<p class="lbl">After block 1\'s attention it was [0.46, 1.70] (recap). The notes the 32 blocks added since have moved it further toward water.</p>' : '') +
+      (k === "river" ? '<p class="lbl">After block 1\'s attention it was [0.26, 2.38] (recap). The notes the 32 blocks added since have moved it further toward water.</p>' : '') +
       '<table class="emb"><thead><tr><td>next token</td><td>its row</td><td>logit = row · vector</td></tr></thead><tbody>' +
       VOCAB.map(([w,r],i)=>{ const act = i === done && done < N, fin = i < done;
         const cell = act ? r[0]+'×'+fv[0].toFixed(2)+' + '+r[1]+'×'+fv[1].toFixed(2) : fin ? lg[i].toFixed(2) : '·';
@@ -884,7 +884,7 @@ add("1.6","Prefill and decode are two different jobs",
   const r = el("div",{class:"row"}); r.append(sb, play);
   v.append(sp.w, so.w, derive, r, tl, close, gauges, out, note, el("p",{},"Batching shares each read of the weights; KV memory caps the batch. Continuous batching lets requests join and leave at every step.")); draw();
  },
- "Prefill is compute-bound: thousands of tokens' worth of math in parallel. Decode is memory-bound: one token per user per full read of the weights and caches. Plain batching runs many users' decode ticks together so they share each weight read. Continuous batching (Orca's iteration-level scheduling) goes further: requests join and leave the batch at every tick, so a finished request's slot is refilled at once instead of waiting for the whole batch. That's the core of your gateway project. Interview metrics: TTFT (time to first token), TPOT or ITL (time per output token), and throughput (tokens per second across all users).");
+ "Prefill is compute-bound: thousands of tokens' worth of math in parallel. Decode is memory-bound: one token per user per full read of the weights and caches. Plain batching runs many users' decode ticks together so they share each weight read. Continuous batching (Orca's iteration-level scheduling) goes further: requests join and leave the batch at every tick, so a finished request's slot is refilled at once instead of waiting for the whole batch. Interview metrics: TTFT (time to first token), TPOT or ITL (time per output token), and throughput (tokens per second across all users).");
 
 add("1.6","How big is the KV cache?",
  "The KV cache, not the weights, often decides how many users fit on a GPU. Every layer stores a key and a value per KV head, for every token. Switch to GQA and watch it shrink.",
