@@ -4,10 +4,18 @@ version = "0.0.1"
 description = "Voice control for the Mac: wake word, local speech, a rules router and Claude Code as the brain."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "httpx>=0.28.1",
+    "numpy>=2.5.4",
+    "openwakeword>=0.6",
+    "pipecat-ai[local,silero]>=1.15",
+]
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = [
+    "pytest>=8",
+    "scipy>=1.18.1",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -15,3 +23,8 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.uv]
+# Hark runs on macOS only; openWakeWord's Linux-only tflite dependency has no
+# wheels for 3.12, so resolve for the Mac alone.
+environments = ["sys_platform == 'darwin'"]
