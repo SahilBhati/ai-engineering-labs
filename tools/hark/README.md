@@ -4,9 +4,10 @@
 rules router for fixed commands, and Claude Code as the brain for
 everything else. Dangerous actions need a spoken yes.**
 
-Status: **scaffold + audio.** The interfaces, a fake end-to-end turn, and
-real audio adapters (wake word, speech-to-text, text-to-speech) exist. No
-real router or brain yet.
+Status: **scaffold + audio + safety gate.** The interfaces, a fake end-to-end
+turn, real audio adapters (wake word, speech-to-text, text-to-speech), the
+rules router and the safety gate with its pre-tool hook exist. No real brain
+yet.
 
 ## Shape
 
@@ -39,6 +40,10 @@ each turn's latency can be broken down by stage.
 | `hark/router/` | `RulesRouter`: normalises the text, vetoes destructive or negated commands, scores it against every action's phrases, and returns `FastAction` at or above 0.85, else `ToBrain`. Stdlib only, under 10 ms. |
 | `hark/actions/` | `Registry` and `OpenResource`: open a URL, app or path by name with macOS `open` (R4). |
 | `examples/actions.toml` | Example resources config with placeholder entries. |
+| `hark/gate/` | `HarkSafetyGate` (policy decision point): `classify` (allow-list of clearly safe tool calls; everything else asks), `Confirmer` (a spoken yes must pass the F6 checks), `GateServer` (Unix socket the hook talks to), `hook_settings()` (the Claude Code settings lane C hands the brain). |
+| `hark/hooks/pretool_hook.py` | The enforcement point: a standalone, stdlib-only `PreToolUse` hook. Asks Hark over the socket; allows only on a clear allow, exits 2 on anything else. |
+| `examples/gate.toml` | Example gate settings (yes list, hallucination list, energy floor). |
+| `bench/lane_d.py` | Latency the hook adds to an allowed tool call. |
 | `hark/stubs/` | A fake adapter for every port. |
 | `hark/audio/` | Real `WakeWord` (openWakeWord), `SpeechToText` (whisper.cpp server) and `TextToSpeech` (Kokoro server) adapters on one shared mic and speaker. `engine.py` is the only module in Hark that imports Pipecat. |
 | `bench/lane_a.py` | Wake-word cost and accuracy, STT latency with and without the vocabulary prompt, idle CPU. |
@@ -57,11 +62,28 @@ holds personal links. Each resource becomes one action; add a few
 phrasings per resource, because the router matches close variants, not
 open-ended requests.
 
+## Safety gate
+
+Any tool call that is not clearly read-only waits for a spoken yes; any doubt
+or failure blocks. `classify` is an allow-list (`ls`, `git status`, pipes of
+read-only commands, `Read`/`Glob`/`Grep`); unknown programs, interpreters,
+redirects, `git push`, `Write`, MCP tools and anything it cannot parse ask.
+Hark must be running for any tool call to run.
+
+```python
+from hark.gate.settings import hook_settings
+settings = hook_settings("/path/to/hark/hooks/pretool_hook.py")   # pass to `claude --settings`
+# and run `claude` with HARK_GATE_SOCKET set to GateServer's socket path
+```
+
+Optional settings: copy `examples/gate.toml` to `~/.config/hark/gate.toml`.
+
 ## Run the tests
 
 ```bash
 uv run pytest              # no audio needed; hardware tests are skipped
 uv run pytest --hardware   # also mic, speaker and the local servers
+uv run pytest -m live      # drives the real `claude` CLI: fail-closed, spoken yes/no, kill-Hark
 ```
 
 Requires macOS, Python 3.12+, [uv](https://docs.astral.sh/uv/) and

@@ -1,0 +1,12 @@
+# Copy to ~/.config/hark/gate.toml. Every setting is optional; the defaults
+# are in hark/gate/config.py.
+[gate]
+# A spoken yes must match one of these exactly (after dropping case and punctuation).
+yes_phrases = ["yes", "yeah", "yep", "do it", "go ahead", "confirm"]
+no_phrases = ["no", "nope", "nah", "cancel", "stop", "dont", "deny"]
+# What the speech engine says to silence or noise. Never counts as a yes.
+hallucinations = ["thank you", "thanks", "thanks for watching", "you", "bye", "okay"]
+# Audio level a yes must reach (rejects a whisper or room noise). Calibrate on your own voice.
+min_energy = 0.03
+# Seconds to answer in total, including the one retry.
+window_s = 10.0
