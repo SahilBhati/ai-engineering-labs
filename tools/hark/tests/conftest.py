@@ -1,6 +1,7 @@
-"""Hardware tests (mic, speaker, local servers) are skipped unless asked for.
+"""Hardware and live tests are skipped unless asked for.
 
     uv run pytest --hardware      # or HARK_HARDWARE=1 uv run pytest
+    uv run pytest -m live         # drives the real `claude` CLI
 """
 
 from __future__ import annotations
