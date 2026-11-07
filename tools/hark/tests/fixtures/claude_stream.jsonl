@@ -1,0 +1,9 @@
+{"type":"system","subtype":"hook_started","hook_event":"SessionStart"}
+{"type":"system","subtype":"init","session_id":"@SESSION@","model":"claude-sonnet-5-5"}
+{"type":"system","subtype":"status","status":"requesting","session_id":"@SESSION@"}
+{"type":"stream_event","event":{"type":"message_start"},"session_id":"@SESSION@"}
+{"type":"stream_event","event":{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"@TEXT@"}},"session_id":"@SESSION@"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"@TEXT@"}]},"session_id":"@SESSION@"}
+{"type":"stream_event","event":{"type":"message_stop"},"session_id":"@SESSION@"}
+{"type":"rate_limit_event","rate_limit_info":{"status":"allowed"}}
+{"type":"result","subtype":"success","is_error":false,"result":"@TEXT@","session_id":"@SESSION@","stop_reason":"end_turn"}
