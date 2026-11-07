@@ -2,20 +2,20 @@
 
 Course: LLM Foundations for engineers. Interactive version: index.html
 
-3. **Two kinds of work: talk, then think** (1.4): Every block does two things in order. Attention lets the words share information. Then each word, on its own, works with what it now knows. Switch between them.
-4. **One neuron is one yes/no question** (1.4): A neuron checks the word for one pattern and answers with a number: positive means yes, zero means no. Flip the two facts and see when this one says yes.
-5. **The MLP: thousands of questions, then add the answers** (1.4): The MLP asks the word thousands of questions at once, keeps the yes answers, and turns each yes into a note added back to the word. Press Run, then switch the sentence.
-6. **The residual stream: a notepad every layer adds to** (1.4): Each word carries one vector through the whole model, its notepad. Every attention and MLP step reads it and adds a note; nothing is lost by default. Run the layers, then try overwriting.
-7. **Stack the blocks: each block sharpens the guess** (1.4): A model stacks the same kind of block many times, each with its own weights. Every block adds notes the next one can build on, so the guess for the next word gets sharper with depth. Drag the depth.
-8. **The last vector scores every token in the vocabulary** (1.5): After the last block, the final vector is compared with a row for every vocabulary token (a dot product). Those scores are the logits; softmax turns them into probabilities. Switch the context.
-9. **Temperature: how sharp the choice is** (1.5): Before softmax, the logits are divided by the temperature. Low temperature sharpens toward the top token, high temperature flattens. Drag it.
-10. **Sampling: roll the dice, but cut the tail** (1.5): The next token is drawn at random by these probabilities. Top-p keeps only the most likely tokens that together reach p, so unlikely ones can't be picked. Sample 50 times.
-11. **Generation is a loop: one token per pass** (1.6): The model only ever predicts one next token. To write more, it appends that token and runs again. Press Generate 1 token and watch how much work each pass repeats; then turn the cache on.
-12. **Without a cache, work grows with the square of the length** (1.6): Recomputing every earlier token on every pass adds up fast. Move the prompt and output lengths and compare.
-13. **The KV cache: compute keys and values once, keep them** (1.6): Earlier tokens' keys and values never change, so the model stores them. Each new token computes only its own query, key and value, then reads the rest from the cache. Step through.
-14. **Prefill and decode are two different jobs** (1.6): The prompt is processed in one parallel pass (prefill), which sets the time to first token. Then tokens come out one at a time (decode), each tick reading all the weights. Batch users, then try 8-bit weights.
-15. **How big is the KV cache?** (1.6): The KV cache, not the weights, often decides how many users fit on a GPU. Every layer stores a key and a value per KV head, for every token. Switch to GQA and watch it shrink.
-16. **Why context windows have a limit** (1.6): Three costs grow with context: KV memory grows in line with it, attention work in prefill grows with its square, and the model only learned positions up to the length it was trained on. Drag the context.
+3. **Two kinds of work: talk, then think** (2.1): Every block does two things in order. Attention lets the words share information. Then each word, on its own, works with what it now knows. Switch between them.
+4. **One neuron is one yes/no question** (2.1): A neuron checks the word for one pattern and answers with a number: positive means yes, zero means no. Flip the two facts and see when this one says yes.
+5. **The MLP: thousands of questions, then add the answers** (2.1): The MLP asks the word thousands of questions at once, keeps the yes answers, and turns each yes into a note added back to the word. Press Run, then switch the sentence.
+6. **The residual stream: a notepad every layer adds to** (2.1): Each word carries one vector through the whole model, its notepad. Every attention and MLP step reads it and adds a note; nothing is lost by default. Run the layers, then try overwriting.
+7. **Stack the blocks: each block sharpens the guess** (2.1): A model stacks the same kind of block many times, each with its own weights. Every block adds notes the next one can build on, so the guess for the next word gets sharper with depth. Drag the depth.
+8. **The last vector scores every token in the vocabulary** (2.2): After the last block, the final vector is compared with a row for every vocabulary token (a dot product). Those scores are the logits; softmax turns them into probabilities. Switch the context.
+9. **Temperature: how sharp the choice is** (2.2): Before softmax, the logits are divided by the temperature. Low temperature sharpens toward the top token, high temperature flattens. Drag it.
+10. **Sampling: roll the dice, but cut the tail** (2.2): The next token is drawn at random by these probabilities. Top-p keeps only the most likely tokens that together reach p, so unlikely ones can't be picked. Sample 50 times.
+11. **Generation is a loop: one token per pass** (2.3): The model only ever predicts one next token. To write more, it appends that token and runs again. Press Generate 1 token and watch how much work each pass repeats; then turn the cache on.
+12. **Without a cache, work grows with the square of the length** (2.3): Recomputing every earlier token on every pass adds up fast. Move the prompt and output lengths and compare.
+13. **The KV cache: compute keys and values once, keep them** (2.3): Earlier tokens' keys and values never change, so the model stores them. Each new token computes only its own query, key and value, then reads the rest from the cache. Step through.
+14. **Prefill and decode are two different jobs** (2.3): The prompt is processed in one parallel pass (prefill), which sets the time to first token. Then tokens come out one at a time (decode), each tick reading all the weights. Batch users, then try 8-bit weights.
+15. **How big is the KV cache?** (2.3): The KV cache, not the weights, often decides how many users fit on a GPU. Every layer stores a key and a value per KV head, for every token. Switch to GQA and watch it shrink.
+16. **Why context windows have a limit** (2.3): Three costs grow with context: KV memory grows in line with it, attention work in prefill grows with its square, and the model only learned positions up to the length it was trained on. Drag the context.
 
 ## Check yourself
 

@@ -242,7 +242,7 @@ const fmtN = n => n >= 1e9 ? (n/1e9).toFixed(2) + "B" : n >= 1e6 ? (n/1e6).toFix
 const STEPS = [];
 const add = (ch, title, say, render, deeper, x) => STEPS.push({ch, title, say, render, deeper, x: x || {}});
 
-/* ---------- 1.4 Transformer block (conceptual) ---------- */
+/* ---------- 2.1 Transformer block (conceptual) ---------- */
 /* ---------- Recap (skippable): Lesson 1 in two steps, and this lesson's question ---------- */
 let nextGuess = null;
 add("R","Where Lesson 1 left off",
@@ -276,7 +276,7 @@ add("R","Where Lesson 1 left off",
  "Weights (the stored tables) never change while you use the model; activations (like bank's blended vector) are computed fresh for each request. Lesson 1, steps 10 and 16.");
 
 add("R","This lesson's question: what comes next?",
- "The model has read “The river bank …”. What word should come next? Make your guess; by the end of 1.5 you'll see the model's.",
+ "The model has read “The river bank …”. What word should come next? Make your guess; by the end of 2.2 you'll see the model's.",
  v=>{
   const opts = ["flooded","collapsed","is","account","closed"];
   const sg = seg("Your guess", opts.map(o=>[o,o]), nextGuess || "");
@@ -287,7 +287,7 @@ add("R","This lesson's question: what comes next?",
  },
  "This whole lesson follows bank from its blended vector to an actual next word: through the block (1.4), to a score for every word (1.5), and then the cost of doing it again and again (1.6).");
 
-/* ---------- 1.4 The block (conceptual): talk, then think, with a notepad that only grows ---------- */
+/* ---------- 2.1 The block (conceptual): talk, then think, with a notepad that only grows ---------- */
 /* 3Blue1Brown-style network diagram: columns of neurons, brightness = activation,
    blue = positive weight, red = negative; activity propagates column to column. */
 function nnSVG(cols, edges, prog, opts){
@@ -327,7 +327,7 @@ function animate(draw, ms, done){
 
 const duo = (a, b) => '<div class="duo"><div><b>Everyday</b><span>' + a + '</span></div><div><b>Technical</b><span>' + b + '</span></div></div>';
 
-add("1.4","Two kinds of work: talk, then think",
+add("2.1","Two kinds of work: talk, then think",
  "Every block does two things in order. Attention lets the words share information. Then each word, on its own, works with what it now knows. Switch between them.",
  v=>{
   let m = "talk", stop = ()=>{};
@@ -372,7 +372,7 @@ add("1.4","Two kinds of work: talk, then think",
   real: "<p>Attention is the only place where words see each other. The MLP uses the same weights for every word and runs on all of them in parallel, which is why it's cheap to batch on a GPU.</p>",
   evidence: '<p>The original transformer paper describes every layer this way: “Each layer has two sub-layers”, multi-head self-attention and “a simple, position-wise fully connected feed-forward network” (the MLP), which is “applied to each position separately and identically” (sections 3.1 and 3.3). <a href="https://arxiv.org/abs/1706.03762">Vaswani et al., Attention Is All You Need (2017) ↗</a></p>'});
 
-add("1.4","One neuron is one yes/no question",
+add("2.1","One neuron is one yes/no question",
  "A neuron checks the word for one pattern and answers with a number: positive means yes, zero means no. Flip the two facts and see when this one says yes.",
  v=>{
   let river = true, bank = true, stop = ()=>{};
@@ -405,7 +405,7 @@ const MLP_N = [
   ["this word is bank",     [0,0,1], -0.5, "a place (noun)"],
   ["money is mentioned",    [0,1,0], -0.5, "money is involved"]
 ];
-add("1.4","The MLP: thousands of questions, then add the answers",
+add("2.1","The MLP: thousands of questions, then add the answers",
  "The MLP asks the word thousands of questions at once, keeps the yes answers, and turns each yes into a note added back to the word. Press Run, then switch the sentence.",
  v=>{
   let sent = "river", word = "bank", stop = ()=>{};
@@ -460,7 +460,7 @@ add("1.4","The MLP: thousands of questions, then add the answers",
   evidence: '<p>MLPs are most of a model: in GPT-3 they hold about 116 billion of its 175 billion parameters (roughly two-thirds), and they\'re where factual associations like “Jordan → basketball” are thought to live. Real neurons are messier than these five: features are spread across many neurons (“superposition”). <a href="https://www.3blue1brown.com/lessons/mlp">3Blue1Brown, How might LLMs store facts ↗</a></p>'});
 
 const NOTES = [["the embedding","word: bank"],["block 1 · attention","next to “river”"],["block 1 · MLP","it's a riverside"],["block 2 · attention","the sentence is about a flood"],["block 2 · MLP","likely next: a water verb (“flooded”)"]];
-add("1.4","The residual stream: a notepad every layer adds to",
+add("2.1","The residual stream: a notepad every layer adds to",
  "Each word carries one vector through the whole model, its notepad. Every attention and MLP step reads it and adds a note; nothing is lost by default. Run the layers, then try overwriting.",
  v=>{
   let n = 1, mode = "add", stop = ()=>{};
@@ -523,13 +523,13 @@ add("1.4","The residual stream: a notepad every layer adds to",
   real: "<p>In numbers: <code>x = x + attention(x)</code>, then <code>x = x + MLP(x)</code>, in every block. Because of the additions, the final vector is literally the original embedding plus every layer's contribution. It also lets training nudges flow straight back to early layers.</p>",
   evidence: '<p>Anthropic\'s interpretability work describes the residual stream as a communication channel: every layer reads from it with a projection and writes back by adding, so the stream is the sum of all previous layers\' outputs plus the original embedding. <a href="https://transformer-circuits.pub/2021/framework/">Elhage et al., A Mathematical Framework for Transformer Circuits (2021) ↗</a></p>'});
 
-add("1.4","Stack the blocks: each block sharpens the guess",
+add("2.1","Stack the blocks: each block sharpens the guess",
  "A model stacks the same kind of block many times, each with its own weights. Every block adds notes the next one can build on, so the guess for the next word gets sharper with depth. Drag the depth.",
  v=>{
   const s = slider("dp","blocks run",1,32,1,1);
   const stack = el("div"), out = el("div",{class:"visual"});
   const play = el("button",{class:"ghost"},"▶ Play blocks 1 → 32");
-  // the same five words as the recap and 1.5; the end state is exactly 1.5's softmax for “The river bank…”
+  // the same five words as the recap and 2.2; the end state is exactly 2.2's softmax for “The river bank…”
   const W = VOCAB.map(([w])=>w);
   const early = [0.10,0.08,0.45,0.22,0.15], late = softmax(logitsFor(CTX.river.v));
   const STAGE = [[1,6,"early blocks","what kind of word is this?"],[7,20,"middle blocks","what does it mean here?"],[21,32,"late blocks","what should come next?"]];
@@ -569,15 +569,15 @@ add("1.4","Stack the blocks: each block sharpens the guess",
  {what: "<p>A <b>transformer</b> = embedding → <b>N blocks</b> (each: attention + MLP on the residual stream) → scoring every word. Common 7–8B models use 32 blocks. The blocks have the same shape but <b>different weights</b>, so each learns a different job.</p>",
   analogy: duo("Editing a draft in passes. The first pass fixes spelling, the next grammar, then meaning, then the ending. Each pass works on the previous pass's result, which is why order and depth matter.",
                 "A compiler's optimization passes over the same intermediate representation: each pass rewrites it a little, and later passes rely on what earlier ones did."),
-  real: "<p>Depth is what lets the model chain steps: block 3 can use a note block 2 wrote (“it's a riverside”) to add a new one (“floods are likely”). One block can only do one round of talk-then-think. Every block has its own weights, so depth costs memory: the classic GPT formula is about 12 × width² parameters per block (4 × width² for attention, 8 × width² for the MLP): 12 × 4,096² × 32 blocks ≈ 6.4B parameters ≈ 12.9 GB at 16-bit. Newer models differ: Llama 3 8B has a gated MLP (three matrices of 4,096 × 14,336) and smaller key/value weights because several query heads share one key/value head (grouped-query attention, explained in 1.6), so a block is about 218M parameters; 32 blocks ≈ 7.0B, plus 1.05B for the input and output word tables ≈ 8.0B.</p>",
+  real: "<p>Depth is what lets the model chain steps: block 3 can use a note block 2 wrote (“it's a riverside”) to add a new one (“floods are likely”). One block can only do one round of talk-then-think. Every block has its own weights, so depth costs memory: the classic GPT formula is about 12 × width² parameters per block (4 × width² for attention, 8 × width² for the MLP): 12 × 4,096² × 32 blocks ≈ 6.4B parameters ≈ 12.9 GB at 16-bit. Newer models differ: Llama 3 8B has a gated MLP (three matrices of 4,096 × 14,336) and smaller key/value weights because several query heads share one key/value head (grouped-query attention, explained in 2.3), so a block is about 218M parameters; 32 blocks ≈ 7.0B, plus 1.05B for the input and output word tables ≈ 8.0B.</p>",
   evidence: '<p>The <b>logit lens</b>: apply the model\'s final scoring step to the residual stream after <i>each</i> block, and you can read its next-word guess at every depth. Early blocks guess vaguely; the right word rises as blocks accumulate. <a href="https://www.greaterwrong.com/posts/AcKRB8wDpdaN6v6ru/interpreting-gpt-the-logit-lens">nostalgebraist, interpreting GPT: the logit lens (2020) ↗</a></p>'});
 
-/* ---------- 1.5 Logits and sampling ---------- */
+/* ---------- 2.2 Logits and sampling ---------- */
 const VOCAB = [["flooded",[0.2,2.0]],["collapsed",[0.3,1.4]],["is",[0.5,0.6]],["account",[2.0,0.1]],["closed",[1.2,0.8]]];
 const CTX = {river:{label:"The river bank…", v:[0.20,2.70]}, money:{label:"cash at the bank…", v:[2.60,0.20]}};
 function logitsFor(v){ return VOCAB.map(([,r])=>r[0]*v[0] + r[1]*v[1]); }
 
-add("1.5","The last vector scores every token in the vocabulary",
+add("2.2","The last vector scores every token in the vocabulary",
  "After the last block, the final vector is compared with a row for every vocabulary token (a dot product). Those scores are the logits; softmax turns them into probabilities. Switch the context.",
  v=>{
   let k = "river", stop = ()=>{};
@@ -604,7 +604,7 @@ add("1.5","The last vector scores every token in the vocabulary",
  },
  "The table of rows is the unembedding matrix: one row per vocabulary token, the same shape as the embedding table (some models share the two). Real models score about 100k tokens at every step. Backend version: brute-force ranking of every candidate on every request, then turning scores into shares.");
 
-add("1.5","Temperature: how sharp the choice is",
+add("2.2","Temperature: how sharp the choice is",
  "Before softmax, the logits are divided by the temperature. Low temperature sharpens toward the top token, high temperature flattens. Drag it.",
  v=>{
   const s = slider("tt","temperature",0.1,2,0.05,1);
@@ -620,7 +620,7 @@ add("1.5","Temperature: how sharp the choice is",
  },
  "Dividing by a small number stretches the gaps between logits, and softmax's exponent turns stretched gaps into a near-certain winner. As temperature approaches 0 you get greedy decoding: always the top token. Even at temperature 0, a served model can occasionally differ between runs, because tiny floating-point differences change when requests are batched differently.");
 
-add("1.5","Sampling: roll the dice, but cut the tail",
+add("2.2","Sampling: roll the dice, but cut the tail",
  "The next token is drawn at random by these probabilities. Top-p keeps only the most likely tokens that together reach p, so unlikely ones can't be picked. Sample 50 times.",
  v=>{
   const st = slider("st","temperature",0.1,2,0.05,1.2), sp = slider("sp","top-p",0.5,1,0.05,0.9);
@@ -666,9 +666,9 @@ add("1.5","Sampling: roll the dice, but cut the tail",
  },
  "Top-k is the blunter cousin: keep the k best tokens. Sampling happens once per token, so a long answer is hundreds of dice rolls, and one unlucky pick can steer everything after it. Backend version: weighted random load balancing that drops low-weight backends before choosing.");
 
-/* ---------- 1.6 Generation and the KV cache (deep) ---------- */
+/* ---------- 2.3 Generation and the KV cache (deep) ---------- */
 const PROMPT = ["The","river","bank"], CONT = ["flooded","after","heavy","rain","last","night","."];
-add("1.6","Generation is a loop: one token per pass",
+add("2.3","Generation is a loop: one token per pass",
  "The model only ever predicts one next token. To write more, it appends that token and runs again. Press Generate 1 token and watch how much work each pass repeats; then turn the cache on.",
  v=>{
   let n = 1, cache = "off", stop = ()=>{};
@@ -717,7 +717,7 @@ add("1.6","Generation is a loop: one token per pass",
  },
  "Each pass runs the whole stack of blocks. Without reuse, pass k reprocesses the prompt and every token generated so far, even though their keys and values haven't changed (a token only looks backward, so later tokens can't change earlier ones). The next steps show what gets reused.");
 
-add("1.6","Without a cache, work grows with the square of the length",
+add("2.3","Without a cache, work grows with the square of the length",
  "Recomputing every earlier token on every pass adds up fast. Move the prompt and output lengths and compare.",
  v=>{
   const sp = slider("qp","prompt tokens",100,8000,100,100), so = slider("qo","output tokens",10,2000,10,2000);
@@ -748,7 +748,7 @@ add("1.6","Without a cache, work grows with the square of the length",
  },
  "Without a cache: output token k reprocesses the prompt plus k earlier outputs, so the total is n × prompt + n²/2. With a cache, each token is processed once: prompt + n. Backend version: recomputing a running total from scratch on every request versus keeping the running total.");
 
-add("1.6","The KV cache: compute keys and values once, keep them",
+add("2.3","The KV cache: compute keys and values once, keep them",
  "Earlier tokens' keys and values never change, so the model stores them. Each new token computes only its own query, key and value, then reads the rest from the cache. Step through.",
  v=>{
   let n = 0, stop = ()=>{}; const LAYERS = 3;
@@ -798,7 +798,7 @@ add("1.6","The KV cache: compute keys and values once, keep them",
  },
  "Queries aren't cached: only the newest token asks a question each step. The cache grows by one row per token, per layer, and lives in GPU memory for as long as the request runs. So each decode step does little math but reads a lot of memory: all the weights plus the whole cache, to produce one token. That's why decode is limited by memory bandwidth. Backend version: write-once memoization keyed by position, in an append-only store.");
 
-add("1.6","Prefill and decode are two different jobs",
+add("2.3","Prefill and decode are two different jobs",
  "The prompt is processed in one parallel pass (prefill), which sets the time to first token. Then tokens come out one at a time (decode), each tick reading all the weights. Batch users, then try 8-bit weights.",
  v=>{
   const sp = slider("fp","prompt tokens",100,32000,100,4000), so = slider("fo","output tokens",10,2000,10,400);
@@ -886,7 +886,7 @@ add("1.6","Prefill and decode are two different jobs",
  },
  "Prefill is compute-bound: thousands of tokens' worth of math in parallel. Decode is memory-bound: one token per user per full read of the weights and caches. Plain batching runs many users' decode ticks together so they share each weight read. Continuous batching (Orca's iteration-level scheduling) goes further: requests join and leave the batch at every tick, so a finished request's slot is refilled at once instead of waiting for the whole batch. Interview metrics: TTFT (time to first token), TPOT or ITL (time per output token), and throughput (tokens per second across all users).");
 
-add("1.6","How big is the KV cache?",
+add("2.3","How big is the KV cache?",
  "The KV cache, not the weights, often decides how many users fit on a GPU. Every layer stores a key and a value per KV head, for every token. Switch to GQA and watch it shrink.",
  v=>{
   let m = "70b", stop = ()=>{}, shownGB = null;
@@ -957,7 +957,7 @@ add("1.6","How big is the KV cache?",
  },
  "Presets: an 8B-class model (32 layers, 32 query heads, 8 KV heads, head size 128) on one 80 GB GPU, and a 70B-class model (80 layers, 64 query heads, 8 KV heads, head size 128) on two. Without GQA (64 KV heads) the 70B case would need 2.6 MB per token and 21.5 GB per 8K request: none fit. With GQA: about 328 KB per token and 2.7 GB per 8K-token request: about 7 fit beside the weights in theory, at most 2 under vLLM's default 92% cap. The levers are exactly the interview topics: fewer KV heads (grouped-query attention), an 8-bit cache (halves it; try the 8-bit switch), paged allocation so memory isn't wasted on fragments (PagedAttention, in vLLM), and sharing the cache for identical prompt prefixes (prefix caching).");
 
-add("1.6","Why context windows have a limit",
+add("2.3","Why context windows have a limit",
  "Three costs grow with context: KV memory grows in line with it, attention work in prefill grows with its square, and the model only learned positions up to the length it was trained on. Drag the context.",
  v=>{
   const s = slider("cw","context length (tokens)",1024,1048576,1024,131072);
@@ -992,7 +992,7 @@ add("1.6","Why context windows have a limit",
   const fitMax = Math.floor((CAPB - WB)/KVTOK), fitCap = Math.floor((CAPB*0.92 - WB)/KVTOK);
   v.append(s.w, out, cap, el("p",{},"Real 128K deployments use more GPUs, 8-bit weights or an 8-bit cache; this 2-GPU, 16-bit setup can't hold one 128K request ("+fmtB(WB + KVTOK*131072)+" needed). The longest single request it can hold: "+fitMax.toLocaleString("en-US")+" tokens using every byte, "+fitCap.toLocaleString("en-US")+" under vLLM's 92% cap."), el("p",{},"1M tokens of 70B-class cache ≈ "+fmtB(KVTOK*MAXC)+": more than both GPUs together, before the 140 GB of weights."), ruler); draw();
  },
- "Long-context models extend the trained range (RoPE scaling and long-context training) and cut the costs (grouped-query attention, smarter attention kernels), but memory and compute still grow with length. That's why serving systems cap context per tier, and why a 1M-token request costs far more than a short one. This is the bridge to 1.9, inference economics.");
+ "Long-context models extend the trained range (RoPE scaling and long-context training) and cut the costs (grouped-query attention, smarter attention kernels), but memory and compute still grow with length. That's why serving systems cap context per tier, and why a 1M-token request costs far more than a short one. This is the bridge to 3.3, inference economics.");
 
 /* ---------- Videos (verified 2026-11-02) ---------- */
 const VIDS = [
@@ -1045,7 +1045,7 @@ add("✓","Check yourself",
  });
 
 
-/* ---------- Explanation panels for 1.5 and 1.6 (attached by step title) ---------- */
+/* ---------- Explanation panels for 2.2 and 2.3 (attached by step title) ---------- */
 const DUO = (a, b) => '<div class="duo"><div><b>Everyday</b><span>' + a + '</span></div><div><b>Technical</b><span>' + b + '</span></div></div>';
 const PANELS = {
   "The last vector scores every token in the vocabulary": {
@@ -1053,7 +1053,7 @@ const PANELS = {
     analogy: DUO("Scoring one job posting against every applicant's CV: one match score per applicant, then turned into shortlist chances.",
                  "Brute-force ranking with no index: score every candidate against the query on every request, then normalize the scores into a distribution."),
     real: "<p><code>logits = W_unembed · x</code>, a vocabulary × width table (100k × 4,096 ≈ 410 million multiply-adds per generated token for this step alone). It's the same shape as the embedding table; some models share the two.</p>",
-    evidence: '<p>Researchers reuse exactly this scoring step on the middle of the model to read its guess after each block (the logit lens from 1.4, step 5). <a href="https://www.greaterwrong.com/posts/AcKRB8wDpdaN6v6ru/interpreting-gpt-the-logit-lens">interpreting GPT: the logit lens ↗</a></p>'},
+    evidence: '<p>Researchers reuse exactly this scoring step on the middle of the model to read its guess after each block (the logit lens from 2.1, step 5). <a href="https://www.greaterwrong.com/posts/AcKRB8wDpdaN6v6ru/interpreting-gpt-the-logit-lens">interpreting GPT: the logit lens ↗</a></p>'},
   "Temperature: how sharp the choice is": {
     what: "<p><b>Temperature</b> is a number set per request (the <code>temperature</code> parameter in an API call). The logits are divided by it before softmax.</p>",
     analogy: DUO("A strict judge versus a relaxed one. Strict (low temperature): the favorite almost always wins. Relaxed (high): underdogs get real chances.",
@@ -1124,7 +1124,7 @@ async function persist(id, body){
 /* ================= stepper ================= */
 let cur = 0;
 try{ const s = JSON.parse(localStorage.getItem(LS) || "{}"); if(Number.isInteger(s.step) && s.step < STEPS.length) cur = s.step; }catch(e){}
-const CHS = [["R","Recap · skippable"],["1.4","1.4 Block"],["1.5","1.5 Sampling"],["1.6","1.6 KV cache"],["V","Videos"],["✓","Questions"]];
+const CHS = [["R","Recap · skippable"],["2.1","2.1 Block"],["2.2","2.2 Sampling"],["2.3","2.3 KV cache"],["V","Videos"],["✓","Questions"]];
 function render(){
   const st = STEPS[cur], card = $("#card");
   card.innerHTML = "";

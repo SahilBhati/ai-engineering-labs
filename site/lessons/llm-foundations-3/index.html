@@ -322,7 +322,7 @@ add("R","Where Lesson 2 left off",
  "Weights are frozen while serving; only the cache and the text grow. Every decode tick reads all the weights once, which is where this lesson's cost question starts.");
 
 add("R","This lesson's two questions",
- "Lesson 2 used the weights; it never said where they came from or what a word costs to serve. Make two guesses; chapter 1.7 answers the first, chapter 1.9 the second.",
+ "Lesson 2 used the weights; it never said where they came from or what a word costs to serve. Make two guesses; chapter 3.1 answers the first, chapter 3.3 the second.",
  v=>{
   const q1 = el("p",{},"<b>1.</b> Where did the weights that guessed “flooded” come from?");
   const s1 = seg("Where the weights came from", [["rules","Engineers wrote rules"],["learned","Learned by guessing the next word in lots of text"],["dict","Copied from a dictionary"]], weightGuess || "");
@@ -337,7 +337,7 @@ add("R","This lesson's two questions",
  },
  "The first question is about training (1.7) and post-training (1.8): a one-off, giant job. The second is inference economics (1.9): the bill you pay on every request, forever.");
 
-/* ---------- 1.7 Training (conceptual) ---------- */
+/* ---------- 3.1 Training (conceptual) ---------- */
 /* 3Blue1Brown-style network diagram: columns of neurons, brightness = activation,
    blue = positive weight, red = negative; activity propagates column to column. */
 function nnSVG(cols, edges, prog, opts){
@@ -375,7 +375,7 @@ function animate(draw, ms, done){
 const duo = (a, b) => '<div class="duo"><div><b>Everyday</b><span>' + a + '</span></div><div><b>Technical</b><span>' + b + '</span></div></div>';
 const TRAIN = ["The","river","bank","flooded"];
 
-add("1.7","Every position in a text is a training example",
+add("3.1","Every position in a text is a training example",
  "Training turns plain text into quiz questions: at every position, guess the next token. “The river bank flooded” gives three questions for free. Press Play.",
  v=>{
   let stop = ()=>{};
@@ -410,7 +410,7 @@ add("1.7","Every position in a text is a training example",
   real: "<p>A text of n tokens gives n − 1 examples. The model makes all of them in <b>one forward pass</b>: the vector at position i predicts token i + 1. Each example's probabilities come from the same logits → softmax you saw in Lesson 2.</p>",
   evidence: '<p>GPT-1 states the objective directly: “we use a standard language modeling objective to maximize the following likelihood”: L<sub>1</sub>(U) = Σ<sub>i</sub> log P(u<sub>i</sub> | u<sub>i−k</sub>, …, u<sub>i−1</sub>; Θ), one term per position. <a href="https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf">Radford et al., Improving Language Understanding by Generative Pre-Training (2018) ↗</a> Llama 3\'s flagship was “pre-trained … on 15.6T text tokens”. <a href="https://arxiv.org/abs/2407.21783">The Llama 3 Herd of Models (2024) ↗</a></p>'});
 
-add("1.7","Loss: how surprised the model was by the right answer",
+add("3.1","Loss: how surprised the model was by the right answer",
  "The loss is −log of the probability the model gave the correct token. Confident and right: near 0. Unsure: large. Train a step and watch the gradient push “flooded” up and the loss fall.",
  v=>{
   let lg = [0,0,0,0,0], steps = 0, stop = ()=>{};
@@ -456,7 +456,7 @@ add("1.7","Loss: how surprised the model was by the right answer",
   real: "<p>With softmax, the gradient of the loss on each score is simply <code>p − 1</code> for the correct token and <code>p</code> for every other: push the right answer up, push the rest down in proportion to how much they stole. Backpropagation carries that signal through all the layers to every weight.</p>",
   evidence: '<p>Maximizing <code>Σ log P(next token | earlier tokens)</code> (GPT-1\'s stated objective) is exactly minimizing the summed −log loss on this page. <a href="https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf">Radford et al. (2018) ↗</a> And the loss falls predictably with scale: “The loss scales as a power-law with model size, dataset size, and the amount of compute used for training”. <a href="https://arxiv.org/abs/2001.08361">Kaplan et al., Scaling Laws for Neural Language Models (2020) ↗</a></p>'});
 
-add("1.7","The causal mask: no peeking at the answer",
+add("3.1","The causal mask: no peeking at the answer",
  "Training feeds the whole sentence at once, so “bank” could simply look at “flooded” and copy it. The causal mask blocks every later position, so each token only looks backward. Toggle the mask.",
  v=>{
   let mode = "off", shown = 0, stop = ()=>{};
@@ -498,7 +498,7 @@ add("1.7","The causal mask: no peeking at the answer",
   real: "<p>In code it's one addition before softmax: <code>scores + mask</code>, where the mask is 0 on and below the diagonal and −∞ above it. e<sup>−∞</sup> = 0, so future tokens get exactly zero weight. Training runs all positions in parallel (fast); generation runs one at a time (Lesson 2), and the mask makes the two compute the same thing.</p>",
   evidence: '<p>The transformer paper: “We need to prevent leftward information flow in the decoder to preserve the auto-regressive property. We implement this inside of scaled dot-product attention by masking out (setting to −∞) all values in the input of the softmax which correspond to illegal connections” (section 3.2.3). <a href="https://arxiv.org/abs/1706.03762">Vaswani et al., Attention Is All You Need (2017) ↗</a></p>'});
 
-add("1.7","Scale: about 6 operations per parameter per token",
+add("3.1","Scale: about 6 operations per parameter per token",
  "Training compute ≈ 6 × parameters × training tokens: 2 for the forward pass, about 4 for the backward pass. Pick a model and token count and see how many GPUs and days it takes.",
  v=>{
   let m = "405";
@@ -546,12 +546,12 @@ add("1.7","Scale: about 6 operations per parameter per token",
   real: "<p>Training splits the model and the data across thousands of GPUs that must exchange gradients every step, so the network and stragglers matter as much as the chips. Memory per parameter is several times the 16-bit weights (gradients and optimizer state too). One failed GPU stalls the whole synchronized job, so teams checkpoint often.</p>",
   evidence: '<p>Kaplan et al.: “Accounting for the backwards pass (approximately twice the compute as the forwards pass), we then define the estimated non-embedding compute as C ≈ 6N floating point operators per training token.” <a href="https://arxiv.org/abs/2001.08361">Scaling Laws (2020) ↗</a> Llama 3 405B: “pre-trained using 3.8×10<sup>25</sup> FLOPs”, “on up to 16K H100 GPUs”, at 38–43% BF16 MFU; “During a 54-day snapshot period of pre-training, we experienced a total of 466 job interruptions.” <a href="https://arxiv.org/abs/2407.21783">The Llama 3 Herd of Models (2024) ↗</a></p>'});
 
-/* ---------- 1.8 Post-training (conceptual) ---------- */
-add("1.8","A base model only continues text",
+/* ---------- 3.2 Post-training (conceptual) ---------- */
+add("3.2","A base model only continues text",
  "Pre-training makes a base model: it continues text the way the internet would, which isn't the same as answering. Post-training turns it into an assistant. Ask both the same question.",
  v=>{
   let m = "base", raw = false, stop = ()=>{};
-  const sg = seg("Model", [["base","Base model (after 1.7)"],["chat","Chat model (after 1.8)"]], m);
+  const sg = seg("Model", [["base","Base model (after 3.1)"],["chat","Chat model (after 3.2)"]], m);
   const sv = seg("Show", [["plain","What you typed"],["raw","What the model actually reads"]], "plain");
   const box = el("div",{class:"vec",style:"white-space:pre-wrap;min-height:9.5em;line-height:1.6"});
   const Q = "What is a river bank?";
@@ -576,8 +576,8 @@ add("1.8","A base model only continues text",
   real: "<p>The API's messages list is flattened into one token string with the template; the server appends the assistant header, and the model continues from there until it emits the end-of-turn token. SFT data is tiny next to pre-training's (Llama 2: 27,540 written SFT examples versus 2 trillion pre-training tokens), yet post-training decides how the model behaves.</p>",
   evidence: '<p>Hugging Face\'s docs: “All causal LMs, whether chat-trained or not, continue a sequence of tokens. … training usually begins with ‘pre-training’ on a huge corpus of text, which creates a ‘base’ model.” Chat models see “control tokens like &lt;|user|&gt; or &lt;|assistant|&gt;”, and with the wrong ones “these models would have drastically worse performance.” <a href="https://huggingface.co/docs/transformers/main/en/chat_templating">Transformers: Chat templates ↗</a></p>'});
 
-add("1.8","Supervised fine-tuning: same loss, curated answers",
- "Supervised fine-tuning (SFT) reuses 1.7's next-token loss on example conversations written by people, but scores only the answer tokens. The model learns to answer, not to write questions. Toggle what gets scored.",
+add("3.2","Supervised fine-tuning: same loss, curated answers",
+ "Supervised fine-tuning (SFT) reuses 3.1's next-token loss on example conversations written by people, but scores only the answer tokens. The model learns to answer, not to write questions. Toggle what gets scored.",
  v=>{
   let mode = "answer", stop = ()=>{};
   const sg = seg("Loss counted on", [["answer","Answer tokens only (SFT)"],["all","Every token"]], mode);
@@ -612,7 +612,7 @@ add("1.8","Supervised fine-tuning: same loss, curated answers",
   real: "<p>Same forward pass, same −ln p per position, same gradient. The only change is the data and a per-token weight: 0 on the template and prompt, 1 on the answer. Many short examples are packed into one long training window, separated by special tokens.</p>",
   evidence: '<p>Llama 2-Chat\'s SFT: “We utilize an autoregressive objective and zero-out the loss on tokens from the user prompt, so as a result, we backpropagate only on answer tokens.” Meta found quality beat quantity: “We stopped annotating SFT after collecting a total of 27,540 annotations.” <a href="https://arxiv.org/abs/2307.09288">Touvron et al., Llama 2 (2023), section 3.1 ↗</a></p>'});
 
-add("1.8","Preference tuning: learn from a better and a worse answer",
+add("3.2","Preference tuning: learn from a better and a worse answer",
  "People find it easier to pick the better of two answers than to write a perfect one. Preference tuning raises the chosen answer's probability and lowers the rejected one. Train on the pair.",
  v=>{
   let margin = 0, steps = 0, meth = "dpo", stop = ()=>{};
@@ -632,7 +632,7 @@ add("1.8","Preference tuning: learn from a better and a worse answer",
     s += '<text x="0" y="58" style="fill:var(--ink)">rejected</text><rect x="'+(mid+dn*k).toFixed(1)+'" y="46" width="'+(-dn*k).toFixed(1)+'" height="18" rx="3" style="fill:var(--neg)"/><text x="'+(mid+dn*k-6).toFixed(1)+'" y="59" text-anchor="end" style="fill:var(--neg)">'+dn.toFixed(2)+'</text>';
     s += '<text x="0" y="114" style="fill:var(--muted)">bars = change in log-probability of each whole answer</text>';
     pic.innerHTML = s + '</g></svg>';
-    out.innerHTML = 'Step '+steps+': gap = <b>'+mg.toFixed(2)+'</b> → P(chosen beats rejected) = σ(gap) = <b>'+P.toFixed(2)+'</b> → loss = −ln '+P.toFixed(2)+' = <b style="color:var(--hot)">'+loss.toFixed(2)+'</b>. Same −log shape as 1.7, applied to a pair of answers instead of one token.';
+    out.innerHTML = 'Step '+steps+': gap = <b>'+mg.toFixed(2)+'</b> → P(chosen beats rejected) = σ(gap) = <b>'+P.toFixed(2)+'</b> → loss = −ln '+P.toFixed(2)+' = <b style="color:var(--hot)">'+loss.toFixed(2)+'</b>. Same −log shape as 3.1, applied to a pair of answers instead of one token.';
   };
   const drawFlow = () => { sm.sync(meth);
     const B = (i,t,hot) => { const x = i*142; return '<rect x="'+x+'" y="10" width="124" height="34" rx="6" style="fill:var(--bg);stroke:'+(hot?'var(--hot)':'var(--line)')+'"/><text x="'+(x+62)+'" y="31" text-anchor="middle" style="fill:var(--ink)">'+t+'</text>'; };
@@ -655,8 +655,8 @@ add("1.8","Preference tuning: learn from a better and a worse answer",
   real: "<p>The pair loss is <code>−ln σ(gap)</code>, where the gap is how much more the model now favors the chosen answer over the rejected one than the starting model did. RLHF needs extra models and generation during training; DPO is ordinary supervised training on pairs, which is why it spread fast.</p>",
   evidence: '<p>InstructGPT (SFT, then RLHF): “outputs from the 1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3, despite having 100x fewer parameters.” <a href="https://arxiv.org/abs/2203.02155">Ouyang et al. (2022) ↗</a> DPO solves “the standard RLHF problem with only a simple classification loss”, “eliminating the need for sampling from the LM during fine-tuning”. <a href="https://arxiv.org/abs/2305.18290">Rafailov et al. (2023) ↗</a> Llama 2 collected “over 1 million binary comparisons”. <a href="https://arxiv.org/abs/2307.09288">Touvron et al. (2023) ↗</a></p>'});
 
-/* ---------- 1.9 Inference economics (deep + lab) ---------- */
-add("1.9","Two latencies you can feel: TTFT and TPOT",
+/* ---------- 3.3 Inference economics (deep + lab) ---------- */
+add("3.3","Two latencies you can feel: TTFT and TPOT",
  "A user feels two waits: the time to first token (prefill) and the time per output token after it (decode). End-to-end = TTFT + (output tokens − 1) × TPOT. Stream a response.",
  v=>{
   const sp = slider("lp","prompt tokens",100,32000,100,4000), so = slider("lo","output tokens",10,2000,10,400);
@@ -700,7 +700,7 @@ add("1.9","Two latencies you can feel: TTFT and TPOT",
   real: "<p>Floors for this setup: prefill ≈ 71 µs per prompt token (2 × 70B operations ÷ 1,978 trillion/s), decode ≈ 21 ms per token (140 GB ÷ 6.7 TB/s, plus cache reads). Real servers add queueing, scheduling and kernel overheads on top, and a long prefill from someone else can delay your next token.</p>",
   evidence: '<p>NVIDIA\'s benchmarking docs: “Time to first token (TTFT) measures how long you wait before seeing the model\'s output”; “Inter-token latency (ITL) is defined as the average time between consecutive tokens”, computed as <code>ITL = (e2e_latency − TTFT) / (Total_output_tokens − 1)</code>. <a href="https://docs.nvidia.com/nim/benchmarking/llm/latest/metrics.html">NVIDIA, LLM benchmarking metrics ↗</a></p>'});
 
-add("1.9","Batching: more tokens per second, each user a bit slower",
+add("3.3","Batching: more tokens per second, each user a bit slower",
  "Batching lets many users share each read of the weights, so total throughput climbs fast. Each tick also reads every user's cache, so per-user TPOT creeps up, until KV memory says stop. Drag the batch.",
  v=>{
   let m = "8b";
@@ -753,7 +753,7 @@ add("1.9","Batching: more tokens per second, each user a bit slower",
   real: "<p>Tick = (weight bytes + B × cache bytes per user) ÷ bandwidth. At small B the weights dominate, so adding users is nearly free. At large B the cache reads dominate and TPOT grows in line with B. An H100 does about 295 operations per byte it reads (989 trillion ÷ 3.35 trillion); at 16-bit, decode does about 1 operation per weight byte per user, so weights alone would need ~295 users to become math-bound. But every user adds cache reads too, so at these context lengths decode stays memory-bound; KV memory is the cap.</p>",
   evidence: '<p>“There is a tradeoff between throughput and time per output token”; “Request latency increases with batch size.” <a href="https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices">Databricks, LLM Inference Performance Engineering: Best Practices ↗</a> “High throughput serving of large language models (LLMs) requires batching sufficiently many requests at a time.” <a href="https://arxiv.org/abs/2309.06180">Kwon et al., vLLM / PagedAttention (2023) ↗</a></p>'});
 
-add("1.9","Why output tokens cost more than input tokens",
+add("3.3","Why output tokens cost more than input tokens",
  "Input tokens are processed all at once in prefill, keeping the GPU's math busy. Output tokens come one tick at a time, each tick reading all the weights. Per token, GPU time differs 5–300×. Drag the batch.",
  v=>{
   const sB = slider("ob","users decoding together",1,219,1,1);
@@ -797,7 +797,7 @@ add("1.9","Why output tokens cost more than input tokens",
   real: "<p>Prefill: 1,500 tokens × 16 billion operations in about 24 ms, the GPU's math fully busy. Decode: each tick moves 16 GB of weights plus every user's cache just to emit one token per user, so per-token cost falls only as the batch grows, and the batch is capped by KV memory. Longer contexts make output even pricier (bigger caches to read every tick).</p>",
   evidence: '<p>“Generating the first token is typically compute-bound, while subsequent decoding is memory-bound operation.” <a href="https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices">Databricks ↗</a> Anthropic\'s price list (checked 2026-11-07) charges output at 5× input on every model listed, e.g. Claude Sonnet 4.6: $3 per million input tokens, $15 per million output tokens. <a href="https://platform.claude.com/docs/en/about-claude/pricing">Anthropic pricing ↗</a></p>'});
 
-add("1.9","Cost per million tokens: the GPU bill divided by tokens",
+add("3.3","Cost per million tokens: the GPU bill divided by tokens",
  "A GPU costs the same per hour whether busy or idle, so cost per token = GPU dollars per hour ÷ tokens produced per hour. Raise the batch or the traffic and the price per token falls.",
  v=>{
   const sB = slider("cb","users in the batch",1,219,1,1), sU = slider("cu","share of the hour with traffic (%)",5,100,5,100);
@@ -830,7 +830,7 @@ add("1.9","Cost per million tokens: the GPU bill divided by tokens",
   real: "<p>Two levers: tokens per second while busy (batching, quantization, better kernels) and busy share of the hour (traffic, autoscaling, sharing GPUs across models). At $3 per hour, batch 1 at about 206 tokens/s costs about $4.04 per million; 219 users at about 11,000 tokens/s cost about $0.075, before overheads.</p>",
   evidence: '<p>vLLM reports “2-4×” higher throughput “with the same level of latency” from better KV memory management alone, which at a fixed GPU price is a 2–4× lower cost per token. <a href="https://arxiv.org/abs/2309.06180">Kwon et al., vLLM / PagedAttention (2023) ↗</a></p>'});
 
-add("1.9","Prompt caching: reuse the stored KV prefix",
+add("3.3","Prompt caching: reuse the stored KV prefix",
  "When many requests start with the same tokens, the server can keep that prefix's KV cache and skip recomputing it. Only the new suffix needs prefill. Send five requests, then edit the system prompt.",
  v=>{
   let on = "on", edited = false, stop = ()=>{};
@@ -879,10 +879,10 @@ add("1.9","Prompt caching: reuse the stored KV prefix",
  {what: "<p><b>Prompt caching</b> (also <b>prefix caching</b>): the server stores the KV cache of a prompt prefix it has already computed and reuses it for any later request that starts with the identical tokens. It's Lesson 2's KV cache, shared across requests instead of kept within one.</p>",
   analogy: duo("A court stenographer who already typed the standard 20-page preamble: each new case only needs the new testimony typed, as long as the preamble is word-for-word identical.",
                 "A content-addressed cache keyed by a hash of the prefix (like a build cache keyed by input hashes): one changed byte early on changes the key, so everything after it misses."),
-  real: "<p>Keys and values of position i depend only on tokens 1…i (the causal mask, 1.7), so an identical prefix yields identical KV. Servers hash fixed-size blocks of the prefix, look them up, and only prefill what's new. Cost: GPU or host memory to keep entries alive, so providers expire them (minutes).</p>",
+  real: "<p>Keys and values of position i depend only on tokens 1…i (the causal mask, 3.1), so an identical prefix yields identical KV. Servers hash fixed-size blocks of the prefix, look them up, and only prefill what's new. Cost: GPU or host memory to keep entries alive, so providers expire them (minutes).</p>",
   evidence: '<p>Anthropic: “Cache write tokens with a 5-minute TTL are 1.25 times the base input tokens price”; “Cache read tokens are 0.1 times the base input tokens price” (with per-model exceptions); “Cache hits require 100 percent identical prompt segments”; “By default, the cache has a 5-minute lifetime.” <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching">Anthropic, Prompt caching ↗</a> vLLM: “Prefix caching kv-cache blocks is a popular optimization in LLM inference to avoid redundant prompt computations.” <a href="https://docs.vllm.ai/en/latest/design/prefix_caching.html">vLLM, Automatic prefix caching ↗</a></p>'});
 
-add("1.9","Quantization: fewer bytes per weight",
+add("3.3","Quantization: fewer bytes per weight",
  "Quantization stores each weight in fewer bits. Half the bytes means each decode tick reads half as much, and the freed memory holds more users' caches. Switch precision and watch both effects.",
  v=>{
   let bits = "16", stop = ()=>{}, shownW = 140;
@@ -918,7 +918,7 @@ add("1.9","Quantization: fewer bytes per weight",
   real: "<p>Decode is memory-bound, so tick time tracks weight bytes: 8-bit halves it. The freed memory goes to KV caches, so the batch grows too: two multiplying wins. Prefill is compute-bound, so it gains only if the GPU also does the math in lower precision (H100 FP8 tensor cores are rated at 2× BF16).</p>",
   evidence: '<p>LLM.int8(): 8-bit inference that can “cut the memory needed for inference by half while retaining full precision performance.” <a href="https://arxiv.org/abs/2208.07339">Dettmers et al. (2022) ↗</a> Lower precision “requires moving less data and thus speeds up token generation”, but “quantization may negatively impact the model generation quality.” <a href="https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices">Databricks ↗</a></p>'});
 
-add("1.9","Lab: size a deployment",
+add("3.3","Lab: size a deployment",
  "Put it together: pick a model, GPUs, precision, batch and request shape, and read off TTFT, TPOT, throughput and cost per million tokens. The memory check tells you if it even fits.",
  v=>{
   const st = {m:"70b", gpus:"2", wbits:"16"};
@@ -981,7 +981,7 @@ add("1.9","Lab: size a deployment",
 /* ---------- Videos (verified 2026-11-07) ---------- */
 const VIDS = [
   ["Watch","Gradient descent, how neural networks learn","3Blue1Brown · Deep Learning Ch. 2","https://www.youtube.com/watch?v=IHZwWFHWa-w",
-   "What “minimize the loss” looks like: a cost function and rolling downhill on it. The intuition behind 1.7's Train button.","Steps 1–2"],
+   "What “minimize the loss” looks like: a cost function and rolling downhill on it. The intuition behind 3.1's Train button.","Steps 1–2"],
   ["Watch","[1hr Talk] Intro to Large Language Models","Andrej Karpathy · talk","https://www.youtube.com/watch?v=zjkBMFhNj_g",
    "Pre-training, then fine-tuning into an assistant, then preference tuning, told end to end.","Steps 1–7"],
   ["Optional","Backpropagation, intuitively","3Blue1Brown · Deep Learning Ch. 3","https://www.youtube.com/watch?v=Ilg3gGewQ5U",
@@ -989,7 +989,7 @@ const VIDS = [
   ["Optional, long","Deep Dive into LLMs like ChatGPT","Andrej Karpathy · 3.5 hours","https://www.youtube.com/watch?v=7xTGNNLPyMI",
    "The full pipeline in depth: data, tokenization, pre-training, SFT, RL, and what the base model really does.","Steps 1–7"],
   ["Optional, long","Let's build GPT: from scratch, in code, spelled out","Andrej Karpathy · hands-on code","https://www.youtube.com/watch?v=kCc8FmEb1nY",
-   "Writes the training loop, the loss and the causal mask in code. For when you want to see 1.7 run.","Steps 1–3"]
+   "Writes the training loop, the loss and the causal mask in code. For when you want to see 3.1 run.","Steps 1–3"]
 ];
 add("V","Videos: build the intuition",
  "Watch the first two; the rest are for depth. Links open in YouTube.",
@@ -1063,7 +1063,7 @@ async function persist(id, body){
 /* ================= stepper ================= */
 let cur = 0;
 try{ const s = JSON.parse(localStorage.getItem(LS) || "{}"); if(Number.isInteger(s.step) && s.step < STEPS.length) cur = s.step; }catch(e){}
-const CHS = [["R","Recap · skippable"],["1.7","1.7 Training"],["1.8","1.8 Post-training"],["1.9","1.9 Inference economics"],["V","Videos"],["✓","Questions"]];
+const CHS = [["R","Recap · skippable"],["3.1","3.1 Training"],["3.2","3.2 Post-training"],["3.3","3.3 Inference economics"],["V","Videos"],["✓","Questions"]];
 function render(){
   const st = STEPS[cur], card = $("#card");
   card.innerHTML = "";
