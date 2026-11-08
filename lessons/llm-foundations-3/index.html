@@ -475,17 +475,17 @@ add("3.1","The causal mask: no peeking at the answer",
     TRAIN.forEach((w,i)=>{ s += '<text x="'+(X0-10)+'" y="'+(Y0+i*C+C/2+4)+'" text-anchor="end" style="fill:var(--ink)">'+w+'</text>';
       const wts = rowW(i, m);
       TRAIN.forEach((_,j)=>{ const future = j > i, x = X0 + j*C, y = Y0 + i*C, wt = wts[j];
-        const cheat = future && i === 2 && j === 3 && m < 0.5;
+        const cheat = j === i + 1 && m < 0.5; // the cell holding this row's own answer
         s += '<rect x="'+(x+2)+'" y="'+(y+2)+'" width="'+(C-4)+'" height="'+(C-4)+'" rx="5" style="fill:'+(cheat?'var(--hot)':'var(--accent)')+';fill-opacity:'+(0.08 + wt*0.85).toFixed(2)+';stroke:'+(cheat?'var(--hot)':'var(--line)')+'" stroke-width="'+(cheat?2:1)+'"/>';
         if(future && m > 0) s += '<rect x="'+(x+2)+'" y="'+(y+2)+'" width="'+(C-4)+'" height="'+(C-4)+'" rx="5" style="fill:var(--bg);fill-opacity:'+m.toFixed(2)+'"/>';
         s += '<text x="'+(x+C/2)+'" y="'+(y+C/2+4)+'" text-anchor="middle" style="fill:'+(future&&m>0.5?'var(--muted)':'var(--ink)')+'">'+(future && m > 0.5 ? '−∞ → 0' : Math.round(wt*100)+'%')+'</text>'; });
-      s += '<text x="'+(X0+4*C+8)+'" y="'+(Y0+i*C+C/2+4)+'" style="fill:var(--muted)">'+(i<3?'→ guess “'+TRAIN[i+1]+'”':'→ guess next')+'</text>'; });
+      s += '<text x="'+(X0+4*C+8)+'" y="'+(Y0+i*C+C/2+4)+'" style="fill:var(--muted)">'+(i<3?'job: guess “'+TRAIN[i+1]+'”':'job: guess what follows')+'</text>'; });
     if(m > 0){ const pts = [[X0+C, Y0],[X0+4*C, Y0],[X0+4*C, Y0+3*C]].map(([x,y])=>x+','+y).join(' ');
       s += '<polygon points="'+pts+'" style="fill:none;stroke:var(--ink);opacity:'+m.toFixed(2)+'" stroke-dasharray="5 4" stroke-width="1.5"/>'; }
     pic.innerHTML = s + '</g></svg>';
   };
   const text = ()=>{ sg.sync(mode);
-    out.innerHTML = mode === "off" ? '<b style="color:var(--hot)">Cheating:</b> the “bank” row, whose job is to guess “flooded”, puts its biggest weight on “flooded” itself. With training, this weight heads to 100% and the loss to near zero: the model learns to copy, which is useless when generating: the next word doesn\'t exist yet.'
+    out.innerHTML = mode === "off" ? '<b style="color:var(--hot)">Cheating:</b> each row\'s answer sits just right of the diagonal (orange). “The” must guess “river” and puts 51% on “river”; “bank” must guess “flooded” and puts 57% on “flooded”. With training, these weights head to 100% and the loss to near zero: the model learns to copy, which is useless when generating: the next word doesn\'t exist yet.'
       : 'Masked: before softmax, every score to a later token is set to −∞, so its weight becomes exactly 0. Each row now sees only itself and earlier tokens, exactly like generation. All three guesses are still trained in one pass.'; };
   sg.addEventListener("click", e=>{ if(!e.target.dataset.k || e.target.dataset.k === mode) return; mode = e.target.dataset.k; text();
     const from = shown, to = mode === "on" ? 1 : 0; stop(); stop = animate(p => { shown = from + (to-from)*p; draw(shown); }, 700); });
