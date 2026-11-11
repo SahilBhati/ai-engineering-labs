@@ -1,0 +1,386 @@
+[
+  {
+    "qid": "Q01",
+    "kind": "single",
+    "prompt": "Why is it safe to reuse a stored KV prefix for a different request?",
+    "options": {
+      "A": "The server re-checks every stored value against the new request and recomputes any that differ",
+      "B": "It isn't fully safe; small errors from a different request's context are accepted for the speed",
+      "C": "Keys and values at position i depend only on tokens 1…i, so an identical prefix always gives identical KV",
+      "D": "KV values come from the weights alone, so they are the same for every prompt and any stored copy works for any request"
+    }
+  },
+  {
+    "qid": "Q02",
+    "kind": "multi",
+    "prompt": "When would the cost gap between output and input tokens shrink? Pick all that apply.",
+    "options": {
+      "A": "Quantized weights, so each tick reads fewer bytes",
+      "B": "Higher temperature",
+      "C": "Smaller KV caches (shorter contexts, fewer KV heads), so more users fit in a batch",
+      "D": "Longer contexts per request",
+      "E": "Larger decode batches, so each weight read is shared by more users"
+    }
+  },
+  {
+    "qid": "Q03",
+    "kind": "number",
+    "prompt": "Run those 6.3 × 10²⁴ operations on 8,192 GPUs at 989 trillion operations per second each, with 40% utilization. How many days?",
+    "unit": "days"
+  },
+  {
+    "qid": "Q04",
+    "kind": "single",
+    "prompt": "Training runs all positions in parallel; generation runs one at a time. Why do the two compute the same thing?",
+    "options": {
+      "A": "The mask makes each position see only itself and earlier positions, exactly as during generation",
+      "B": "They don't match exactly; a short extra training phase adjusts the model so generation roughly agrees",
+      "C": "Both run at the same temperature, so the probabilities they compute come out identical",
+      "D": "Generation quietly retrains the model after each token so it stays in step with training"
+    }
+  },
+  {
+    "qid": "Q05",
+    "kind": "single",
+    "prompt": "You ask a base model (pre-training only) “What is a river bank?” What is it most likely to do?",
+    "options": {
+      "A": "Return an error, since the prompt lacks the chat template a base model expects",
+      "B": "Answer politely like a chat assistant, since question-and-answer text is all over its training data",
+      "C": "Refuse, because a base model has no instructions telling it how to respond to users",
+      "D": "Continue the text as a document would, perhaps with more quiz questions, rather than answer"
+    }
+  },
+  {
+    "qid": "Q06",
+    "kind": "multi",
+    "prompt": "On a cache hit for that 3,000-token prefix, what improves? Pick all that apply.",
+    "options": {
+      "A": "The answer gets more accurate",
+      "B": "TPOT: each output token gets much faster",
+      "C": "TTFT: only the new tokens need prefill",
+      "D": "Input cost: providers bill cached input tokens at a discount"
+    }
+  },
+  {
+    "qid": "Q07",
+    "kind": "single",
+    "prompt": "What would the model learn if you trained without the causal mask?",
+    "options": {
+      "A": "Nothing: training would crash, because softmax needs at least one masked score in every row",
+      "B": "To copy the next token from the input, since it could see it; at generation that token doesn't exist yet",
+      "C": "To generate whole sentences at once, since every position would see every other one at the same time",
+      "D": "Exactly the same thing, only slower, since each position would also attend to positions it then ignores"
+    }
+  },
+  {
+    "qid": "Q08",
+    "kind": "number",
+    "prompt": "TTFT is 0.3 s and TPOT is 25 ms. How many seconds until a 401-token answer has fully arrived?",
+    "unit": "s"
+  },
+  {
+    "qid": "Q09",
+    "kind": "number",
+    "prompt": "Training compute ≈ 6 × parameters × tokens. A 70B model on 15 trillion tokens. How many operations, in units of 10²⁴?",
+    "unit": "× 10²⁴"
+  },
+  {
+    "qid": "Q10",
+    "kind": "single",
+    "prompt": "Why does pre-training need no human labels?",
+    "options": {
+      "A": "The text supplies the answer: the right label at each position is simply the next token",
+      "B": "It does need labels; they are crowdsourced, which is why pre-training costs so much",
+      "C": "Labels are added later during fine-tuning; pre-training only learns word statistics",
+      "D": "A smaller model labels the text first, and the large model then learns from those labels"
+    }
+  },
+  {
+    "qid": "Q11",
+    "kind": "single",
+    "prompt": "An app sends a 3,000-token system prompt plus a short user message. How should it order the prompt to keep prompt-cache hits?",
+    "options": {
+      "A": "Fixed content first (system prompt, tools, examples); changing content (user message, time) last",
+      "B": "Put a timestamp at the top so the cache can tell how old the prompt is and expire it in time",
+      "C": "Order doesn't matter; the cache matches any shared stretch of text wherever it appears in the prompt",
+      "D": "User message first, so it gets the most attention, then the system prompt and tools after it"
+    }
+  },
+  {
+    "qid": "Q12",
+    "kind": "single",
+    "prompt": "Which backend pattern is decode batching most like?",
+    "options": {
+      "A": "A CDN edge cache: answers to common prompts are stored near users and served without running the model",
+      "B": "A circuit breaker: requests beyond the batch size are rejected until the GPU recovers",
+      "C": "Group commit: many transactions share one disk flush, so each waits a bit longer but throughput rises",
+      "D": "Read replicas: each user in the batch gets a copy of the weights to read from in parallel"
+    }
+  },
+  {
+    "qid": "Q13",
+    "kind": "number",
+    "prompt": "Loss = −ln p(correct token). The model gives the correct token 50%. What is the loss?"
+  },
+  {
+    "qid": "Q14",
+    "kind": "single",
+    "prompt": "Which backend pattern is prompt caching most like?",
+    "options": {
+      "A": "A message queue: prompts wait until enough with the same prefix arrive to process them together",
+      "B": "Database sharding: each prefix is pinned to one server, which keeps its cache forever",
+      "C": "A write-through cache in front of a database: every new prompt is written to the cache and to disk",
+      "D": "A content-addressed cache with a TTL: hash prefix blocks, look them up, expire after minutes"
+    }
+  },
+  {
+    "qid": "Q15",
+    "kind": "number",
+    "prompt": "Prefill floor: 2 operations per parameter per token. A 70B model on GPUs delivering 1,978 trillion operations per second in total. Minimum TTFT for a 2,000-token prompt, in milliseconds?",
+    "unit": "ms"
+  },
+  {
+    "qid": "Q16",
+    "kind": "number",
+    "prompt": "Same formula, but the model gives the correct token only 1%. What is the loss?"
+  },
+  {
+    "qid": "Q17",
+    "kind": "single",
+    "prompt": "Llama 2 used about 27,540 written SFT examples versus about 2 trillion pre-training tokens. What does that say?",
+    "options": {
+      "A": "SFT examples teach facts far more efficiently than pre-training tokens, so most knowledge comes from SFT",
+      "B": "SFT overwrites most of what pre-training learned, so a small set is enough to rebuild it",
+      "C": "Knowledge comes from pre-training; a small, high-quality SFT set mainly shapes behavior and format",
+      "D": "Pre-training is mostly wasted, since the useful skills only appear once SFT begins"
+    }
+  },
+  {
+    "qid": "Q18",
+    "kind": "single",
+    "prompt": "Why use −ln p instead of 1 − p as the loss?",
+    "options": {
+      "A": "1 − p can go negative when the model is very confident, which would reward a wrong answer instead of punishing it",
+      "B": "There is no difference in what the model learns: both are lowest at p = 1, so −ln p is just convention",
+      "C": "−ln p is cheaper to compute on a GPU than a subtraction across the whole vocabulary",
+      "D": "−ln p grows without limit as p → 0, so confident wrong answers are punished hard; 1 − p caps the penalty at 1"
+    }
+  },
+  {
+    "qid": "Q19",
+    "kind": "multi",
+    "prompt": "Which levers lower cost per million tokens? Pick all that apply.",
+    "options": {
+      "A": "More tokens per second while busy (batching, quantization, better kernels)",
+      "B": "A bigger vocabulary",
+      "C": "Lower temperature",
+      "D": "A higher busy share of each paid hour (traffic, autoscaling, sharing GPUs across models)"
+    }
+  },
+  {
+    "qid": "Q20",
+    "kind": "single",
+    "prompt": "Which backend idea is the causal mask most like?",
+    "options": {
+      "A": "A dead-letter queue: future tokens are parked to one side and processed after the current one finishes",
+      "B": "A load balancer: each token is routed only to the attention heads that are free",
+      "C": "A snapshot read: each transaction sees only what committed before it, never later writes",
+      "D": "Rate limiting: each token may only attend to a fixed number of others per step"
+    }
+  },
+  {
+    "qid": "Q21",
+    "kind": "multi",
+    "prompt": "Which are real differences between training and serving infrastructure? Pick all that apply.",
+    "options": {
+      "A": "Training uses a KV cache to skip recomputation",
+      "B": "One failed GPU stalls a whole synchronized training job, so teams checkpoint often",
+      "C": "Training needs several times the memory per parameter (gradients and optimizer state)",
+      "D": "Training GPUs must exchange gradients every step, so the network and stragglers matter as much as the chips",
+      "E": "Serving updates the weights after every request"
+    }
+  },
+  {
+    "qid": "Q22",
+    "kind": "single",
+    "prompt": "Why does an output token cost more GPU time than an input token?",
+    "options": {
+      "A": "Output tokens are longer than input tokens, because the model writes whole words rather than pieces",
+      "B": "Input tokens share each weight read in prefill; each output step reads all the weights to emit one token per user",
+      "C": "Providers charge more for output to discourage long answers; the GPU time per token is actually about the same",
+      "D": "Output tokens pass through more layers than input tokens, since the model must also pick the next token"
+    }
+  },
+  {
+    "qid": "Q23",
+    "kind": "single",
+    "prompt": "SFT scores only the answer tokens (weight 0 on the template and prompt). What would go wrong if it scored the prompt too?",
+    "options": {
+      "A": "The causal mask would stop working, because the prompt tokens would then be able to see the answer after them",
+      "B": "The model would forget its vocabulary, since prompt tokens would dominate every gradient step",
+      "C": "Effort would go into predicting user messages, so the model learns to write prompts as well as answers",
+      "D": "Nothing much; scoring the prompt only costs a little more compute per training example"
+    }
+  },
+  {
+    "qid": "Q24",
+    "kind": "single",
+    "prompt": "You raise the decode batch from 1 to 64. What happens?",
+    "options": {
+      "A": "Each user's TPOT stays exactly the same until compute runs out, and throughput rises 64 times",
+      "B": "Total tokens per second rise a lot, each user's TPOT rises a little, and KV memory caps how many users fit",
+      "C": "Both total throughput and each user's TPOT improve, since the GPU is busier and works more efficiently per token",
+      "D": "Total throughput stays the same, since the GPU is already busy; each user just gets 64 times slower"
+    }
+  },
+  {
+    "qid": "Q25",
+    "kind": "number",
+    "prompt": "Two GPUs at $4 per GPU-hour produce 1,000 output tokens per second. What is the cost per million output tokens, in dollars?",
+    "unit": "$"
+  },
+  {
+    "qid": "Q26",
+    "kind": "single",
+    "prompt": "With softmax and cross-entropy, what is the gradient on each logit?",
+    "options": {
+      "A": "−ln p for the correct token, and 0 for every other token",
+      "B": "p − 1 for the correct token, and p for every other token",
+      "C": "p for the correct token, and p − 1 for every other token",
+      "D": "1 for the correct token, 0 for every other token"
+    }
+  },
+  {
+    "qid": "Q27",
+    "kind": "number",
+    "prompt": "An H100 does about 989 trillion operations per second and reads about 3.35 trillion bytes per second. How many operations can it do per byte read before memory stops being the bottleneck?"
+  },
+  {
+    "qid": "Q28",
+    "kind": "number",
+    "prompt": "A 70B model's weights at 8-bit (1 byte each). How many GB?",
+    "unit": "GB"
+  },
+  {
+    "qid": "Q29",
+    "kind": "single",
+    "prompt": "The DPO loss is −ln σ(gap). What is the “gap”?",
+    "options": {
+      "A": "The number of tokens at which the chosen and rejected answers differ from each other",
+      "B": "The reward model's score for the chosen answer minus its score for the rejected one, as in RLHF",
+      "C": "How much more the model now favors chosen over rejected, compared with the starting model",
+      "D": "The difference in length between the chosen and rejected answers, which DPO penalizes"
+    }
+  },
+  {
+    "qid": "Q30",
+    "kind": "number",
+    "prompt": "Pre-training on one 1,000-token document. How many next-token training examples does it give?"
+  },
+  {
+    "qid": "Q31",
+    "kind": "number",
+    "prompt": "Toy server: 16 GB of weights, 1 GB of KV cache per user, 1 TB/s of memory bandwidth. Tick = (16 + B × 1) GB ÷ 1 TB/s. With B = 16 users, how many tokens per second in total?",
+    "unit": "tokens/s"
+  },
+  {
+    "qid": "Q32",
+    "kind": "single",
+    "prompt": "How is the causal mask applied in code?",
+    "options": {
+      "A": "Add −∞ to scores above the diagonal before softmax, so future positions get exactly 0 weight",
+      "B": "Multiply the values of future tokens by 0.5, so they count for half in the weighted average",
+      "C": "Delete the future tokens from the input, so each position runs on a shorter sequence",
+      "D": "Set the attention weights above the diagonal to 0 after the weighted average has been taken"
+    }
+  },
+  {
+    "qid": "Q33",
+    "kind": "number",
+    "prompt": "Same setup ($8 per hour, 1,000 tokens/s while busy), but the GPUs are busy only half the time. Cost per million output tokens, in dollars?",
+    "unit": "$"
+  },
+  {
+    "qid": "Q34",
+    "kind": "single",
+    "prompt": "Quantization speeds up decode a lot but prefill much less. Why?",
+    "options": {
+      "A": "Decode is memory-bound, so fewer weight bytes speed it up; prefill is compute-bound, so smaller weights barely help",
+      "B": "Prefill doesn't read the weights at all; it only builds the KV cache from the prompt's embeddings",
+      "C": "Prefill results are already cached from earlier requests, so there is little left for it to speed up",
+      "D": "Quantization only shrinks the output layer, which decode runs on every step but prefill runs only once per prompt"
+    }
+  },
+  {
+    "qid": "Q35",
+    "kind": "single",
+    "prompt": "Quantizing weights to 8-bit gives decode “two multiplying wins”. What are they?",
+    "options": {
+      "A": "Temperature can drop and sampling can be skipped, since 8-bit logits are already sharp",
+      "B": "The model needs fewer layers and a smaller vocabulary, so each decode tick has less work to do in total",
+      "C": "Each tick reads half the weight bytes, and the freed memory holds more KV caches for a bigger batch",
+      "D": "Prompts and answers get shorter, since 8-bit weights produce more compact tokens"
+    }
+  },
+  {
+    "qid": "Q36",
+    "kind": "single",
+    "prompt": "What does a chat template do?",
+    "options": {
+      "A": "Adds a second, smaller model that tracks the conversation and hands the main model one turn at a time",
+      "B": "Rewrites the user's prompt into a fixed question format, the one the base model saw most in pre-training",
+      "C": "Stores past conversations on the server so the model can recall them in a later session",
+      "D": "Wraps each turn in special tokens like <|user|> and flattens the messages into one string to continue"
+    }
+  },
+  {
+    "qid": "Q37",
+    "kind": "single",
+    "prompt": "Base model vs chat model after supervised fine-tuning (SFT): what changes?",
+    "options": {
+      "A": "A new answer-generation layer is added on top of the base model, and only that layer is trained on dialogue",
+      "B": "The next-token loss is replaced by a reward score, so the model learns what people prefer",
+      "C": "Only the weight values, via more training with the same next-token loss on curated prompt → answer pairs",
+      "D": "The tokenizer is retrained for dialogue, so turns and roles get pieces of their own"
+    }
+  },
+  {
+    "qid": "Q38",
+    "kind": "single",
+    "prompt": "RLHF vs DPO: what does each need?",
+    "options": {
+      "A": "RLHF: a reward model and reinforcement learning, generating during training. DPO: one loss on chosen/rejected pairs",
+      "B": "RLHF trains on single answers rated by people; DPO needs whole conversations, with every turn scored by people",
+      "C": "Both need a trained reward model and sampled answers during training; DPO just trains its reward model faster",
+      "D": "RLHF: only human-written answers, trained like SFT. DPO: a reward model scoring the model's own answers"
+    }
+  },
+  {
+    "qid": "Q39",
+    "kind": "number",
+    "prompt": "Decode floor: each tick reads all the weights. 140 GB of weights, 6.7 TB/s of combined bandwidth. Minimum TPOT in milliseconds (ignore the cache reads)?",
+    "unit": "ms"
+  },
+  {
+    "qid": "Q40",
+    "kind": "single",
+    "prompt": "A 70B model on 2 H100s at 16-bit misses its TPOT target and fits only a few users. Which fix keeps quality but adds communication overhead and a bigger minimum deployment?",
+    "options": {
+      "A": "Adding GPUs (tensor parallelism): more bandwidth per tick and more room for caches",
+      "B": "Raising the batch size: more users share each weight read, so each user's TPOT drops",
+      "C": "Quantizing to 8-bit: half the bytes per tick and room for twice the caches",
+      "D": "Lowering the temperature: fewer candidate tokens per step, so each tick is faster"
+    }
+  },
+  {
+    "qid": "Q41",
+    "kind": "single",
+    "prompt": "In a chat app, which latency does a user notice first?",
+    "options": {
+      "A": "Throughput: total tokens per second across all users",
+      "B": "Time to compute the KV cache size",
+      "C": "End-to-end latency: the time until the whole answer has finished",
+      "D": "TTFT (time to first token): how long before anything appears"
+    }
+  }
+]

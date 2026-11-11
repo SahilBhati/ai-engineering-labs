@@ -1,0 +1,685 @@
+{
+  "lesson": 2,
+  "runs": 3,
+  "questions": 34,
+  "metrics": {
+    "grounded": 0.9509803921568627,
+    "agreement": 1,
+    "openDisputes": 0,
+    "optionsOnly": 0.9523809523809523,
+    "keyLongest": 0.2777777777777778,
+    "confirmedFlags": 0,
+    "coverage": 1,
+    "stepCoverage": 0.9285714285714286,
+    "viewed": 1,
+    "visualOnlyCites": 0.010309278350515464
+  },
+  "pass": {
+    "grounded": false,
+    "agreement": true,
+    "openDisputes": true,
+    "keyLongest": true,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": false,
+  "notGrounded": [
+    {
+      "id": "L2-mlp-05",
+      "grounded": 1,
+      "correct": 3
+    },
+    {
+      "id": "L2-logits-01",
+      "grounded": 2,
+      "correct": 3
+    },
+    {
+      "id": "L2-sampling-03",
+      "grounded": 2,
+      "correct": 3
+    },
+    {
+      "id": "L2-prefill-03",
+      "grounded": 2,
+      "correct": 3
+    }
+  ],
+  "ambiguous": [],
+  "disputes": [],
+  "weakDistractors": [
+    {
+      "id": "L2-mlp-01",
+      "right": 2
+    },
+    {
+      "id": "L2-mlp-04",
+      "right": 3
+    },
+    {
+      "id": "L2-mlp-05",
+      "right": 3
+    },
+    {
+      "id": "L2-residual-01",
+      "right": 3
+    },
+    {
+      "id": "L2-residual-02",
+      "right": 3
+    },
+    {
+      "id": "L2-residual-03",
+      "right": 3
+    },
+    {
+      "id": "L2-stack-03",
+      "right": 3
+    },
+    {
+      "id": "L2-logits-01",
+      "right": 3
+    },
+    {
+      "id": "L2-temperature-01",
+      "right": 3
+    },
+    {
+      "id": "L2-temperature-03",
+      "right": 3
+    },
+    {
+      "id": "L2-sampling-03",
+      "right": 3
+    },
+    {
+      "id": "L2-loop-01",
+      "right": 2
+    },
+    {
+      "id": "L2-kvcache-01",
+      "right": 3
+    },
+    {
+      "id": "L2-kvcache-02",
+      "right": 3
+    },
+    {
+      "id": "L2-kvcache-03",
+      "right": 3
+    },
+    {
+      "id": "L2-prefill-01",
+      "right": 3
+    },
+    {
+      "id": "L2-prefill-02",
+      "right": 3
+    },
+    {
+      "id": "L2-prefill-03",
+      "right": 3
+    },
+    {
+      "id": "L2-kvsize-04",
+      "right": 2
+    },
+    {
+      "id": "L2-context-02",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L2-mlp-01",
+    "L2-residual-01",
+    "L2-logits-01",
+    "L2-sampling-03",
+    "L2-prefill-02"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [
+    "S03"
+  ],
+  "flags": [
+    {
+      "step": "S04",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "relies on 'dot product' and 'Basics, step 11' from another lesson with only a pointer, no one-line reminder of what a dot product is"
+      ]
+    },
+    {
+      "step": "S07",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "logit lens and 'final scoring step' are used before logits/unembedding are taught in the next chapter"
+      ]
+    },
+    {
+      "step": "S08",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Cites 'After block 1's attention it was [0.26, 2.38] (recap)' but the recap steps shown never display those numbers."
+      ]
+    },
+    {
+      "step": "S11",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Intro says 'turn the cache on' and shows a 'KV cache' toggle before any step explains what the KV cache is (taught in S13)."
+      ]
+    },
+    {
+      "step": "S14",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "very dense: tick strip, 'each tick drawn = 10 real ticks', and GPU bars all at once; hard to tell which mark matters"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L2-mlp-01",
+      "concept": "mlp",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L2-mlp-02",
+      "concept": "mlp",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-mlp-03",
+      "concept": "mlp",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-mlp-04",
+      "concept": "mlp",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-mlp-05",
+      "concept": "mlp",
+      "kind": "single",
+      "grounded": 1,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-residual-01",
+      "concept": "residual",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-residual-02",
+      "concept": "residual",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-residual-03",
+      "concept": "residual",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-stack-01",
+      "concept": "stack",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-stack-02",
+      "concept": "stack",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-stack-03",
+      "concept": "stack",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-logits-01",
+      "concept": "logits",
+      "kind": "single",
+      "grounded": 2,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-logits-02",
+      "concept": "logits",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-temperature-01",
+      "concept": "temperature",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-temperature-02",
+      "concept": "temperature",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-temperature-03",
+      "concept": "temperature",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-sampling-01",
+      "concept": "sampling",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-sampling-02",
+      "concept": "sampling",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-sampling-03",
+      "concept": "sampling",
+      "kind": "single",
+      "grounded": 2,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-loop-01",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L2-loop-02",
+      "concept": "loop",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-kvcache-01",
+      "concept": "kvcache",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-kvcache-02",
+      "concept": "kvcache",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-kvcache-03",
+      "concept": "kvcache",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-prefill-01",
+      "concept": "prefill",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-prefill-02",
+      "concept": "prefill",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-prefill-03",
+      "concept": "prefill",
+      "kind": "single",
+      "grounded": 2,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-kvsize-01",
+      "concept": "kvsize",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-kvsize-02",
+      "concept": "kvsize",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-kvsize-03",
+      "concept": "kvsize",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-kvsize-04",
+      "concept": "kvsize",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L2-kvsize-05",
+      "concept": "kvsize",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-context-01",
+      "concept": "context",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S16"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L2-context-02",
+      "concept": "context",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": "2026-11-10-L2",
+  "diff": {
+    "metrics": {
+      "grounded": {
+        "before": 0.9803921568627451,
+        "after": 0.9509803921568627
+      },
+      "agreement": {
+        "before": 1,
+        "after": 1
+      },
+      "openDisputes": {
+        "before": 1,
+        "after": 0
+      },
+      "optionsOnly": {
+        "before": 0.9523809523809523,
+        "after": 0.9523809523809523
+      },
+      "keyLongest": {
+        "before": 0.9444444444444444,
+        "after": 0.2777777777777778
+      },
+      "confirmedFlags": {
+        "before": 3,
+        "after": 0
+      },
+      "coverage": {
+        "before": 1,
+        "after": 1
+      },
+      "stepCoverage": {
+        "before": 0.9285714285714286,
+        "after": 0.9285714285714286
+      },
+      "viewed": {
+        "before": 1,
+        "after": 1
+      },
+      "visualOnlyCites": {
+        "before": 0.03,
+        "after": 0.010309278350515464
+      }
+    },
+    "nowGrounded": [],
+    "lostGrounding": [
+      "L2-logits-01",
+      "L2-sampling-03",
+      "L2-prefill-03"
+    ]
+  }
+}

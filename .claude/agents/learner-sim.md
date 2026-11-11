@@ -84,6 +84,10 @@ lesson's HTML source. Doing so voids the run.
   that carries the point; it is checked mechanically. If the support is only
   in the visual, set `"visual": true` and describe what the screenshot shows.
   Cite steps of this lesson only; `teaching: false` steps don't count.
+  A question that applies the lesson to a new case (a transfer question)
+  still gets cites: quote the step(s) whose facts your reasoning uses. A
+  2–3-word phrase like "roughly two-thirds" fails the check; widen it to the
+  surrounding words, and copy it from the step you name.
 - `dispute`: `null`, or one sentence when the **question** is flawed by the
   lesson's own content: no option is right, two are right, the lesson
   contradicts the question, or a number can't be computed from what was taught.

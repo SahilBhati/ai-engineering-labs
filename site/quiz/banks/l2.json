@@ -20,10 +20,10 @@
       "id": "L2-mlp-01", "concept": "mlp", "kind": "single",
       "prompt": "What does the MLP do that attention doesn't?",
       "options": [
-        "It lets words exchange information with each other",
-        "It processes each word on its own: thousands of learned yes/no-style questions about the word, whose answers are written back into its vector",
-        "It turns the final vector into vocabulary scores",
-        "It stores the keys and values of earlier tokens"
+        "It lets words exchange information with one another, so each word can pull in context from earlier ones",
+        "It works on each word alone: thousands of learned yes/no-style questions whose answers are added to its vector",
+        "It turns the final vector into a score for every vocabulary token, ready for softmax to pick from",
+        "It stores the keys and values of earlier tokens, so later tokens can look them up without recomputing them"
       ],
       "answer": [1],
       "why": "A block is talk, then think. Attention is the only place where words see each other; the MLP then works on each word separately with the same weights, which is why it batches so well on a GPU."
@@ -45,20 +45,20 @@
       "prompt": "In notes = W_down · max(0, W_up · x + b), what do W_up and W_down hold?",
       "options": [
         "W_up holds the questions (one row per neuron); W_down holds the note each neuron writes back",
-        "W_up holds the vocabulary; W_down holds the positions",
-        "W_up is computed per request; W_down is learned",
-        "Both hold cached keys and values"
+        "W_up holds the vocabulary scores; W_down holds the position of each token in the sequence",
+        "W_up is computed fresh for each request from the input x; only W_down is learned in training",
+        "Both hold the keys and values cached for earlier tokens, one for keys and one for values"
       ],
       "answer": [0],
       "why": "Widen, then narrow: W_up asks thousands of questions about the word, ReLU keeps the ones that fire, W_down turns those into notes added to the word's vector. Both are learned weights, frozen at inference."
     },
     {
       "id": "L2-mlp-05", "concept": "mlp", "kind": "single",
-      "prompt": "Roughly what share of a classic GPT-style model's parameters sit in the MLPs?",
+      "prompt": "GPT-3 has 175 billion parameters. Roughly how many of them sit in the MLPs?",
       "options": [
-        "About two-thirds",
-        "About 10%",
-        "Exactly half",
+        "About 116 billion (roughly two-thirds)",
+        "About 17 billion (about 10%)",
+        "Exactly 87.5 billion (half)",
         "Almost none: attention holds the weights"
       ],
       "answer": [0],
@@ -68,10 +68,10 @@
       "id": "L2-residual-01", "concept": "residual", "kind": "single",
       "prompt": "What is the residual stream?",
       "options": [
-        "The leftover probability after top-p cuts the tail",
-        "The word's vector as it travels through the model, with each layer's output added to it rather than replacing it",
-        "The queue of tokens waiting for decode",
-        "The error signal flowing backward in training"
+        "The leftover probability after top-p cuts the tail, which is spread back over the kept tokens",
+        "The word's vector as it passes through the model, each layer's output added to it rather than replacing it",
+        "The queue of tokens waiting for decode, each picked up as soon as a batch slot frees up",
+        "The error signal flowing backward through every layer during training, which adjusts each layer's weights"
       ],
       "answer": [1],
       "why": "x = x + attention(x), then x = x + MLP(x), in every block. The final vector is literally the original embedding plus every layer's contribution."
@@ -92,10 +92,10 @@
       "id": "L2-residual-03", "concept": "residual", "kind": "single",
       "prompt": "Which backend pattern is the residual stream most like?",
       "options": [
-        "A cache in front of a database",
-        "An append-only log, or a request context object that each middleware enriches instead of replacing",
-        "A load balancer",
-        "A circuit breaker"
+        "A cache in front of a database: each layer checks the stream before recomputing a value",
+        "An append-only log, or a request context that each middleware enriches rather than replaces",
+        "A load balancer that routes each word's vector to whichever layer is least busy",
+        "A pipeline where each stage replaces the request object with its own transformed version of it"
       ],
       "answer": [1],
       "why": "Each layer reads the shared state and adds its contribution, and nothing earlier is discarded. (The KV cache is the one that's like a cache: memoized work.)"
@@ -116,10 +116,10 @@
       "id": "L2-stack-03", "concept": "stack", "kind": "single",
       "prompt": "Why stack 32 blocks instead of one very wide block?",
       "options": [
-        "Depth lets the model chain steps: a later block can use a note an earlier block wrote (“it's a riverside”) to add a new one (“floods are likely”)",
-        "All 32 blocks share one set of weights, so depth is free",
-        "Each block handles a different part of the vocabulary",
-        "Stacking makes the KV cache smaller"
+        "Depth chains steps: a later block uses an earlier block's note (“it's a riverside”) to add one (“floods likely”)",
+        "All 32 blocks share one set of weights, so depth adds reasoning steps without adding any parameters",
+        "Each block handles a different slice of the vocabulary, so 32 blocks cover more tokens than one wide block could",
+        "Stacking shrinks the KV cache, because only the last block keeps keys and values for earlier tokens"
       ],
       "answer": [0],
       "why": "One block is one round of talk-then-think. The blocks share a shape but each has its own weights, so depth costs memory, and a deeper model has a bigger KV cache (one entry per layer)."
@@ -128,10 +128,10 @@
       "id": "L2-logits-01", "concept": "logits", "kind": "single",
       "prompt": "How does the final vector for the last token become a probability for every token in the vocabulary?",
       "options": [
-        "The nearest token in the embedding table is picked directly",
-        "Dot product with each row of the unembedding table gives one logit per token; softmax turns the logits into probabilities",
-        "The MLP outputs one probability per token",
-        "Attention over the vocabulary"
+        "The nearest row in the embedding table is found and that token gets probability 1, the rest 0",
+        "A dot product with each unembedding row gives one logit per token; softmax turns logits into probabilities",
+        "The last MLP outputs one probability per token directly, already summing to 1 across the whole vocabulary",
+        "Attention runs over the whole vocabulary, and each token's attention share is its probability"
       ],
       "answer": [1],
       "why": "logits = W_unembed · x: about 100,000 scores, one per vocabulary token, then softmax. The unembedding table has the same shape as the embedding table; some models share the two."
@@ -146,10 +146,10 @@
       "id": "L2-temperature-01", "concept": "temperature", "kind": "single",
       "prompt": "What does temperature do, mechanically?",
       "options": [
-        "Adds random noise to the weights",
+        "Adds random noise of size T to the weights, so each run of the same prompt differs a little",
         "Divides the logits by T before softmax: small T stretches the gaps, large T shrinks them",
-        "Removes all but the top T tokens",
-        "Changes how many tokens are generated"
+        "Keeps only the top T tokens and renormalizes, so T = 1 always picks the single best token",
+        "Multiplies the logits by T after softmax, so a large T makes the top token even more likely"
       ],
       "answer": [1],
       "why": "p = softmax(logits / T). Dividing by a small number stretches the gaps, and softmax's exponent turns stretched gaps into a near-certain winner."
@@ -164,10 +164,10 @@
       "id": "L2-temperature-03", "concept": "temperature", "kind": "single",
       "prompt": "As temperature approaches 0, what happens?",
       "options": [
-        "Greedy decoding: the top-scoring token is chosen every time",
-        "Every token becomes equally likely",
-        "The model stops generating",
-        "Answers become factually correct"
+        "Greedy decoding: the top-scoring token is picked every time, so output repeats",
+        "Every token becomes equally likely, since dividing by a tiny T flattens all the gaps",
+        "The model stops generating, because no token keeps a nonzero probability",
+        "Answers become factually correct, since only the model's surest token survives"
       ],
       "answer": [0],
       "why": "The gaps grow without bound, so the top logit takes ~100% of the probability. Deterministic is not the same as correct: the top token can still be wrong."
@@ -188,10 +188,10 @@
       "id": "L2-sampling-03", "concept": "sampling", "kind": "single",
       "prompt": "Why use top-p instead of sampling from the full distribution?",
       "options": [
-        "It makes generation faster",
-        "It cuts the long tail of unlikely tokens, so one unlucky draw can't derail a long answer, while keeping variety among plausible tokens",
-        "It guarantees the same output every time",
-        "It reduces the size of the KV cache"
+        "It makes generation faster, since softmax only has to run over the few tokens that survive the cut",
+        "It cuts the long tail, so one unlucky draw can't derail a long answer, yet keeps variety among plausible tokens",
+        "It guarantees the same output every time, because the cut removes all randomness from sampling",
+        "It shrinks the KV cache, since tokens cut from the tail never need their keys and values stored on the GPU"
       ],
       "answer": [1],
       "why": "A long answer is hundreds of draws; thousands of tiny-probability tokens add up to a real chance of a bad pick somewhere. Top-p adapts the cut: few tokens when the model is sure, more when it isn't (top-k keeps a fixed k)."
@@ -200,10 +200,10 @@
       "id": "L2-loop-01", "concept": "loop", "kind": "single",
       "prompt": "Why are earlier tokens' keys and values still valid on the next generation pass?",
       "options": [
-        "A token only looks backward, so appending a new token can't change anything computed for earlier ones",
-        "The model is retrained after each token",
-        "Keys and values are random, so any value works",
-        "They aren't valid; they are always recomputed"
+        "A token only looks backward, so appending a token can't change what was computed for earlier ones",
+        "The model is quickly retrained after each token, so the stored keys and values are refreshed",
+        "Keys and values are random projections, so any stored value works as well as a fresh one",
+        "They aren't valid: every pass recomputes them, since each new token changes earlier tokens' context"
       ],
       "answer": [0],
       "why": "Position i only attends to positions 1…i. Adding position i+1 changes nothing about earlier positions, so their keys and values can be stored and reused."
@@ -218,10 +218,10 @@
       "id": "L2-kvcache-01", "concept": "kvcache", "kind": "single",
       "prompt": "What exactly does the KV cache store?",
       "options": [
-        "The final output tokens of earlier requests",
+        "The final output tokens of earlier requests, to answer repeated prompts",
         "Every earlier token's key and value vectors, for every layer",
-        "The query vectors of every token",
-        "The model's weights in a faster memory"
+        "The query vectors of every earlier token, in every layer",
+        "A copy of the model's weights in faster on-chip memory"
       ],
       "answer": [1],
       "why": "Keys and values are what a token offers to later tokens. Queries are only needed for the newest token, so they aren't kept. The cache grows by one entry per token per layer and lives in GPU memory for the whole request."
@@ -230,10 +230,10 @@
       "id": "L2-kvcache-02", "concept": "kvcache", "kind": "single",
       "prompt": "With a KV cache, what does each decode step compute?",
       "options": [
-        "q, k and v for every token so far",
+        "q, k and v for every token so far, then attend over all of them as on the first pass",
         "q, k and v for the new token only; append its k and v to the cache; attend over the whole cache",
-        "Only the logits, skipping attention",
-        "k and v for every token, but q only for the new one"
+        "Only the logits for the new token, since attention was already done for the cached tokens",
+        "k and v for every token again, but q only for the new token, then attend over the fresh k and v"
       ],
       "answer": [1],
       "why": "The new token still attends to everything before it, but reads stored keys and values instead of recomputing them."
@@ -243,9 +243,9 @@
       "prompt": "Which backend pattern is the KV cache most like?",
       "options": [
         "Memoization: compute once, store, reuse because the inputs can't change",
-        "A message queue",
+        "A message queue: each token's keys and values wait until the next pass consumes them",
         "A write-ahead log used for crash recovery",
-        "Sharding a table across machines"
+        "Sharding: each layer's keys and values live on a different machine"
       ],
       "answer": [0],
       "why": "Earlier tokens' keys and values are pure functions of tokens that never change, so caching them is always safe: no invalidation needed within a request."
@@ -255,9 +255,9 @@
       "prompt": "Prefill vs decode: which sets which latency?",
       "options": [
         "Prefill sets time to first token (TTFT); decode sets time per output token (TPOT)",
-        "Prefill sets TPOT; decode sets TTFT",
-        "Both set TTFT",
-        "Neither: network latency dominates both"
+        "Prefill sets time per output token (TPOT); decode sets time to first token (TTFT)",
+        "Both set TTFT; TPOT is fixed by the model size alone",
+        "Neither: network latency dominates both TTFT and TPOT"
       ],
       "answer": [0],
       "why": "Prefill processes the whole prompt in one parallel pass and fills the cache before the first token can appear. Decode then produces tokens one tick at a time."
@@ -266,10 +266,10 @@
       "id": "L2-prefill-02", "concept": "prefill", "kind": "single",
       "prompt": "Why is prefill compute-bound while single-user decode is memory-bound?",
       "options": [
-        "Prefill reuses each weight it reads across all prompt tokens at once; decode reads all the weights to produce one token per user, so it mostly waits on memory",
-        "Prefill runs on the CPU and decode on the GPU",
-        "Decode does more math per token than prefill",
-        "Prefill skips attention"
+        "Prefill reuses each weight it reads across every prompt token; decode reads all weights for one token per user",
+        "Prefill runs on the CPU while decode runs on the GPU, whose memory is slower to reach than the CPU's",
+        "Decode does more math per token than prefill, because each output token must attend to the whole prompt again",
+        "Prefill skips attention and only runs the MLPs, so it has less memory to read per token than decode"
       ],
       "answer": [0],
       "why": "Same weights, different math per byte. Prefill does many tokens' worth of math per weight read; decode does one. Batching many users' decode ticks shares each weight read, which is why batching decides throughput."
@@ -278,10 +278,10 @@
       "id": "L2-prefill-03", "concept": "prefill", "kind": "single",
       "prompt": "What does continuous batching change?",
       "options": [
-        "Requests join and leave the batch at every decode tick, instead of waiting for the whole batch to finish",
-        "All requests in a batch must have the same length",
-        "The batch is fixed at server start",
-        "Prefill and decode run on separate models"
+        "Requests join and leave the batch at every decode tick, rather than waiting for the batch to finish",
+        "All requests in a batch are padded to the same length, so the short ones finish with the longest one",
+        "The batch size is fixed at server start and every slot is kept busy by queuing requests",
+        "Prefill and decode run on separate models, so new prompts no longer pause the decode loop"
       ],
       "answer": [0],
       "why": "Scheduling per tick means a finished request frees its slot immediately and a new one starts without waiting for the longest answer in the batch."
@@ -340,10 +340,10 @@
       "id": "L2-context-02", "concept": "context", "kind": "single",
       "prompt": "Every request to a chatbot starts with the same 2,000-token system prompt. How could the server avoid redoing that work?",
       "options": [
-        "Keep the KV cache computed for that prefix and reuse it for every request that starts with the identical tokens",
-        "Lower the temperature for the system prompt",
-        "Send the system prompt only once per day",
-        "Compress the prompt with gzip before sending it"
+        "Keep the KV cache computed for that prefix and reuse it for requests that start with identical tokens",
+        "Lower the temperature while the system prompt is processed, so the model reads it in fewer forward passes",
+        "Send the system prompt only once per day, since the model remembers it between requests",
+        "Compress the prompt with gzip before sending it, so the model has fewer tokens to process"
       ],
       "answer": [0],
       "why": "Keys and values for a prefix depend only on the prefix's tokens, so identical prefixes give identical KV. Lesson 3 calls this prompt caching."
