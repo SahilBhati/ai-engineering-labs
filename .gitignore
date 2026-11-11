@@ -35,3 +35,7 @@ publish-staging/
 
 # Personal agent rules (private paths)
 CLAUDE.local.md
+
+# learner-sim: screenshots and agent logs are regenerated per run; scorecards, answers and step text are kept
+tools/learner-sim/runs/*/steps/*.png
+tools/learner-sim/runs/*/run-*/log.txt

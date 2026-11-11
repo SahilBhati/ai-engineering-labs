@@ -1,0 +1,648 @@
+{
+  "lesson": 2,
+  "runs": 3,
+  "questions": 34,
+  "metrics": {
+    "grounded": 0.9803921568627451,
+    "agreement": 1,
+    "openDisputes": 1,
+    "optionsOnly": 0.9523809523809523,
+    "keyLongest": 0.9444444444444444,
+    "confirmedFlags": 3,
+    "coverage": 1,
+    "stepCoverage": 0.9285714285714286,
+    "viewed": 1,
+    "visualOnlyCites": 0.03
+  },
+  "pass": {
+    "grounded": false,
+    "agreement": true,
+    "openDisputes": false,
+    "optionsOnly": false,
+    "keyLongest": false,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": false,
+  "notGrounded": [
+    {
+      "id": "L2-mlp-05",
+      "grounded": 1,
+      "correct": 3
+    }
+  ],
+  "ambiguous": [],
+  "disputes": [
+    {
+      "id": "L2-kvsize-02",
+      "reasons": [
+        "Lesson's 328 KB/token is 327,680 bytes ×8192 = 2.68 GB; rounding to 2.7 is the only ambiguity."
+      ]
+    }
+  ],
+  "weakDistractors": [
+    {
+      "id": "L2-mlp-01",
+      "right": 3
+    },
+    {
+      "id": "L2-mlp-04",
+      "right": 3
+    },
+    {
+      "id": "L2-mlp-05",
+      "right": 3
+    },
+    {
+      "id": "L2-residual-01",
+      "right": 3
+    },
+    {
+      "id": "L2-residual-02",
+      "right": 3
+    },
+    {
+      "id": "L2-residual-03",
+      "right": 3
+    },
+    {
+      "id": "L2-stack-03",
+      "right": 3
+    },
+    {
+      "id": "L2-logits-01",
+      "right": 3
+    },
+    {
+      "id": "L2-temperature-01",
+      "right": 3
+    },
+    {
+      "id": "L2-temperature-03",
+      "right": 3
+    },
+    {
+      "id": "L2-sampling-03",
+      "right": 3
+    },
+    {
+      "id": "L2-loop-01",
+      "right": 3
+    },
+    {
+      "id": "L2-kvcache-01",
+      "right": 3
+    },
+    {
+      "id": "L2-kvcache-02",
+      "right": 3
+    },
+    {
+      "id": "L2-kvcache-03",
+      "right": 3
+    },
+    {
+      "id": "L2-prefill-01",
+      "right": 3
+    },
+    {
+      "id": "L2-prefill-02",
+      "right": 3
+    },
+    {
+      "id": "L2-prefill-03",
+      "right": 3
+    },
+    {
+      "id": "L2-kvsize-04",
+      "right": 3
+    },
+    {
+      "id": "L2-context-02",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L2-mlp-01",
+    "L2-mlp-04",
+    "L2-residual-01",
+    "L2-residual-03",
+    "L2-stack-03",
+    "L2-logits-01",
+    "L2-temperature-01",
+    "L2-temperature-03",
+    "L2-sampling-03",
+    "L2-loop-01",
+    "L2-kvcache-01",
+    "L2-kvcache-02",
+    "L2-kvcache-03",
+    "L2-prefill-01",
+    "L2-prefill-02",
+    "L2-prefill-03",
+    "L2-context-02"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [
+    "S03"
+  ],
+  "flags": [
+    {
+      "step": "S05",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "'frozen at inference' uses 'inference' without definition",
+        "'superposition' and 'inference' are dropped in without explanation."
+      ]
+    },
+    {
+      "step": "S07",
+      "kind": "term-before-taught",
+      "runs": 3,
+      "confirmed": true,
+      "notes": [
+        "'final scoring step' and 'logit lens' invoked before logits are taught in next chapter (forward reference)",
+        "uses grouped-query attention and 'logit lens' scoring step before they are taught (forward reference to 2.3 / next chapter)",
+        "Uses 'final scoring step' and 'grouped-query attention' before they are taught (pointed forward to the next chapter and 2.3); the percentage bars are the model's guess before logits exist."
+      ]
+    },
+    {
+      "step": "S12",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "cites GQA and memory-bandwidth cost before GQA is explained"
+      ]
+    },
+    {
+      "step": "S14",
+      "kind": "term-before-taught",
+      "runs": 3,
+      "confirmed": true,
+      "notes": [
+        "uses compute-bound / memory-bandwidth-bound, H100, FasterTransformer before explaining them (only glossed by analogy)",
+        "'compute-bound' and 'memory-bandwidth-bound' used in the technical analogy before being explained; very dense step with many unexplained numbers (H100, 92% line)",
+        "'compute-bound' and 'memory-bandwidth-bound' are used without a plain definition; 'tick', 'H100' and 'vLLM' are also used cold."
+      ]
+    },
+    {
+      "step": "S15",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "red tiles 'queued' vs teal tiles meaning only explained in small text; two GPU bars show few teal slivers hard to count"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L2-mlp-01",
+      "concept": "mlp",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-mlp-02",
+      "concept": "mlp",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-mlp-03",
+      "concept": "mlp",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-mlp-04",
+      "concept": "mlp",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-mlp-05",
+      "concept": "mlp",
+      "kind": "single",
+      "grounded": 1,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-residual-01",
+      "concept": "residual",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-residual-02",
+      "concept": "residual",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-residual-03",
+      "concept": "residual",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-stack-01",
+      "concept": "stack",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-stack-02",
+      "concept": "stack",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-stack-03",
+      "concept": "stack",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-logits-01",
+      "concept": "logits",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-logits-02",
+      "concept": "logits",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-temperature-01",
+      "concept": "temperature",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-temperature-02",
+      "concept": "temperature",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-temperature-03",
+      "concept": "temperature",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-sampling-01",
+      "concept": "sampling",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-sampling-02",
+      "concept": "sampling",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-sampling-03",
+      "concept": "sampling",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-loop-01",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-loop-02",
+      "concept": "loop",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-kvcache-01",
+      "concept": "kvcache",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-kvcache-02",
+      "concept": "kvcache",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-kvcache-03",
+      "concept": "kvcache",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-prefill-01",
+      "concept": "prefill",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-prefill-02",
+      "concept": "prefill",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-prefill-03",
+      "concept": "prefill",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-kvsize-01",
+      "concept": "kvsize",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-kvsize-02",
+      "concept": "kvsize",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [
+        "Lesson's 328 KB/token is 327,680 bytes ×8192 = 2.68 GB; rounding to 2.7 is the only ambiguity."
+      ],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-kvsize-03",
+      "concept": "kvsize",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-kvsize-04",
+      "concept": "kvsize",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L2-kvsize-05",
+      "concept": "kvsize",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L2-context-01",
+      "concept": "context",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S16"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L2-context-02",
+      "concept": "context",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": null,
+  "diff": null
+}

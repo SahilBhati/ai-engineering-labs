@@ -1,0 +1,214 @@
+[
+  {
+    "qid": "Q24",
+    "kind": "single",
+    "options": {
+      "A": "W_up holds the questions (one row per neuron); W_down holds the note each neuron writes back",
+      "B": "Both hold cached keys and values",
+      "C": "W_up is computed per request; W_down is learned",
+      "D": "W_up holds the vocabulary; W_down holds the positions"
+    }
+  },
+  {
+    "qid": "Q09",
+    "kind": "single",
+    "options": {
+      "A": "Requests join and leave the batch at every decode tick, instead of waiting for the whole batch to finish",
+      "B": "The batch is fixed at server start",
+      "C": "All requests in a batch must have the same length",
+      "D": "Prefill and decode run on separate models"
+    }
+  },
+  {
+    "qid": "Q25",
+    "kind": "single",
+    "options": {
+      "A": "Answers become factually correct",
+      "B": "Every token becomes equally likely",
+      "C": "The model stops generating",
+      "D": "Greedy decoding: the top-scoring token is chosen every time"
+    }
+  },
+  {
+    "qid": "Q05",
+    "kind": "single",
+    "options": {
+      "A": "Both set TTFT",
+      "B": "Prefill sets time to first token (TTFT); decode sets time per output token (TPOT)",
+      "C": "Prefill sets TPOT; decode sets TTFT",
+      "D": "Neither: network latency dominates both"
+    }
+  },
+  {
+    "qid": "Q31",
+    "kind": "single",
+    "options": {
+      "A": "Lower the temperature for the system prompt",
+      "B": "Send the system prompt only once per day",
+      "C": "Compress the prompt with gzip before sending it",
+      "D": "Keep the KV cache computed for that prefix and reuse it for every request that starts with the identical tokens"
+    }
+  },
+  {
+    "qid": "Q11",
+    "kind": "single",
+    "options": {
+      "A": "It guarantees the same output every time",
+      "B": "It makes generation faster",
+      "C": "It cuts the long tail of unlikely tokens, so one unlucky draw can't derail a long answer, while keeping variety among plausible tokens",
+      "D": "It reduces the size of the KV cache"
+    }
+  },
+  {
+    "qid": "Q20",
+    "kind": "multi",
+    "options": {
+      "A": "The KV cache would no longer be valid",
+      "B": "Training nudges would struggle to reach the early layers",
+      "C": "The vocabulary would shrink",
+      "D": "Later layers would lose what earlier layers found unless every layer learned to copy it forward"
+    }
+  },
+  {
+    "qid": "Q28",
+    "kind": "single",
+    "options": {
+      "A": "The model is retrained after each token",
+      "B": "Keys and values are random, so any value works",
+      "C": "A token only looks backward, so appending a new token can't change anything computed for earlier ones",
+      "D": "They aren't valid; they are always recomputed"
+    }
+  },
+  {
+    "qid": "Q16",
+    "kind": "single",
+    "options": {
+      "A": "The final output tokens of earlier requests",
+      "B": "The model's weights in a faster memory",
+      "C": "Every earlier token's key and value vectors, for every layer",
+      "D": "The query vectors of every token"
+    }
+  },
+  {
+    "qid": "Q19",
+    "kind": "single",
+    "options": {
+      "A": "The error signal flowing backward in training",
+      "B": "The leftover probability after top-p cuts the tail",
+      "C": "The queue of tokens waiting for decode",
+      "D": "The word's vector as it travels through the model, with each layer's output added to it rather than replacing it"
+    }
+  },
+  {
+    "qid": "Q34",
+    "kind": "single",
+    "options": {
+      "A": "Changes how many tokens are generated",
+      "B": "Adds random noise to the weights",
+      "C": "Divides the logits by T before softmax: small T stretches the gaps, large T shrinks them",
+      "D": "Removes all but the top T tokens"
+    }
+  },
+  {
+    "qid": "Q01",
+    "kind": "single",
+    "options": {
+      "A": "Dot product with each row of the unembedding table gives one logit per token; softmax turns the logits into probabilities",
+      "B": "The MLP outputs one probability per token",
+      "C": "The nearest token in the embedding table is picked directly",
+      "D": "Attention over the vocabulary"
+    }
+  },
+  {
+    "qid": "Q29",
+    "kind": "multi",
+    "options": {
+      "A": "Quantizing the weights, freeing memory for caches",
+      "B": "Grouped-query attention (fewer KV heads)",
+      "C": "Using top-p sampling",
+      "D": "Storing the KV cache at 8-bit instead of 16-bit",
+      "E": "Raising the temperature"
+    }
+  },
+  {
+    "qid": "Q23",
+    "kind": "multi",
+    "options": {
+      "A": "The model only learned positions up to its training length",
+      "B": "The vocabulary runs out of token IDs",
+      "C": "KV memory grows in line with the number of tokens",
+      "D": "The tokenizer can only split a fixed number of words",
+      "E": "Prefill attention work grows with the square of the number of tokens"
+    }
+  },
+  {
+    "qid": "Q15",
+    "kind": "single",
+    "options": {
+      "A": "All 32 blocks share one set of weights, so depth is free",
+      "B": "Depth lets the model chain steps: a later block can use a note an earlier block wrote (“it's a riverside”) to add a new one (“floods are likely”)",
+      "C": "Each block handles a different part of the vocabulary",
+      "D": "Stacking makes the KV cache smaller"
+    }
+  },
+  {
+    "qid": "Q07",
+    "kind": "single",
+    "options": {
+      "A": "A circuit breaker",
+      "B": "A cache in front of a database",
+      "C": "A load balancer",
+      "D": "An append-only log, or a request context object that each middleware enriches instead of replacing"
+    }
+  },
+  {
+    "qid": "Q12",
+    "kind": "single",
+    "options": {
+      "A": "Decode does more math per token than prefill",
+      "B": "Prefill reuses each weight it reads across all prompt tokens at once; decode reads all the weights to produce one token per user, so it mostly waits on memory",
+      "C": "Prefill runs on the CPU and decode on the GPU",
+      "D": "Prefill skips attention"
+    }
+  },
+  {
+    "qid": "Q30",
+    "kind": "single",
+    "options": {
+      "A": "It turns the final vector into vocabulary scores",
+      "B": "It processes each word on its own: thousands of learned yes/no-style questions about the word, whose answers are written back into its vector",
+      "C": "It lets words exchange information with each other",
+      "D": "It stores the keys and values of earlier tokens"
+    }
+  },
+  {
+    "qid": "Q17",
+    "kind": "single",
+    "options": {
+      "A": "q, k and v for every token so far",
+      "B": "k and v for every token, but q only for the new one",
+      "C": "Only the logits, skipping attention",
+      "D": "q, k and v for the new token only; append its k and v to the cache; attend over the whole cache"
+    }
+  },
+  {
+    "qid": "Q06",
+    "kind": "single",
+    "options": {
+      "A": "About 10%",
+      "B": "About two-thirds",
+      "C": "Exactly half",
+      "D": "Almost none: attention holds the weights"
+    }
+  },
+  {
+    "qid": "Q08",
+    "kind": "single",
+    "options": {
+      "A": "A message queue",
+      "B": "A write-ahead log used for crash recovery",
+      "C": "Sharding a table across machines",
+      "D": "Memoization: compute once, store, reuse because the inputs can't change"
+    }
+  }
+]
