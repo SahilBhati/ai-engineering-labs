@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz · AI Engineering Labs</title>
+<meta name="description" content="Self-scoring quizzes for the LLM Foundations lessons: ten questions, a scorecard, and what to study again.">
+<link rel="stylesheet" href="../assets/site.css">
+<script>(function(){var r=document.documentElement;try{r.dataset.theme=localStorage.getItem("ael-theme")||"light";if(localStorage.getItem("ael-nav")==="0")r.classList.add("nav-collapsed");}catch(e){r.dataset.theme="light";}})();</script>
+<style>
+/* Quiz page. Two status colors only, used the same way everywhere:
+   --accent = answered right, --hot = missed. Neutral gray = not yet answered. */
+.quiz{display:flex; flex-direction:column; gap:28px; max-width:760px}
+.picker{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.picker .lbl{font:500 .75rem var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-right:4px}
+.picker a{font:500 .85rem var(--font-mono); padding:6px 12px; border-radius:999px; border:1px solid var(--line); color:var(--muted); text-decoration:none; background:var(--surface)}
+.picker a[aria-current="page"]{border-color:var(--accent); color:var(--accent)}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:24px; display:flex; flex-direction:column; gap:18px}
+.qmeta{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font:500 .75rem var(--font-mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.dots{display:flex; gap:4px}
+.dots span{width:22px; height:5px; border-radius:3px; background:var(--line)}
+.dots span.now{background:var(--muted)}
+.dots span.done{background:var(--ink); opacity:.55}
+.qprompt{font-size:1.2rem; line-height:1.45; font-weight:600; overflow-wrap:anywhere}
+.qhint{color:var(--muted); font-size:.9rem}
+.opts{display:flex; flex-direction:column; gap:8px; border:0; padding:0; margin:0}
+.opt{display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border:1px solid var(--line); border-radius:10px; cursor:pointer; background:var(--bg); line-height:1.45; overflow-wrap:anywhere}
+.opt:hover{border-color:var(--muted)}
+.opt input{margin-top:4px; accent-color:var(--accent); flex:none}
+.opt:has(input:checked){border-color:var(--ink)}
+.numq{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.numq input{font:1.1rem var(--font-mono); padding:10px 12px; width:14ch; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+.numq .unit{font-family:var(--font-mono); color:var(--muted)}
+.numq .bad{color:var(--hot); font-size:.85rem; width:100%}
+.actions{display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center}
+.btn{cursor:pointer}
+.btn[disabled]{opacity:.45; cursor:not-allowed}
+.btn.link{border-color:transparent; color:var(--muted); padding-inline:4px}
+.note{font-size:.9rem; color:var(--muted)}
+.note.warn{color:var(--hot)}
+/* scorecard */
+.score{display:flex; gap:18px; align-items:baseline; flex-wrap:wrap}
+.score b{font-size:3.2rem; line-height:1; letter-spacing:-.02em}
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-size:.85rem; color:var(--muted)}
+.legend i{display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px}
+.ok-bg{background:var(--accent)} .miss-bg{background:var(--hot)}
+.rows{display:flex; flex-direction:column; gap:10px; margin:0; padding:0; list-style:none}
+.row{display:grid; grid-template-columns:minmax(0,1fr) 140px 3.5em; gap:12px; align-items:center}
+.row .name{overflow-wrap:anywhere}
+.row .name small{display:block; color:var(--muted); font:500 .72rem var(--font-mono); letter-spacing:.06em; text-transform:uppercase}
+.bar{display:flex; height:10px; border-radius:5px; overflow:hidden; background:var(--line)}
+.bar span{display:block; height:100%}
+.row .frac{font-family:var(--font-mono); text-align:right}
+.study{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px}
+.study a{display:flex; justify-content:space-between; gap:12px; padding:10px 14px; border:1px solid var(--hot); border-radius:10px; text-decoration:none; color:var(--ink)}
+.study a span:last-child{color:var(--hot); font-weight:600; white-space:nowrap}
+.review{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:14px}
+.rv{border:1px solid var(--line); border-left:4px solid var(--line); border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:8px; background:var(--bg)}
+.rv.ok{border-left-color:var(--accent)} .rv.miss{border-left-color:var(--hot)}
+.rv .tag{font:500 .72rem var(--font-mono); letter-spacing:.06em; text-transform:uppercase}
+.rv.ok .tag{color:var(--accent)} .rv.miss .tag{color:var(--hot)}
+.rv .p{font-weight:600; overflow-wrap:anywhere}
+.rv dl{margin:0; display:grid; grid-template-columns:auto minmax(0,1fr); gap:4px 12px; font-size:.95rem}
+.rv dt{color:var(--muted)} .rv dd{margin:0; overflow-wrap:anywhere}
+.rv .why{font-size:.95rem; color:var(--ink)}
+.rv .why b{color:var(--muted); font-weight:600}
+.copy-box{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+h2.sec{font-size:1.25rem; letter-spacing:-.01em}
+@media (max-width:600px){ .card{padding:18px} .row{grid-template-columns:minmax(0,1fr) 80px 3em} }
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <button class="icon-btn" id="navBtn" aria-controls="sidenav" aria-expanded="true" aria-label="Collapse sidebar"><span aria-hidden="true">☰</span></button>
+  <a class="brand" href="../">AI Engineering <span>Labs</span></a>
+  <nav class="site" aria-label="Main"><a href="../lessons/" aria-current="page">Lessons</a><a href="../writeups/">Write-ups</a><a href="../tools/">Tools</a><a href="../about.html">About</a></nav>
+  <div class="header-cta"><a class="gh" href="https://github.com/SahilBhati/ai-engineering-labs" target="_blank" rel="noopener">GitHub ↗</a><button class="btn small" id="themeBtn" aria-pressed="false">Dark mode</button><a class="btn primary small" href="../lessons/llm-foundations-1/">Start lesson 1</a></div>
+</div></header>
+<div class="layout">
+<aside class="sidenav" id="sidenav" aria-label="Site sections"><div class="grp"><p class="lbl">Start here</p><a href="../index.html">Home</a><a href="../about.html">About</a></div><div class="grp"><p class="lbl">Course · LLM Foundations</p><a href="../lessons/">All lessons</a><a href="../lessons/llm-foundations-1/"><span class="num">01</span>Tokens, embeddings, attention</a><a href="../lessons/llm-foundations-2/"><span class="num">02</span>The block, sampling, the KV cache</a><a href="../lessons/llm-foundations-3/"><span class="num">03</span>Training and inference economics</a></div><div class="grp"><p class="lbl">Self-test</p><a href="./?lesson=1" data-quiz="1"><span class="num">Q1</span>Quiz · lesson 1</a><a href="./?lesson=2" data-quiz="2"><span class="num">Q2</span>Quiz · lesson 2</a><a href="./?lesson=3" data-quiz="3"><span class="num">Q3</span>Quiz · lesson 3</a></div></aside>
+<main>
+<section class="band"><div class="wrap"><div class="quiz">
+  <div class="page-head">
+    <span class="eyebrow" id="eyebrow">Self-test</span>
+    <h1 id="title" style="font-size:clamp(2rem,4vw,2.8rem)">Quiz</h1>
+    <p class="lede" id="lede">Ten questions, scored when you finish. Seven come from this lesson and three from earlier ones; questions you miss come back more often.</p>
+  </div>
+  <nav class="picker" aria-label="Choose a lesson"><span class="lbl">Lesson</span><a href="./?lesson=1" data-quiz="1">1</a><a href="./?lesson=2" data-quiz="2">2</a><a href="./?lesson=3" data-quiz="3">3</a></nav>
+  <div id="app" aria-live="polite"><p class="note">Loading questions…</p></div>
+</div></div></section>
+<footer class="site"><div class="wrap">
+  <span>AI Engineering Labs · learning in public</span>
+  <span><a href="https://github.com/SahilBhati/ai-engineering-labs" target="_blank" rel="noopener">GitHub ↗</a> · <a href="../llms.txt">llms.txt</a></span>
+</div></footer>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+<script src="../assets/quiz/engine.js"></script>
+<script>
+(function(){
+  "use strict";
+  // Lessons that have a bank. A new lesson adds its number here and a banks/lN.json file.
+  const AVAILABLE = [1, 2, 3];
+  const Q = window.Quiz, app = document.getElementById("app");
+  const h = (tag, attrs, html) => { const e = document.createElement(tag);
+    for(const k in (attrs || {})) e.setAttribute(k, attrs[k]); if(html != null) e.innerHTML = html; return e; };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+
+  const asked = parseInt(new URLSearchParams(location.search).get("lesson"), 10);
+  const lesson = AVAILABLE.includes(asked) ? asked : Math.max.apply(null, AVAILABLE);
+  document.querySelectorAll("[data-quiz]").forEach(a => { if(+a.dataset.quiz === lesson) a.setAttribute("aria-current", "page"); });
+
+  // Storage may be blocked (private mode, policies). The store falls back to memory; say so on the scorecard.
+  let storage = null; try{ storage = window.localStorage; }catch(e){ storage = null; }
+  const store = Q.createStore(storage);
+  // Strategy hook: a later scheduler can set window.QUIZ_STRATEGY before this script runs.
+  const strategy = window.QUIZ_STRATEGY || Q.leitnerStrategy;
+
+  let banks = [], attempt = [], idx = 0, responses = [], order = [];
+
+  const need = AVAILABLE.filter(n => n <= lesson);
+  Promise.all(need.map(n => fetch("banks/l" + n + ".json").then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })))
+    .then(bs => { banks = bs; start(); })
+    .catch(() => { app.innerHTML = '<div class="card"><p>The question banks could not be loaded. If you opened this file from disk, serve the folder over HTTP instead (for example <code>python3 -m http.server</code>).</p></div>'; });
+
+  function start(){
+    const b = banks.find(x => x.lesson === lesson);
+    document.getElementById("eyebrow").textContent = "Self-test · Lesson " + lesson;
+    document.getElementById("title").textContent = "Quiz: " + b.title;
+    document.title = "Quiz · Lesson " + lesson + " · AI Engineering Labs";
+    document.getElementById("lede").textContent = lesson === 1
+      ? "Ten questions from this lesson, scored when you finish. Questions you miss come back more often."
+      : "Ten questions, scored when you finish: seven from this lesson, three from earlier lessons. Questions you miss come back more often.";
+    attempt = Q.buildAttempt(banks, lesson, {store, strategy});
+    responses = attempt.map(() => null);
+    // Show options in a fresh order each attempt, so position can't be memorized.
+    order = attempt.map(q => q.options ? Q.shuffle(q.options.map((_, i) => i), Math.random) : null);
+    idx = 0; renderQuestion();
+  }
+
+  function answered(i){
+    const q = attempt[i], r = responses[i];
+    if(q.kind === "number") return r != null && Number.isFinite(Q.parseNumber(r));
+    return Array.isArray(r) && r.length > 0;
+  }
+
+  function renderQuestion(){
+    const q = attempt[idx], b = banks.find(x => x.lesson === q.lesson), last = idx === attempt.length - 1;
+    const card = h("div", {class: "card"});
+    const dots = attempt.map((_, i) => '<span class="' + (i === idx ? "now" : (i < idx ? "done" : "")) + '"></span>').join("");
+    card.append(h("div", {class: "qmeta"}, '<span>Question ' + (idx + 1) + ' of ' + attempt.length + ' · lesson ' + q.lesson + '</span><span class="dots" aria-hidden="true">' + dots + '</span>'));
+    const pid = "qp-" + idx;
+    card.append(h("p", {class: "qprompt", id: pid}, esc(q.prompt)));
+    const hints = {single: "Pick one.", multi: "Pick all that apply. Scored right only if you pick exactly the right set.", number: "Type a number." + (q.tol ? " Within " + Math.round(q.tol * 1000) / 10 + "% counts as right." : " Exact answer.")};
+    card.append(h("p", {class: "qhint"}, hints[q.kind]));
+    const next = h("button", {class: "btn primary", type: "button"}, last ? "See results" : "Next →");
+    const sync = () => { next.disabled = !answered(idx); };
+
+    if(q.kind === "number"){
+      const wrap = h("div", {class: "numq"});
+      const inp = h("input", {type: "text", inputmode: "decimal", autocomplete: "off", "aria-labelledby": pid, id: "num-" + idx});
+      inp.value = responses[idx] || "";
+      const bad = h("span", {class: "bad", role: "status"});
+      inp.addEventListener("input", () => { responses[idx] = inp.value;
+        bad.textContent = inp.value.trim() && !Number.isFinite(Q.parseNumber(inp.value)) ? "Use digits only, e.g. 2.68 or 8,002,000." : ""; sync(); });
+      inp.addEventListener("keydown", e => { if(e.key === "Enter" && answered(idx)) next.click(); });
+      wrap.append(inp); if(q.unit) wrap.append(h("span", {class: "unit"}, esc(q.unit))); wrap.append(bad);
+      card.append(wrap);
+      setTimeout(() => inp.focus({preventScroll: true}), 0);
+    } else {
+      const fs = h("fieldset", {class: "opts", "aria-labelledby": pid});
+      const type = q.kind === "single" ? "radio" : "checkbox";
+      order[idx].forEach(oi => {
+        const lab = h("label", {class: "opt"});
+        const inp = h("input", {type, name: "q" + idx, value: String(oi)});
+        if((responses[idx] || []).includes(oi)) inp.checked = true;
+        inp.addEventListener("change", () => {
+          responses[idx] = Array.from(fs.querySelectorAll("input:checked")).map(x => +x.value);
+          sync();
+        });
+        lab.append(inp, h("span", null, esc(q.options[oi])));
+        fs.append(lab);
+      });
+      card.append(fs);
+    }
+
+    const acts = h("div", {class: "actions"});
+    const left = h("div");
+    if(idx > 0){ const back = h("button", {class: "btn", type: "button"}, "← Back"); back.addEventListener("click", () => { idx--; renderQuestion(); }); left.append(back); }
+    const skip = h("button", {class: "btn link", type: "button"}, "I don't know");
+    skip.addEventListener("click", () => { responses[idx] = q.kind === "number" ? "" : []; advance(); });
+    left.append(skip);
+    next.addEventListener("click", () => { if(answered(idx)) advance(); });
+    acts.append(left, next);
+    card.append(acts);
+    sync();
+    app.replaceChildren(card);
+  }
+
+  function advance(){
+    if(idx < attempt.length - 1){ idx++; renderQuestion(); app.scrollIntoView({block: "nearest"}); }
+    else finish();
+  }
+
+  function finish(){
+    const results = attempt.map((q, i) => {
+      const correct = Q.grade(q, responses[i]);
+      return {q, response: responses[i], correct, box: store.record(q.id, correct)};
+    });
+    renderScorecard(results);
+  }
+
+  function bar(right, total){
+    const ok = total ? right / total * 100 : 0;
+    return '<span class="bar" aria-hidden="true"><span class="ok-bg" style="width:' + ok + '%"></span><span class="miss-bg" style="width:' + (100 - ok) + '%"></span></span>';
+  }
+  function row(name, sub, right, total){
+    return '<li class="row"><span class="name">' + (sub ? '<small>' + esc(sub) + '</small>' : '') + esc(name) + '</span>' + bar(right, total) + '<span class="frac">' + right + '/' + total + '</span></li>';
+  }
+
+  function renderScorecard(results){
+    const sc = Q.scorecard(results, banks);
+    const out = h("div", {class: "quiz"});
+
+    const head = h("div", {class: "card"});
+    head.append(h("p", {class: "eyebrow"}, "Your score"));
+    head.append(h("div", {class: "score"}, '<b>' + sc.right + ' / ' + sc.total + '</b><span class="muted">' +
+      (sc.right === sc.total ? "Every question right." : (sc.total - sc.right) + " to study again, listed below.") + '</span>'));
+    head.append(h("p", {class: "legend"}, '<span><i class="ok-bg"></i>answered right</span><span><i class="miss-bg"></i>missed (wrong or skipped)</span>'));
+    head.append(h("p", {class: "note" + (store.persistent ? "" : " warn")}, store.persistent
+      ? "Saved in this browser only: missed questions come back more often next time."
+      : "This browser is blocking storage, so this attempt won't be remembered. The quiz still works; questions are drawn fresh each time."));
+    out.append(head);
+
+    const brk = h("div", {class: "card"});
+    brk.append(h("h2", {class: "sec"}, "By lesson"));
+    brk.append(h("p", {class: "note"}, "Each bar is one lesson's questions in this attempt: the share you got right, then the share you missed."));
+    brk.append(h("ul", {class: "rows"}, sc.byLesson.map(l => row(l.title, "Lesson " + l.lesson, l.right, l.total)).join("")));
+    brk.append(h("h2", {class: "sec"}, "By concept"));
+    brk.append(h("p", {class: "note"}, "Same bars, one row per concept tested. Any concept with orange in its bar is in “Study more”."));
+    brk.append(h("ul", {class: "rows"}, sc.byConcept.map(c => row(c.label, "Lesson " + c.lesson, c.right, c.total)).join("")));
+    out.append(brk);
+
+    if(sc.studyMore.length){
+      const st = h("div", {class: "card"});
+      st.append(h("h2", {class: "sec"}, "Study more"));
+      st.append(h("p", {class: "note"}, "Every concept you missed at least once, linked to the chapter that teaches it."));
+      st.append(h("ul", {class: "study"}, sc.studyMore.map(c =>
+        '<li><a href="' + esc(c.href) + '"><span>Lesson ' + c.lesson + ' · ' + esc(c.label) + '</span><span>' + (c.total - c.right) + ' missed →</span></a></li>').join("")));
+      const prompt = Q.copyPrompt(results, banks);
+      const cb = h("div", {class: "copy-box"});
+      const btn = h("button", {class: "btn primary", type: "button"}, "Copy prompt");
+      const msg = h("span", {class: "note", role: "status"}, "A ready prompt for any AI assistant: your missed questions, your answers, the right answers.");
+      btn.addEventListener("click", () => {
+        const done = ok => { msg.textContent = ok ? "Copied. Paste it into any AI assistant." : "Couldn't copy automatically; the prompt is shown below to copy by hand."; if(!ok) showRaw(); };
+        const showRaw = () => { if(!cb.querySelector("textarea")){ const ta = h("textarea", {rows: "10", readonly: "", style: "width:100%;font:.85rem var(--font-mono);padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)", "aria-label": "Prompt to copy"}); ta.value = prompt; cb.append(ta); ta.select(); } };
+        try{ navigator.clipboard.writeText(prompt).then(() => done(true), () => done(false)); }catch(e){ done(false); }
+      });
+      cb.append(btn, msg);
+      st.append(cb);
+      out.append(st);
+    }
+
+    const rv = h("div", {class: "card"});
+    rv.append(h("h2", {class: "sec"}, "Every question"));
+    rv.append(h("p", {class: "note"}, "In the order asked. Left edge: teal = right, orange = missed."));
+    rv.append(h("ol", {class: "review"}, results.map((r, i) => {
+      const b = banks.find(x => x.lesson === r.q.lesson), c = b.concepts[r.q.concept];
+      return '<li class="rv ' + (r.correct ? "ok" : "miss") + '"><span class="tag">' + (i + 1) + ' · ' + (r.correct ? "right" : "missed") + ' · lesson ' + r.q.lesson + ' · ' + esc(c ? c.label : r.q.concept) + '</span>' +
+        '<p class="p">' + esc(r.q.prompt) + '</p><dl><dt>Your answer</dt><dd>' + esc(Q.answerText(r.q, r.response)) + '</dd><dt>Right answer</dt><dd>' + esc(Q.rightText(r.q)) + '</dd></dl>' +
+        '<p class="why"><b>Why: </b>' + esc(r.q.why) + '</p></li>';
+    }).join("")));
+    out.append(rv);
+
+    const again = h("div", {class: "actions"});
+    const retry = h("button", {class: "btn primary", type: "button"}, "Take another quiz");
+    retry.addEventListener("click", () => { start(); window.scrollTo(0, 0); });
+    const reset = h("button", {class: "btn link", type: "button"}, "Forget my history");
+    reset.addEventListener("click", () => { store.reset(); reset.textContent = "History cleared"; reset.disabled = true; });
+    const back = h("a", {class: "btn", href: banks.find(x => x.lesson === lesson).url}, "Back to lesson " + lesson);
+    again.append(h("div", null), h("div", {style: "display:flex;gap:10px;flex-wrap:wrap"}));
+    again.lastChild.append(reset, back, retry);
+    out.append(again);
+
+    app.replaceChildren(out);
+    window.__quizResults = results; // for scripted checks
+  }
+})();
+</script>
+</body>
+</html>

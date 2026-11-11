@@ -1,0 +1,439 @@
+{
+  "lesson": 3,
+  "title": "Training and inference economics",
+  "url": "../lessons/llm-foundations-3/",
+  "concepts": {
+    "examples": { "label": "Next-token prediction", "anchor": "ch-3-1" },
+    "loss": { "label": "Loss (cross-entropy)", "anchor": "ch-3-1" },
+    "mask": { "label": "Causal mask", "anchor": "ch-3-1" },
+    "scale": { "label": "Training compute and infrastructure", "anchor": "ch-3-1" },
+    "base": { "label": "Base model and chat template", "anchor": "ch-3-2" },
+    "sft": { "label": "Supervised fine-tuning", "anchor": "ch-3-2" },
+    "preference": { "label": "Preference tuning (RLHF, DPO)", "anchor": "ch-3-2" },
+    "latency": { "label": "TTFT and TPOT", "anchor": "ch-3-3" },
+    "batching": { "label": "Batching: throughput vs latency", "anchor": "ch-3-3" },
+    "outcost": { "label": "Why output tokens cost more", "anchor": "ch-3-3" },
+    "costpm": { "label": "Cost per million tokens", "anchor": "ch-3-3" },
+    "pcache": { "label": "Prompt caching", "anchor": "ch-3-3" },
+    "quant": { "label": "Quantization", "anchor": "ch-3-3" },
+    "capacity": { "label": "Capacity planning", "anchor": "ch-3-3" }
+  },
+  "questions": [
+    {
+      "id": "L3-examples-01", "concept": "examples", "kind": "number",
+      "prompt": "Pre-training on one 1,000-token document. How many next-token training examples does it give?",
+      "answer": [999], "tol": 0,
+      "why": "Every position except the last predicts the token after it: n − 1 = 999. The model makes all 999 predictions in one forward pass: the vector at position i predicts token i + 1."
+    },
+    {
+      "id": "L3-examples-02", "concept": "examples", "kind": "single",
+      "prompt": "Why does pre-training need no human labels?",
+      "options": [
+        "The text supplies the answer: the right label at each position is simply the next token",
+        "A smaller model labels the text first",
+        "Labels are added later, during fine-tuning",
+        "It does need labels; they are crowdsourced"
+      ],
+      "answer": [0],
+      "why": "Self-supervised learning: the data is its own label. That is why pre-training can use trillions of tokens of raw text."
+    },
+    {
+      "id": "L3-loss-01", "concept": "loss", "kind": "number",
+      "prompt": "Loss = −ln p(correct token). The model gives the correct token 50%. What is the loss?",
+      "answer": [0.693], "tol": 0.02,
+      "why": "−ln 0.5 = ln 2 ≈ 0.693."
+    },
+    {
+      "id": "L3-loss-02", "concept": "loss", "kind": "number",
+      "prompt": "Same formula, but the model gives the correct token only 1%. What is the loss?",
+      "answer": [4.605], "tol": 0.02,
+      "why": "−ln 0.01 = ln 100 ≈ 4.6. Dropping from 50% to 1% multiplies the loss by about 6.6, while 1 − p would only go from 0.5 to 0.99."
+    },
+    {
+      "id": "L3-loss-03", "concept": "loss", "kind": "single",
+      "prompt": "Why use −ln p instead of 1 − p as the loss?",
+      "options": [
+        "−ln p punishes confident wrong answers without limit (p → 0 gives loss → ∞), while 1 − p caps the penalty at 1",
+        "1 − p can be negative",
+        "−ln p is cheaper to compute",
+        "There is no difference in what the model learns"
+      ],
+      "answer": [0],
+      "why": "Being 1% sure of the right answer should hurt far more than being 50% sure. The log makes the penalty grow sharply as p shrinks, and it pairs with softmax into a simple gradient (p − 1 on the right token)."
+    },
+    {
+      "id": "L3-loss-04", "concept": "loss", "kind": "single",
+      "prompt": "With softmax and cross-entropy, what is the gradient on each logit?",
+      "options": [
+        "p − 1 for the correct token, and p for every other token",
+        "1 for the correct token, 0 for all others",
+        "−ln p for every token",
+        "The same value for every token"
+      ],
+      "answer": [0],
+      "why": "Push the right answer up (p − 1 is negative, so gradient descent raises it) and push every other token down in proportion to how much probability it took."
+    },
+    {
+      "id": "L3-mask-01", "concept": "mask", "kind": "single",
+      "prompt": "What would the model learn if you trained without the causal mask?",
+      "options": [
+        "To copy the next token from the input, since it could see it; at generation time that token doesn't exist yet, so the trick fails",
+        "Exactly the same thing, only slower",
+        "To generate whole sentences at once",
+        "Nothing: training would crash"
+      ],
+      "answer": [0],
+      "why": "Without the mask, position i can attend to token i + 1, which is its own answer. The loss drops fast by cheating. At generation the future isn't there, so the model has learned nothing useful."
+    },
+    {
+      "id": "L3-mask-02", "concept": "mask", "kind": "single",
+      "prompt": "How is the causal mask applied in code?",
+      "options": [
+        "Add −∞ to the scores above the diagonal before softmax, so future positions get exactly 0 weight",
+        "Delete the future tokens from the input",
+        "Multiply the values of future tokens by 0.5",
+        "Set the attention weights to 0 after the weighted average"
+      ],
+      "answer": [0],
+      "why": "scores + mask, where the mask is 0 on and below the diagonal and −∞ above it. e^−∞ = 0, so the future gets exactly zero share and the remaining shares still sum to 1."
+    },
+    {
+      "id": "L3-mask-03", "concept": "mask", "kind": "single",
+      "prompt": "Training runs all positions in parallel; generation runs one at a time. Why do the two compute the same thing?",
+      "options": [
+        "The causal mask makes each position see only itself and earlier positions, exactly what it sees during generation",
+        "Generation retrains the model after each token",
+        "They don't; models are adjusted after training to match",
+        "Both use the same temperature"
+      ],
+      "answer": [0],
+      "why": "In both cases position i depends only on tokens 1…i. That is also why the KV cache (Lesson 2) and prompt caching are correct."
+    },
+    {
+      "id": "L3-scale-01", "concept": "scale", "kind": "number",
+      "prompt": "Training compute ≈ 6 × parameters × tokens. A 70B model on 15 trillion tokens. How many operations, in units of 10²⁴?",
+      "answer": [6.3], "tol": 0.03, "unit": "× 10²⁴",
+      "why": "6 × 70 × 10⁹ × 15 × 10¹² = 6,300 × 10²¹ = 6.3 × 10²⁴. The 6 is 2 for the forward pass plus about 4 for the backward pass."
+    },
+    {
+      "id": "L3-scale-02", "concept": "scale", "kind": "number",
+      "prompt": "Run those 6.3 × 10²⁴ operations on 8,192 GPUs at 989 trillion operations per second each, with 40% utilization. How many days?",
+      "answer": [22.5], "tol": 0.06, "unit": "days",
+      "why": "8,192 × 989 × 10¹² × 0.4 ≈ 3.24 × 10¹⁸ per second. 6.3 × 10²⁴ ÷ 3.24 × 10¹⁸ ≈ 1.94 million seconds ÷ 86,400 ≈ 22.5 days."
+    },
+    {
+      "id": "L3-scale-03", "concept": "scale", "kind": "multi",
+      "prompt": "Which are real differences between training and serving infrastructure? Pick all that apply.",
+      "options": [
+        "Training GPUs must exchange gradients every step, so the network and stragglers matter as much as the chips",
+        "Training needs several times the memory per parameter (gradients and optimizer state)",
+        "One failed GPU stalls a whole synchronized training job, so teams checkpoint often",
+        "Serving updates the weights after every request",
+        "Training uses a KV cache to skip recomputation"
+      ],
+      "answer": [0, 1, 2],
+      "why": "Training is one huge synchronized job that writes weights; serving is many independent requests that only read them. Serving never updates weights, and the KV cache is a generation-time trick."
+    },
+    {
+      "id": "L3-base-01", "concept": "base", "kind": "single",
+      "prompt": "You ask a base model (pre-training only) “What is a river bank?” What is it most likely to do?",
+      "options": [
+        "Continue the text as a document would, perhaps with more quiz questions, rather than answer",
+        "Answer politely like a chat assistant",
+        "Refuse, because it has no instructions",
+        "Return an error"
+      ],
+      "answer": [0],
+      "why": "A base model only continues text. Answering as an assistant is learned in post-training."
+    },
+    {
+      "id": "L3-base-02", "concept": "base", "kind": "single",
+      "prompt": "What does a chat template do?",
+      "options": [
+        "Wraps each turn in special tokens (like <|user|>, <|assistant|>) and flattens the messages list into one token string the model continues",
+        "Adds a second model that handles conversation",
+        "Stores past conversations on the server",
+        "Translates the prompt into a fixed format of questions"
+      ],
+      "answer": [0],
+      "why": "The API's messages become one sequence; the server appends the assistant header, and the model continues until it emits the end-of-turn token. The model is still predicting the next token."
+    },
+    {
+      "id": "L3-sft-01", "concept": "sft", "kind": "single",
+      "prompt": "Base model vs chat model after supervised fine-tuning (SFT): what changes?",
+      "options": [
+        "Only the weight values, through more training with the same next-token loss on curated prompt → answer pairs; architecture, tokenizer and loss stay the same",
+        "A new answer-generation layer is added",
+        "The tokenizer is retrained for dialogue",
+        "The loss function is replaced by a reward"
+      ],
+      "answer": [0],
+      "why": "SFT is the same forward pass, the same −ln p per position, the same gradient. Only the data changes, plus a per-token weight that decides which positions are scored."
+    },
+    {
+      "id": "L3-sft-02", "concept": "sft", "kind": "single",
+      "prompt": "SFT scores only the answer tokens (weight 0 on the template and prompt). What would go wrong if it scored the prompt too?",
+      "options": [
+        "Training effort would go into predicting user messages, so the model learns to write prompts as well as answers",
+        "Nothing; it only costs a little more compute",
+        "The causal mask would stop working",
+        "The model would forget the vocabulary"
+      ],
+      "answer": [0],
+      "why": "The goal is to learn how to respond. Scoring the prompt teaches the model to imitate users, and wastes the small SFT dataset on text it doesn't need to produce."
+    },
+    {
+      "id": "L3-sft-03", "concept": "sft", "kind": "single",
+      "prompt": "Llama 2 used about 27,540 written SFT examples versus about 2 trillion pre-training tokens. What does that say?",
+      "options": [
+        "Knowledge comes from pre-training; a small, high-quality post-training set mainly shapes behavior and format",
+        "SFT examples are worth more than pre-training tokens for learning facts",
+        "Pre-training is mostly wasted",
+        "SFT replaces most of what pre-training learned"
+      ],
+      "answer": [0],
+      "why": "Post-training is tiny next to pre-training, yet it decides how the model behaves: it steers what the base model already knows rather than teaching new knowledge."
+    },
+    {
+      "id": "L3-preference-01", "concept": "preference", "kind": "single",
+      "prompt": "RLHF vs DPO: what does each need?",
+      "options": [
+        "RLHF: a trained reward model plus reinforcement learning with generation during training. DPO: one loss directly on chosen/rejected pairs, ordinary supervised training",
+        "RLHF: only human-written answers. DPO: a reward model",
+        "Both need a reward model; DPO just trains it faster",
+        "RLHF trains on single answers; DPO needs a full conversation"
+      ],
+      "answer": [0],
+      "why": "Both learn from preference pairs. DPO skips the reward model and the reinforcement-learning loop, which is why it spread quickly: simpler, cheaper, and stable."
+    },
+    {
+      "id": "L3-preference-02", "concept": "preference", "kind": "single",
+      "prompt": "The DPO loss is −ln σ(gap). What is the “gap”?",
+      "options": [
+        "How much more the model now favors the chosen answer over the rejected one, compared with the starting model",
+        "The difference in length between the two answers",
+        "The reward model's score difference",
+        "The number of tokens the two answers differ by"
+      ],
+      "answer": [0],
+      "why": "Measured relative to the starting model, so the model is pushed toward the chosen answer without drifting far from what it was."
+    },
+    {
+      "id": "L3-latency-01", "concept": "latency", "kind": "number",
+      "prompt": "TTFT is 0.3 s and TPOT is 25 ms. How many seconds until a 401-token answer has fully arrived?",
+      "answer": [10.3], "tol": 0.02, "unit": "s",
+      "why": "The first token arrives at TTFT; the other 400 each take one TPOT: 0.3 + 400 × 0.025 = 0.3 + 10 = 10.3 s."
+    },
+    {
+      "id": "L3-latency-02", "concept": "latency", "kind": "single",
+      "prompt": "In a chat app, which latency does a user notice first?",
+      "options": [
+        "TTFT: how long before anything appears",
+        "End-to-end latency",
+        "Throughput across all users",
+        "Time to compute the KV cache size"
+      ],
+      "answer": [0],
+      "why": "With streaming, the wait before the first token is the felt delay; after that, a TPOT faster than reading speed feels smooth."
+    },
+    {
+      "id": "L3-latency-03", "concept": "latency", "kind": "number",
+      "prompt": "Prefill floor: 2 operations per parameter per token. A 70B model on GPUs delivering 1,978 trillion operations per second in total. Minimum TTFT for a 2,000-token prompt, in milliseconds?",
+      "answer": [141.6], "tol": 0.05, "unit": "ms",
+      "why": "2 × 70 × 10⁹ = 140 billion per token ÷ 1,978 × 10¹² ≈ 71 µs per token. × 2,000 ≈ 142 ms, before queueing and overheads."
+    },
+    {
+      "id": "L3-batching-01", "concept": "batching", "kind": "single",
+      "prompt": "You raise the decode batch from 1 to 64. What happens?",
+      "options": [
+        "Total tokens per second rises a lot; each user's TPOT rises a little; KV memory eventually caps how many users fit",
+        "Both throughput and each user's TPOT get better",
+        "Throughput stays the same; each user gets slower",
+        "Each user's TPOT stays exactly the same until compute runs out"
+      ],
+      "answer": [0],
+      "why": "Tick = (weight bytes + B × cache bytes per user) ÷ bandwidth. At small B the weight read dominates and is shared, so extra users are nearly free. Cache reads grow with B, and cache memory runs out first."
+    },
+    {
+      "id": "L3-batching-02", "concept": "batching", "kind": "number",
+      "prompt": "Toy server: 16 GB of weights, 1 GB of KV cache per user, 1 TB/s of memory bandwidth. Tick = (16 + B × 1) GB ÷ 1 TB/s. With B = 16 users, how many tokens per second in total?",
+      "answer": [500], "tol": 0.02, "unit": "tokens/s",
+      "why": "Tick = 32 GB ÷ 1,000 GB/s = 32 ms, one token per user per tick: 16 ÷ 0.032 = 500 tokens/s. With one user: 17 ms → about 59 tokens/s. Sixteen users get 8.5× the throughput for under 2× the TPOT."
+    },
+    {
+      "id": "L3-batching-03", "concept": "batching", "kind": "single",
+      "prompt": "Which backend pattern is decode batching most like?",
+      "options": [
+        "Group commit: many transactions share one disk flush, so each waits slightly longer but total throughput rises",
+        "A circuit breaker",
+        "Read replicas",
+        "A CDN edge cache"
+      ],
+      "answer": [0],
+      "why": "The expensive shared step (reading every weight; flushing the log) is paid once per batch instead of once per request."
+    },
+    {
+      "id": "L3-outcost-01", "concept": "outcost", "kind": "single",
+      "prompt": "Why does an output token cost more GPU time than an input token?",
+      "options": [
+        "Input tokens are processed together in prefill, with the GPU's math fully busy; each output step reads all the weights and caches to emit just one token per user",
+        "Output tokens go through more layers",
+        "Output tokens are longer than input tokens",
+        "Providers charge more for output to discourage long answers; GPU time is the same"
+      ],
+      "answer": [0],
+      "why": "Prefill is compute-bound and shares each weight read across the whole prompt. Decode is memory-bound: a full read of weights plus caches per tick. The price gap mirrors that GPU-time gap."
+    },
+    {
+      "id": "L3-outcost-02", "concept": "outcost", "kind": "multi",
+      "prompt": "When would the cost gap between output and input tokens shrink? Pick all that apply.",
+      "options": [
+        "Larger decode batches, so each weight read is shared by more users",
+        "Smaller KV caches (shorter contexts, fewer KV heads), so more users fit in a batch",
+        "Quantized weights, so each tick reads fewer bytes",
+        "Longer contexts per request",
+        "Higher temperature"
+      ],
+      "answer": [0, 1, 2],
+      "why": "Anything that spreads or shrinks the bytes read per tick helps decode. Longer contexts make output pricier (bigger caches to read every tick); temperature doesn't change the work."
+    },
+    {
+      "id": "L3-outcost-03", "concept": "outcost", "kind": "number",
+      "prompt": "An H100 does about 989 trillion operations per second and reads about 3.35 trillion bytes per second. How many operations can it do per byte read before memory stops being the bottleneck?",
+      "answer": [295], "tol": 0.03,
+      "why": "989 ÷ 3.35 ≈ 295. Decode at 16-bit does about 1 operation per weight byte per user, so it would take ~295 users to become math-bound, and KV memory runs out long before."
+    },
+    {
+      "id": "L3-costpm-01", "concept": "costpm", "kind": "number",
+      "prompt": "Two GPUs at $4 per GPU-hour produce 1,000 output tokens per second. What is the cost per million output tokens, in dollars?",
+      "answer": [2.22], "tol": 0.03, "unit": "$",
+      "why": "$8 per hour ÷ 3.6 million tokens per hour (1,000 × 3,600) ≈ $2.22 per million."
+    },
+    {
+      "id": "L3-costpm-02", "concept": "costpm", "kind": "number",
+      "prompt": "Same setup ($8 per hour, 1,000 tokens/s while busy), but the GPUs are busy only half the time. Cost per million output tokens, in dollars?",
+      "answer": [4.44], "tol": 0.03, "unit": "$",
+      "why": "You pay for the whole hour but produce only 1.8 million tokens: $8 ÷ 1.8 ≈ $4.44. Halving utilization doubles the cost per token."
+    },
+    {
+      "id": "L3-costpm-03", "concept": "costpm", "kind": "multi",
+      "prompt": "Which levers lower cost per million tokens? Pick all that apply.",
+      "options": [
+        "More tokens per second while busy (batching, quantization, better kernels)",
+        "A higher busy share of each paid hour (traffic, autoscaling, sharing GPUs across models)",
+        "Lower temperature",
+        "A bigger vocabulary"
+      ],
+      "answer": [0, 1],
+      "why": "Cost per token = dollars per hour ÷ tokens per hour. Only throughput-while-busy and utilization move that ratio."
+    },
+    {
+      "id": "L3-pcache-01", "concept": "pcache", "kind": "single",
+      "prompt": "Why is it safe to reuse a stored KV prefix for a different request?",
+      "options": [
+        "Keys and values at position i depend only on tokens 1…i (the causal mask), so an identical prefix always gives identical KV",
+        "KV values are the same for every prompt",
+        "The server re-checks every value against the new request",
+        "It isn't fully safe; small errors are accepted for speed"
+      ],
+      "answer": [0],
+      "why": "The causal mask makes the prefix's KV independent of whatever comes after it. Exact token match is required: one different early token changes everything after it."
+    },
+    {
+      "id": "L3-pcache-02", "concept": "pcache", "kind": "single",
+      "prompt": "An app sends a 3,000-token system prompt plus a short user message. How should it order the prompt to keep prompt-cache hits?",
+      "options": [
+        "Fixed content first (system prompt, tools, examples), changing content (user message, timestamps) last",
+        "User message first so it gets the most attention",
+        "Put a timestamp at the top so the cache knows the prompt's age",
+        "Order doesn't matter; the cache matches any shared text"
+      ],
+      "answer": [0],
+      "why": "The cache matches prefixes. Anything that varies near the start breaks the match for everything after it."
+    },
+    {
+      "id": "L3-pcache-03", "concept": "pcache", "kind": "multi",
+      "prompt": "On a cache hit for that 3,000-token prefix, what improves? Pick all that apply.",
+      "options": [
+        "TTFT: only the new tokens need prefill",
+        "Input cost: providers bill cached input tokens at a discount",
+        "TPOT: each output token gets much faster",
+        "The answer gets more accurate"
+      ],
+      "answer": [0, 1],
+      "why": "Prompt caching skips prefill work, which is TTFT and input cost. Decode still reads the same weights and the same (now longer) cache each tick, and the output is identical."
+    },
+    {
+      "id": "L3-pcache-04", "concept": "pcache", "kind": "single",
+      "prompt": "Which backend pattern is prompt caching most like?",
+      "options": [
+        "A content-addressed cache with a TTL: hash the prefix blocks, look them up, expire entries after minutes",
+        "A write-through cache in front of a database",
+        "A message queue",
+        "Database sharding"
+      ],
+      "answer": [0],
+      "why": "Servers hash fixed-size blocks of the prefix and look them up; entries hold GPU or host memory, so they expire. Same key, same content, safe to share."
+    },
+    {
+      "id": "L3-quant-01", "concept": "quant", "kind": "number",
+      "prompt": "A 70B model's weights at 8-bit (1 byte each). How many GB?",
+      "answer": [70], "tol": 0.02, "unit": "GB",
+      "why": "70 billion × 1 byte = 70 GB, half of the 140 GB at 16-bit. Decode reads every weight each tick, so the tick's weight read halves too."
+    },
+    {
+      "id": "L3-quant-02", "concept": "quant", "kind": "single",
+      "prompt": "Quantization speeds up decode a lot but prefill much less. Why?",
+      "options": [
+        "Decode is memory-bound, so fewer bytes per weight means a faster tick; prefill is compute-bound, so it gains only if the GPU also does the math in lower precision",
+        "Prefill doesn't use the weights",
+        "Quantization only applies to output tokens",
+        "Prefill is already cached"
+      ],
+      "answer": [0],
+      "why": "Speed follows the bottleneck. Decode waits on memory; prefill waits on math. Lower-precision math units (e.g. FP8 tensor cores at 2× BF16) are what make prefill faster too."
+    },
+    {
+      "id": "L3-quant-03", "concept": "quant", "kind": "single",
+      "prompt": "Quantizing weights to 8-bit gives decode “two multiplying wins”. What are they?",
+      "options": [
+        "Each tick reads half the weight bytes, and the freed memory holds more KV caches, so the batch grows",
+        "Fewer layers and a smaller vocabulary",
+        "Shorter prompts and shorter answers",
+        "Lower temperature and less sampling"
+      ],
+      "answer": [0],
+      "why": "Faster ticks times more users per tick. The cost is some quality, depending on the method and the bit width."
+    },
+    {
+      "id": "L3-capacity-01", "concept": "capacity", "kind": "single",
+      "prompt": "A 70B model on 2 H100s at 16-bit misses its TPOT target and fits only a few users. Which fix keeps quality but adds communication overhead and a bigger minimum deployment?",
+      "options": [
+        "Adding GPUs (tensor parallelism): more bandwidth per tick and more room for caches",
+        "Quantizing to 8-bit",
+        "Raising the batch size",
+        "Lowering the temperature"
+      ],
+      "answer": [0],
+      "why": "Splitting weights and caches across more GPUs halves the bytes each one reads, but they must talk every layer and the bill grows with them. Quantization keeps the GPU count but can cost quality; a bigger batch makes TPOT worse, not better."
+    },
+    {
+      "id": "L3-capacity-02", "concept": "capacity", "kind": "number",
+      "prompt": "Decode floor: each tick reads all the weights. 140 GB of weights, 6.7 TB/s of combined bandwidth. Minimum TPOT in milliseconds (ignore the cache reads)?",
+      "answer": [20.9], "tol": 0.04, "unit": "ms",
+      "why": "140 GB ÷ 6,700 GB/s ≈ 0.0209 s ≈ 21 ms per token, before cache reads and overheads."
+    },
+    {
+      "id": "L3-mask-04", "concept": "mask", "kind": "single",
+      "prompt": "Which backend idea is the causal mask most like?",
+      "options": [
+        "A snapshot read: each transaction sees only what was committed before it, never later writes",
+        "A load balancer",
+        "Rate limiting",
+        "A dead-letter queue"
+      ],
+      "answer": [0],
+      "why": "Each position sees only earlier positions, the way a snapshot sees only earlier commits. That one-way visibility is what makes caching the past safe."
+    }
+  ]
+}

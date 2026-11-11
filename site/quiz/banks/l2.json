@@ -1,0 +1,352 @@
+{
+  "lesson": 2,
+  "title": "The block, sampling, the KV cache",
+  "url": "../lessons/llm-foundations-2/",
+  "concepts": {
+    "mlp": { "label": "The MLP", "anchor": "ch-2-1" },
+    "residual": { "label": "Residual stream", "anchor": "ch-2-1" },
+    "stack": { "label": "Stacking blocks and parameter count", "anchor": "ch-2-1" },
+    "logits": { "label": "Logits", "anchor": "ch-2-2" },
+    "temperature": { "label": "Temperature", "anchor": "ch-2-2" },
+    "sampling": { "label": "Sampling and top-p", "anchor": "ch-2-2" },
+    "loop": { "label": "The generation loop", "anchor": "ch-2-3" },
+    "kvcache": { "label": "KV cache", "anchor": "ch-2-3" },
+    "prefill": { "label": "Prefill vs decode", "anchor": "ch-2-3" },
+    "kvsize": { "label": "KV cache size", "anchor": "ch-2-3" },
+    "context": { "label": "Context window limits", "anchor": "ch-2-3" }
+  },
+  "questions": [
+    {
+      "id": "L2-mlp-01", "concept": "mlp", "kind": "single",
+      "prompt": "What does the MLP do that attention doesn't?",
+      "options": [
+        "It lets words exchange information with each other",
+        "It processes each word on its own: thousands of learned yes/no-style questions about the word, whose answers are written back into its vector",
+        "It turns the final vector into vocabulary scores",
+        "It stores the keys and values of earlier tokens"
+      ],
+      "answer": [1],
+      "why": "A block is talk, then think. Attention is the only place where words see each other; the MLP then works on each word separately with the same weights, which is why it batches so well on a GPU."
+    },
+    {
+      "id": "L2-mlp-02", "concept": "mlp", "kind": "number",
+      "prompt": "One neuron: inputs x = [1, 1], weights [1, 1], bias −1, then ReLU. What does it output?",
+      "answer": [1], "tol": 0,
+      "why": "Dot product 1×1 + 1×1 = 2, plus bias −1 = 1, ReLU keeps positives: max(0, 1) = 1. It fires."
+    },
+    {
+      "id": "L2-mlp-03", "concept": "mlp", "kind": "number",
+      "prompt": "Same neuron (weights [1, 1], bias −1, ReLU), now x = [1, 0]: only “river earlier” is present. Output?",
+      "answer": [0], "tol": 0,
+      "why": "1×1 + 0×1 = 1, plus bias −1 = 0, max(0, 0) = 0. The bias sets the bar: this neuron fires only when both facts are present."
+    },
+    {
+      "id": "L2-mlp-04", "concept": "mlp", "kind": "single",
+      "prompt": "In notes = W_down · max(0, W_up · x + b), what do W_up and W_down hold?",
+      "options": [
+        "W_up holds the questions (one row per neuron); W_down holds the note each neuron writes back",
+        "W_up holds the vocabulary; W_down holds the positions",
+        "W_up is computed per request; W_down is learned",
+        "Both hold cached keys and values"
+      ],
+      "answer": [0],
+      "why": "Widen, then narrow: W_up asks thousands of questions about the word, ReLU keeps the ones that fire, W_down turns those into notes added to the word's vector. Both are learned weights, frozen at inference."
+    },
+    {
+      "id": "L2-mlp-05", "concept": "mlp", "kind": "single",
+      "prompt": "Roughly what share of a classic GPT-style model's parameters sit in the MLPs?",
+      "options": [
+        "About two-thirds",
+        "About 10%",
+        "Exactly half",
+        "Almost none: attention holds the weights"
+      ],
+      "answer": [0],
+      "why": "Per block, attention has about 4 × width² parameters and the MLP about 8 × width², so 8 of 12. In GPT-3 that's about 116 of 175 billion. MLPs are also where factual associations are thought to live."
+    },
+    {
+      "id": "L2-residual-01", "concept": "residual", "kind": "single",
+      "prompt": "What is the residual stream?",
+      "options": [
+        "The leftover probability after top-p cuts the tail",
+        "The word's vector as it travels through the model, with each layer's output added to it rather than replacing it",
+        "The queue of tokens waiting for decode",
+        "The error signal flowing backward in training"
+      ],
+      "answer": [1],
+      "why": "x = x + attention(x), then x = x + MLP(x), in every block. The final vector is literally the original embedding plus every layer's contribution."
+    },
+    {
+      "id": "L2-residual-02", "concept": "residual", "kind": "multi",
+      "prompt": "What would break if each layer replaced the vector instead of adding to it? Pick all that apply.",
+      "options": [
+        "Later layers would lose what earlier layers found unless every layer learned to copy it forward",
+        "Training nudges would struggle to reach the early layers",
+        "The vocabulary would shrink",
+        "The KV cache would no longer be valid"
+      ],
+      "answer": [0, 1],
+      "why": "Adding keeps everything on a shared notepad and gives gradients a direct path back to early layers. Vocabulary and caching don't depend on it."
+    },
+    {
+      "id": "L2-residual-03", "concept": "residual", "kind": "single",
+      "prompt": "Which backend pattern is the residual stream most like?",
+      "options": [
+        "A cache in front of a database",
+        "An append-only log, or a request context object that each middleware enriches instead of replacing",
+        "A load balancer",
+        "A circuit breaker"
+      ],
+      "answer": [1],
+      "why": "Each layer reads the shared state and adds its contribution, and nothing earlier is discarded. (The KV cache is the one that's like a cache: memoized work.)"
+    },
+    {
+      "id": "L2-stack-01", "concept": "stack", "kind": "number",
+      "prompt": "Classic formula: about 12 × width² parameters per block. Width 4,096, 32 blocks. How many parameters, in billions?",
+      "answer": [6.44], "tol": 0.04, "unit": "billion",
+      "why": "4,096² = 16,777,216. × 12 = 201 million per block. × 32 = 6.44 billion. (Llama 3 8B lands at 8.0B because of a gated MLP, shared key/value heads, and its large word tables.)"
+    },
+    {
+      "id": "L2-stack-02", "concept": "stack", "kind": "number",
+      "prompt": "Those 6.44 billion parameters stored at 16-bit (2 bytes each). How many GB?",
+      "answer": [12.88], "tol": 0.04, "unit": "GB",
+      "why": "6.44 billion × 2 bytes ≈ 12.9 GB. Rule of thumb: 16-bit weights take 2 GB per billion parameters."
+    },
+    {
+      "id": "L2-stack-03", "concept": "stack", "kind": "single",
+      "prompt": "Why stack 32 blocks instead of one very wide block?",
+      "options": [
+        "Depth lets the model chain steps: a later block can use a note an earlier block wrote (“it's a riverside”) to add a new one (“floods are likely”)",
+        "All 32 blocks share one set of weights, so depth is free",
+        "Each block handles a different part of the vocabulary",
+        "Stacking makes the KV cache smaller"
+      ],
+      "answer": [0],
+      "why": "One block is one round of talk-then-think. The blocks share a shape but each has its own weights, so depth costs memory, and a deeper model has a bigger KV cache (one entry per layer)."
+    },
+    {
+      "id": "L2-logits-01", "concept": "logits", "kind": "single",
+      "prompt": "How does the final vector for the last token become a probability for every token in the vocabulary?",
+      "options": [
+        "The nearest token in the embedding table is picked directly",
+        "Dot product with each row of the unembedding table gives one logit per token; softmax turns the logits into probabilities",
+        "The MLP outputs one probability per token",
+        "Attention over the vocabulary"
+      ],
+      "answer": [1],
+      "why": "logits = W_unembed · x: about 100,000 scores, one per vocabulary token, then softmax. The unembedding table has the same shape as the embedding table; some models share the two."
+    },
+    {
+      "id": "L2-logits-02", "concept": "logits", "kind": "number",
+      "prompt": "The unembedding table is 100,000 × 4,096. About how many multiply-adds does scoring the vocabulary cost per generated token, in millions?",
+      "answer": [409.6], "tol": 0.03, "unit": "million",
+      "why": "One dot product of width 4,096 per vocabulary token: 100,000 × 4,096 = 409.6 million, for this step alone."
+    },
+    {
+      "id": "L2-temperature-01", "concept": "temperature", "kind": "single",
+      "prompt": "What does temperature do, mechanically?",
+      "options": [
+        "Adds random noise to the weights",
+        "Divides the logits by T before softmax: small T stretches the gaps, large T shrinks them",
+        "Removes all but the top T tokens",
+        "Changes how many tokens are generated"
+      ],
+      "answer": [1],
+      "why": "p = softmax(logits / T). Dividing by a small number stretches the gaps, and softmax's exponent turns stretched gaps into a near-certain winner."
+    },
+    {
+      "id": "L2-temperature-02", "concept": "temperature", "kind": "number",
+      "prompt": "Two candidate tokens with logits [2, 1]. At temperature T = 0.5, what probability does the first get, in percent?",
+      "answer": [88.08], "tol": 0.01, "unit": "%",
+      "why": "Divide by 0.5: [4, 2]. Softmax depends on the gap, 2: e² ÷ (e² + 1) ≈ 7.389 ÷ 8.389 ≈ 88%. At T = 1 it would be e ÷ (e + 1) ≈ 73%."
+    },
+    {
+      "id": "L2-temperature-03", "concept": "temperature", "kind": "single",
+      "prompt": "As temperature approaches 0, what happens?",
+      "options": [
+        "Greedy decoding: the top-scoring token is chosen every time",
+        "Every token becomes equally likely",
+        "The model stops generating",
+        "Answers become factually correct"
+      ],
+      "answer": [0],
+      "why": "The gaps grow without bound, so the top logit takes ~100% of the probability. Deterministic is not the same as correct: the top token can still be wrong."
+    },
+    {
+      "id": "L2-sampling-01", "concept": "sampling", "kind": "number",
+      "prompt": "Top-p with p = 0.9. Sorted probabilities: 0.50, 0.30, 0.15, 0.05. How many tokens are kept?",
+      "answer": [3], "tol": 0,
+      "why": "Keep the smallest set that reaches p: 0.50 + 0.30 = 0.80 (not enough), + 0.15 = 0.95 ≥ 0.9. Three tokens; the 0.05 tail is cut."
+    },
+    {
+      "id": "L2-sampling-02", "concept": "sampling", "kind": "number",
+      "prompt": "Same top-p cut (kept 0.50, 0.30, 0.15). After rescaling to 100%, what is the top token's probability, in percent?",
+      "answer": [52.63], "tol": 0.02, "unit": "%",
+      "why": "The kept tokens sum to 0.95, so each is divided by 0.95: 0.50 ÷ 0.95 ≈ 52.6%."
+    },
+    {
+      "id": "L2-sampling-03", "concept": "sampling", "kind": "single",
+      "prompt": "Why use top-p instead of sampling from the full distribution?",
+      "options": [
+        "It makes generation faster",
+        "It cuts the long tail of unlikely tokens, so one unlucky draw can't derail a long answer, while keeping variety among plausible tokens",
+        "It guarantees the same output every time",
+        "It reduces the size of the KV cache"
+      ],
+      "answer": [1],
+      "why": "A long answer is hundreds of draws; thousands of tiny-probability tokens add up to a real chance of a bad pick somewhere. Top-p adapts the cut: few tokens when the model is sure, more when it isn't (top-k keeps a fixed k)."
+    },
+    {
+      "id": "L2-loop-01", "concept": "loop", "kind": "single",
+      "prompt": "Why are earlier tokens' keys and values still valid on the next generation pass?",
+      "options": [
+        "A token only looks backward, so appending a new token can't change anything computed for earlier ones",
+        "The model is retrained after each token",
+        "Keys and values are random, so any value works",
+        "They aren't valid; they are always recomputed"
+      ],
+      "answer": [0],
+      "why": "Position i only attends to positions 1…i. Adding position i+1 changes nothing about earlier positions, so their keys and values can be stored and reused."
+    },
+    {
+      "id": "L2-loop-02", "concept": "loop", "kind": "number",
+      "prompt": "Without a cache, generating n tokens after a prompt costs about n × prompt + n²/2 token positions. Prompt 100, output 2,000. How many positions, in millions?",
+      "answer": [2.2], "tol": 0.03, "unit": "million",
+      "why": "2,000 × 100 + 2,000² ÷ 2 = 200,000 + 2,000,000 = 2.2 million. With a cache it's prompt + n = 2,100."
+    },
+    {
+      "id": "L2-kvcache-01", "concept": "kvcache", "kind": "single",
+      "prompt": "What exactly does the KV cache store?",
+      "options": [
+        "The final output tokens of earlier requests",
+        "Every earlier token's key and value vectors, for every layer",
+        "The query vectors of every token",
+        "The model's weights in a faster memory"
+      ],
+      "answer": [1],
+      "why": "Keys and values are what a token offers to later tokens. Queries are only needed for the newest token, so they aren't kept. The cache grows by one entry per token per layer and lives in GPU memory for the whole request."
+    },
+    {
+      "id": "L2-kvcache-02", "concept": "kvcache", "kind": "single",
+      "prompt": "With a KV cache, what does each decode step compute?",
+      "options": [
+        "q, k and v for every token so far",
+        "q, k and v for the new token only; append its k and v to the cache; attend over the whole cache",
+        "Only the logits, skipping attention",
+        "k and v for every token, but q only for the new one"
+      ],
+      "answer": [1],
+      "why": "The new token still attends to everything before it, but reads stored keys and values instead of recomputing them."
+    },
+    {
+      "id": "L2-kvcache-03", "concept": "kvcache", "kind": "single",
+      "prompt": "Which backend pattern is the KV cache most like?",
+      "options": [
+        "Memoization: compute once, store, reuse because the inputs can't change",
+        "A message queue",
+        "A write-ahead log used for crash recovery",
+        "Sharding a table across machines"
+      ],
+      "answer": [0],
+      "why": "Earlier tokens' keys and values are pure functions of tokens that never change, so caching them is always safe: no invalidation needed within a request."
+    },
+    {
+      "id": "L2-prefill-01", "concept": "prefill", "kind": "single",
+      "prompt": "Prefill vs decode: which sets which latency?",
+      "options": [
+        "Prefill sets time to first token (TTFT); decode sets time per output token (TPOT)",
+        "Prefill sets TPOT; decode sets TTFT",
+        "Both set TTFT",
+        "Neither: network latency dominates both"
+      ],
+      "answer": [0],
+      "why": "Prefill processes the whole prompt in one parallel pass and fills the cache before the first token can appear. Decode then produces tokens one tick at a time."
+    },
+    {
+      "id": "L2-prefill-02", "concept": "prefill", "kind": "single",
+      "prompt": "Why is prefill compute-bound while single-user decode is memory-bound?",
+      "options": [
+        "Prefill reuses each weight it reads across all prompt tokens at once; decode reads all the weights to produce one token per user, so it mostly waits on memory",
+        "Prefill runs on the CPU and decode on the GPU",
+        "Decode does more math per token than prefill",
+        "Prefill skips attention"
+      ],
+      "answer": [0],
+      "why": "Same weights, different math per byte. Prefill does many tokens' worth of math per weight read; decode does one. Batching many users' decode ticks shares each weight read, which is why batching decides throughput."
+    },
+    {
+      "id": "L2-prefill-03", "concept": "prefill", "kind": "single",
+      "prompt": "What does continuous batching change?",
+      "options": [
+        "Requests join and leave the batch at every decode tick, instead of waiting for the whole batch to finish",
+        "All requests in a batch must have the same length",
+        "The batch is fixed at server start",
+        "Prefill and decode run on separate models"
+      ],
+      "answer": [0],
+      "why": "Scheduling per tick means a finished request frees its slot immediately and a new one starts without waiting for the longest answer in the batch."
+    },
+    {
+      "id": "L2-kvsize-01", "concept": "kvsize", "kind": "number",
+      "prompt": "KV cache bytes per token = 2 × layers × KV heads × head size × bytes per number. 80 layers, 8 KV heads, head size 128, 16-bit. How many KB per token?",
+      "answer": [327.68], "tol": 0.05, "unit": "KB",
+      "why": "2 × 80 × 8 × 128 × 2 = 327,680 bytes ≈ 328 KB (320 KiB) per token. The 2 at the front is one key plus one value."
+    },
+    {
+      "id": "L2-kvsize-02", "concept": "kvsize", "kind": "number",
+      "prompt": "Same model (327,680 bytes per token). How many GB for one 8,192-token request?",
+      "answer": [2.68], "tol": 0.08, "unit": "GB",
+      "why": "327,680 × 8,192 = 2,684,354,560 bytes ≈ 2.7 GB (2.5 GiB) for one request."
+    },
+    {
+      "id": "L2-kvsize-03", "concept": "kvsize", "kind": "number",
+      "prompt": "A 70B model at 16-bit (140 GB of weights) on two 80 GB GPUs. Ignoring every other overhead, how many 8K-token requests (2.68 GB of KV cache each) fit in the memory left over?",
+      "answer": [7], "tol": 0,
+      "why": "160 − 140 = 20 GB left. 20 ÷ 2.68 ≈ 7.5, so 7 whole requests, fewer once real overheads are counted. Concurrency is set by KV memory, not by compute."
+    },
+    {
+      "id": "L2-kvsize-04", "concept": "kvsize", "kind": "multi",
+      "prompt": "Which changes let more concurrent requests fit on the same GPUs? Pick all that apply.",
+      "options": [
+        "Grouped-query attention (fewer KV heads)",
+        "Storing the KV cache at 8-bit instead of 16-bit",
+        "Quantizing the weights, freeing memory for caches",
+        "Raising the temperature",
+        "Using top-p sampling"
+      ],
+      "answer": [0, 1, 2],
+      "why": "Anything that shrinks bytes per token or frees memory raises concurrency. Temperature and top-p only change which token is drawn; they don't touch memory."
+    },
+    {
+      "id": "L2-kvsize-05", "concept": "kvsize", "kind": "number",
+      "prompt": "A model has 64 query heads. With grouped-query attention, 8 KV heads serve them. How many times smaller is the KV cache than with one KV head per query head?",
+      "answer": [8], "tol": 0, "unit": "×",
+      "why": "The cache stores one key and one value per KV head. 64 → 8 KV heads cuts it by 64 ÷ 8 = 8×, while every query head still gets its own query."
+    },
+    {
+      "id": "L2-context-01", "concept": "context", "kind": "multi",
+      "prompt": "Why do context windows have a limit? Pick all that apply.",
+      "options": [
+        "KV memory grows in line with the number of tokens",
+        "Prefill attention work grows with the square of the number of tokens",
+        "The model only learned positions up to its training length",
+        "The vocabulary runs out of token IDs",
+        "The tokenizer can only split a fixed number of words"
+      ],
+      "answer": [0, 1, 2],
+      "why": "Memory, compute and training. Vocabulary size is unrelated: the same IDs repeat as often as needed."
+    },
+    {
+      "id": "L2-context-02", "concept": "context", "kind": "single",
+      "prompt": "Every request to a chatbot starts with the same 2,000-token system prompt. How could the server avoid redoing that work?",
+      "options": [
+        "Keep the KV cache computed for that prefix and reuse it for every request that starts with the identical tokens",
+        "Lower the temperature for the system prompt",
+        "Send the system prompt only once per day",
+        "Compress the prompt with gzip before sending it"
+      ],
+      "answer": [0],
+      "why": "Keys and values for a prefix depend only on the prefix's tokens, so identical prefixes give identical KV. Lesson 3 calls this prompt caching."
+    }
+  ]
+}
