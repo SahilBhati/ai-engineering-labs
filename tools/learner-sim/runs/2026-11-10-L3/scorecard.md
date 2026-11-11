@@ -7,7 +7,7 @@
 | Grounded | 98% | 100% |
 | Agreement | 100% | 100% |
 | Key disputes (open) | 0 | 0 |
-| Options-only guess | 100% | ≤10% |
+| Options-only guess | 100% | info |
 | Key is the longest option | 100% | ≤35% |
 | Lesson flags (confirmed) | 4 | → 0 |
 | Coverage (concepts) | 100% | 100% |

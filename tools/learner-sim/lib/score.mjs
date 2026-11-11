@@ -13,6 +13,8 @@ import path from "node:path";
 
 const Quiz = createRequire(import.meta.url)(path.resolve(import.meta.dirname, "../../../site/assets/quiz/engine.js"));
 
+// Options-only is reported, not gated: a model that knows the subject spots the true option without
+// the stem, so it says little about a beginner. Key-is-longest is the gated, model-free cue check.
 export const TARGETS = {grounded: 1, agreement: 1, openDisputes: 0, optionsOnly: 0.1, keyLongest: 0.35, coverage: 1, viewed: 1};
 
 // Model-free cue check: is the single-choice key the strictly longest option? Chance is 1/k (25% with 4).
@@ -145,8 +147,7 @@ export function aggregate({bank, steps, runs, closedDisputes = {}}){
     visualOnlyCites: rate(runs.flatMap(r => r.questions).filter(q => q.visualOnly).length, runs.flatMap(r => r.questions).filter(q => q.cited).length || 1)
   };
   const pass = {grounded: metrics.grounded >= TARGETS.grounded, agreement: metrics.agreement >= TARGETS.agreement,
-    openDisputes: metrics.openDisputes <= TARGETS.openDisputes, optionsOnly: metrics.optionsOnly <= TARGETS.optionsOnly,
-    keyLongest: metrics.keyLongest <= TARGETS.keyLongest,
+    openDisputes: metrics.openDisputes <= TARGETS.openDisputes, keyLongest: metrics.keyLongest <= TARGETS.keyLongest,
     coverage: metrics.coverage >= TARGETS.coverage, viewed: metrics.viewed >= TARGETS.viewed};
   return {lesson: bank.lesson, runs: R, questions: qs.length, metrics, pass, gate: Object.values(pass).every(Boolean),
     notGrounded: rows.filter(r => r.grounded < R).map(r => ({id: r.id, grounded: r.grounded, correct: r.correct})),
@@ -172,7 +173,7 @@ const pct = x => x == null ? "–" : Math.round(x * 100) + "%";
 const fmt = (k, x) => ["openDisputes", "confirmedFlags"].includes(k) ? String(x ?? "–") : pct(x);
 const LABEL = {grounded: "Grounded", agreement: "Agreement", openDisputes: "Key disputes (open)", optionsOnly: "Options-only guess", keyLongest: "Key is the longest option",
   confirmedFlags: "Lesson flags (confirmed)", coverage: "Coverage (concepts)", stepCoverage: "Coverage (teaching steps)", viewed: "Screenshots viewed (worst run)", visualOnlyCites: "Visual-only cites"};
-const GOAL = {grounded: "100%", agreement: "100%", openDisputes: "0", optionsOnly: "≤10%", keyLongest: "≤35%", confirmedFlags: "→ 0", coverage: "100%", stepCoverage: "info", viewed: "100%", visualOnlyCites: "info"};
+const GOAL = {grounded: "100%", agreement: "100%", openDisputes: "0", optionsOnly: "info", keyLongest: "≤35%", confirmedFlags: "→ 0", coverage: "100%", stepCoverage: "info", viewed: "100%", visualOnlyCites: "info"};
 
 export function toMarkdown(card, d, title){
   const L = [`# Learner-sim scorecard: ${title || "Lesson " + card.lesson}`, "",

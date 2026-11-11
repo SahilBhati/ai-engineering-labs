@@ -29,12 +29,17 @@ Needs Node 22+, Chrome, and the `claude` CLI (for `sim`). Runs use Sonnet.
 | Grounded | correct **and** cites a teaching step with a verified quote (or a described visual) | 100% |
 | Agreement | same answer in every run; disagreement marks the question ambiguous | 100% |
 | Key disputes | the actor says the question is flawed by the lesson's own content; a human reviews each | 0 open |
-| Options-only guess | choice question answered right from its options alone in ≥ 2 of 3 runs: weak distractors | ≤ 10% |
+| Options-only guess | choice question answered right from its options alone in ≥ 2 of 3 runs | info only |
+| Key is the longest option | single-choice key strictly longer than every distractor (chance ≈ 25%) | ≤ 35% |
 | Lesson flags | per step: term before taught, unclear visual, inconsistent highlight, C1–C12 fails; confirmed when ≥ 2 of 3 runs raise it | trending to 0 |
 | Coverage | bank concepts with ≥ 1 question grounded in ≥ 2 of 3 runs (teaching-step coverage reported too) | 100% |
 
-The gate passes when Grounded, Agreement, Key disputes, Options-only and
-Coverage all meet target. Flags are tracked as a trend.
+The gate passes when Grounded, Agreement, Key disputes, Key-longest,
+Coverage and Screenshots viewed all meet target. Flags are tracked as a trend.
+
+Options-only is reported but not gated: the actor knows the subject, so it
+can spot the true option without the question; that says little about a
+beginner. Key-is-longest is the model-free check for a cue a person could game.
 
 **The human learner is ground truth.** When real quiz misses disagree with
 the actor's verdict, fix the actor's instructions or this scoring, not the

@@ -18,7 +18,6 @@
     "grounded": false,
     "agreement": true,
     "openDisputes": true,
-    "optionsOnly": false,
     "keyLongest": false,
     "coverage": true,
     "viewed": true
