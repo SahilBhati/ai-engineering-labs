@@ -71,6 +71,9 @@ export function sameAnswer(q, a, b){
 
 const rate = (n, d) => d ? n / d : 1;
 
+// "S5" and "s05" name the same step as "S05": an id-format slip shouldn't void a correct cite.
+export const stepId = x => { const m = /^s0*(\d+)$/i.exec(String(x == null ? "" : x).trim()); return m ? "S" + m[1].padStart(2, "0") : x; };
+
 // One run: each question graded, its cites checked against the step text.
 export function scoreRun({bank, steps, map, options = {}, answers}){
   const byId = new Map(bank.questions.map(q => [q.id, q])), stepById = new Map(steps.map(s => [s.id, s]));
@@ -80,9 +83,9 @@ export function scoreRun({bank, steps, map, options = {}, answers}){
     const a = given[qid] || {}, resp = response(q, a.answer, perm);
     const correct = resp != null && Quiz.grade(q, resp);
     const cites = (Array.isArray(a.cites) ? a.cites : []).map(c => {
-      const s = stepById.get(c && c.step);
+      const s = stepById.get(stepId(c && c.step));
       const valid = !!(s && s.teaching && (c.visual ? normalize(c.quote).length > 0 : quoteOnStep(s, c.quote)));
-      return {step: c && c.step, visual: !!(c && c.visual), valid};
+      return {step: stepId(c && c.step), visual: !!(c && c.visual), valid};
     });
     const validSteps = [...new Set(cites.filter(c => c.valid).map(c => c.step))];
     const oo = q.kind === "number" ? null : (options[qid] == null ? null : toBankIndices(options[qid], perm));
@@ -93,10 +96,10 @@ export function scoreRun({bank, steps, map, options = {}, answers}){
       optionsOnlyCorrect: oo == null ? (q.kind === "number" ? null : false) : Quiz.grade(q, oo)};
   });
   const flags = (Array.isArray(answers && answers.flags) ? answers.flags : [])
-    .filter(f => f && stepById.has(f.step) && FLAG_KINDS.includes(f.kind))
-    .map(f => ({step: f.step, kind: f.kind, note: String(f.note || "")}));
+    .filter(f => f && stepById.has(stepId(f.step)) && FLAG_KINDS.includes(f.kind))
+    .map(f => ({step: stepId(f.step), kind: f.kind, note: String(f.note || "")}));
   // The actor must look at every teaching step's screenshot and say what its visual shows.
-  const seen = (answers && answers.visuals) || {}, teach = steps.filter(s => s.teaching);
+  const seen = Object.fromEntries(Object.entries((answers && answers.visuals) || {}).map(([k, v]) => [stepId(k), v])), teach = steps.filter(s => s.teaching);
   const viewed = rate(teach.filter(s => normalize(seen[s.id]).split(" ").length >= 4).length, teach.length);
   return {questions, flags, viewed};
 }

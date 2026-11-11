@@ -301,7 +301,7 @@
       "id": "L3-outcost-03", "concept": "outcost", "kind": "number",
       "prompt": "An H100 does about 989 trillion operations per second and reads about 3.35 trillion bytes per second. How many operations can it do per byte read before memory stops being the bottleneck?",
       "answer": [295], "tol": 0.03,
-      "why": "989 ÷ 3.35 ≈ 295. Decode at 16-bit does about 1 operation per weight byte per user, so it would take ~295 users to become math-bound, and KV memory runs out long before."
+      "why": "989 ÷ 3.35 ≈ 295. Decode at 16-bit does about 1 operation per weight byte per user, so it would take ~295 users to become compute-bound, and KV memory runs out long before."
     },
     {
       "id": "L3-costpm-01", "concept": "costpm", "kind": "number",

@@ -19,7 +19,7 @@ Course: LLM Foundations for engineers. Interactive version: index.html
 15. **Gradient: how training nudges each number** (1.3): Training nudges each number in proportion to what it's multiplied by. To score “flooded” as the next word, bank's row meets flooded's output row [1, 3] (really via the layers, skipped here). Target 2; now −1.3. Press Train step.
 16. **bank has one row, but two meanings** (1.4): Attention shifts bank's meaning to fit its sentence; its row never changes. Switch attention on, then change the sentence.
 17. **The three basics, running together** (1.4): Attention is the three basics in a row: score, softmax, blend. bank asks the same question (its query) in every sentence; each earlier word answers with its key. Step through, then switch the sentence.
-18. **Who does each token listen to?** (1.4): Each token blends earlier tokens; arc thickness shows how much. Tap any word. Later words are greyed: a token only looks backward (why comes in 3.1).
+18. **Who does each token listen to?** (1.4): Each token blends earlier tokens and itself. The number under each word is its share (arc thickness shows the same); “self” is the share a token keeps from its own vector. Tap any word, or switch sentences. Later words are greyed: a token only looks backward (why comes in 3.1).
 19. **Several heads: one blend per need** (1.4): A head is one copy of attention with its own softmax. One head's shares must add to 100%, so it can't focus sharply on two words at once. bank needs “river” (setting) and “the” (grammar). Compare.
 20. **Cost grows with the square of the context** (1.4): Every token scores every token it can see. Drag the slider: double the tokens, about four times the work.
 

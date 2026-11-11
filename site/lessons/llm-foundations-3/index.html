@@ -279,7 +279,7 @@ add("R","Where Lesson 2 left off",
   const frame = (p, gen) => { // gen = tokens generated before this pass; p = 0..1 through the pass (1 = finished)
     const seq = PROMPT.concat(CONT.slice(0, gen)), newTok = CONT[gen], inN = gen === 0 ? PROMPT.length : 1;
     const blk = ph(p,0,0.3), lg = ph(p,0.3,0.5), smp = ph(p,0.5,0.62), fly = ph(p,0.62,0.88), kv = ph(p,0.05,0.3);
-    let s = '<svg viewBox="0 0 720 214" style="max-width:760px" role="img" aria-label="One pass: sequence through the blocks, logits, a sampled token appended, and the KV cache growing"><g style="font:500 11px var(--font-mono)">';
+    let s = '<svg viewBox="0 0 720 230" style="max-width:760px" role="img" aria-label="One pass: sequence through the blocks, logits, a sampled token appended, and the KV cache growing"><g style="font:500 11px var(--font-mono)">';
     s += '<text x="10" y="31" style="fill:var(--muted)">text</text>';
     seq.forEach((t,i)=>{ const isIn = i >= seq.length - inN && p < 1 && p > 0;
       s += '<rect x="'+chipX(i)+'" y="14" width="58" height="26" rx="6" style="fill:var(--surface);stroke:'+(isIn?'var(--accent)':'var(--line)')+'" stroke-width="'+(isIn?2:1)+'"/><text x="'+(chipX(i)+29)+'" y="31" text-anchor="middle" style="fill:var(--ink)">'+esc(t)+'</text>'; });
@@ -305,7 +305,7 @@ add("R","Where Lesson 2 left off",
     const cached = (gen === 0 ? 0 : PROMPT.length + gen - 1), nowAdd = p > 0 ? inN : 0;
     for(let i=0;i<cached + nowAdd;i++){ const fresh = i >= cached, a = fresh ? kv : 1;
       s += '<rect x="'+chipX(i)+'" y="164" width="58" height="22" rx="4" style="fill:var(--accent);fill-opacity:'+(fresh?0.75*a:0.35).toFixed(2)+';stroke:var(--accent)"/><text x="'+(chipX(i)+29)+'" y="179" text-anchor="middle" style="fill:'+(fresh&&a>0.5?'var(--surface)':'var(--ink)')+'">k,v '+(i+1)+'</text>'; }
-    s += '<text x="10" y="206" style="fill:var(--muted)">one row per processed token (all layers: 32 in this 8B-size picture, 80 in a 70B model; reused on every later pass)</text>';
+    s += '<text x="10" y="206" style="fill:var(--muted)">one row per processed token, reused on every later pass</text><text x="10" y="222" style="fill:var(--muted)">(each row covers all layers: 32 in this 8B-size picture, 80 in a 70B model)</text>';
     pic.innerHTML = s + '</g></svg>';
   };
   const label = ()=>{
@@ -319,7 +319,7 @@ add("R","Where Lesson 2 left off",
   const r = el("div",{class:"row"}); r.append(run, rst);
   v.append(r, pic, cap); label(); frame(0, 0);
  },
- "Weights are frozen while serving; only the cache and the text grow. Every decode tick reads all the weights once, which is where this lesson's cost question starts.");
+ "Weights are frozen while serving; only the cache and the text grow. Every decode tick reads all the weights once, so decode is memory-bound: the limit is how fast bytes arrive from memory, and the math units wait. Prefill pushes many tokens through each read, so it is compute-bound: the math units are the limit. This is where this lesson's cost question starts.");
 
 add("R","This lesson's two questions",
  "Lesson 2 used the weights; it never said where they came from or what a word costs to serve. Make two guesses; chapter 3.1 answers the first, chapter 3.3 the second.",
@@ -543,7 +543,7 @@ add("3.1","Scale: about 6 operations per parameter per token",
  {what: "<p><b>FLOPs</b> (floating-point operations) count the multiply-adds. A forward pass costs about 2 per parameter per token (Lesson 2's prefill number); the <b>backward pass</b> (computing gradients) about twice that, so training ≈ 6. <b>MFU</b> (model FLOPs utilization) is the share of the GPUs' peak math actually used.</p>",
   analogy: duo("Building a dam versus running the hydroelectric plant: a one-off megaproject with a huge crew, then years of steady operation where every hour of running cost counts.",
                 "A massive one-off batch backfill on a whole cluster versus the online service that serves the result: one is judged by job completion time and utilization, the other by p99 latency and cost per request."),
-  real: "<p>Training splits the model and the data across thousands of GPUs that must exchange gradients every step, so the network and stragglers matter as much as the chips. Memory per parameter is several times the 16-bit weights (gradients and optimizer state too). One failed GPU stalls the whole synchronized job, so teams checkpoint often.</p>",
+  real: "<p>Training splits the model and the data across thousands of GPUs that must exchange gradients every step, so the network and stragglers (the slowest GPU, which every step waits for) matter as much as the chips. Memory per parameter is several times the 16-bit weights (gradients, plus optimizer state: the extra numbers per weight the optimizer keeps, such as running averages of past gradients). One failed GPU stalls the whole synchronized job, so teams checkpoint often.</p>",
   evidence: '<p>Kaplan et al.: “Accounting for the backwards pass (approximately twice the compute as the forwards pass), we then define the estimated non-embedding compute as C ≈ 6N floating point operators per training token.” <a href="https://arxiv.org/abs/2001.08361">Scaling Laws (2020) ↗</a> Llama 3 405B: “pre-trained using 3.8×10<sup>25</sup> FLOPs”, “on up to 16K H100 GPUs”, at 38–43% BF16 MFU; “During a 54-day snapshot period of pre-training, we experienced a total of 466 job interruptions.” <a href="https://arxiv.org/abs/2407.21783">The Llama 3 Herd of Models (2024) ↗</a></p>'});
 
 /* ---------- 3.2 Post-training (conceptual) ---------- */
@@ -630,7 +630,9 @@ add("3.2","Preference tuning: learn from a better and a worse answer",
     s += '<line x1="'+mid+'" y1="4" x2="'+mid+'" y2="74" style="stroke:var(--line)"/><text x="'+mid+'" y="90" text-anchor="middle" style="fill:var(--muted)">starting model (SFT)</text>';
     s += '<text x="0" y="24" style="fill:var(--ink)">chosen</text><rect x="'+mid+'" y="12" width="'+(up*k).toFixed(1)+'" height="18" rx="3" style="fill:var(--cool)"/><text x="'+(mid+up*k+6).toFixed(1)+'" y="25" style="fill:var(--cool)">'+(up>0?'+':'')+up.toFixed(2)+'</text>';
     s += '<text x="0" y="58" style="fill:var(--ink)">rejected</text><rect x="'+(mid+dn*k).toFixed(1)+'" y="46" width="'+(-dn*k).toFixed(1)+'" height="18" rx="3" style="fill:var(--neg)"/><text x="'+(mid+dn*k-6).toFixed(1)+'" y="59" text-anchor="end" style="fill:var(--neg)">'+dn.toFixed(2)+'</text>';
-    s += '<text x="0" y="114" style="fill:var(--muted)">bars = change in log-probability of each whole answer</text>';
+    s += '<text x="'+(mid-90)+'" y="90" text-anchor="end" style="fill:var(--neg)">← less likely</text><text x="'+(mid+90)+'" y="90" style="fill:var(--cool)">more likely →</text>';
+    if(mg === 0) s += '<text x="'+(mid-12)+'" y="42" text-anchor="end" style="fill:var(--muted)">both at 0.00: nothing trained yet</text>';
+    s += '<text x="0" y="114" style="fill:var(--muted)">bars = change in log-probability of each whole answer, compared with the starting model</text>';
     pic.innerHTML = s + '</g></svg>';
     out.innerHTML = 'Step '+steps+': gap = <b>'+mg.toFixed(2)+'</b> → P(chosen beats rejected) = σ(gap) = <b>'+P.toFixed(2)+'</b> → loss = −ln '+P.toFixed(2)+' = <b style="color:var(--hot)">'+loss.toFixed(2)+'</b>. Same −log shape as 3.1, applied to a pair of answers instead of one token.';
   };
@@ -649,10 +651,10 @@ add("3.2","Preference tuning: learn from a better and a worse answer",
   v.append(pair, r, pic, out, sm, flow); draw(0); drawFlow();
  },
  "Gap 0 → loss 0.69 (a coin flip). Each step widens the gap; at gap 3, P = 0.95 and loss = 0.05. Real DPO also scales the gap by a factor β and measures it against a frozen copy of the SFT model, so the model can't drift too far.",
- {what: "<p><b>Preference tuning</b> trains on pairs: a prompt, a <b>chosen</b> answer and a <b>rejected</b> one, judged by people (or a model). <b>RLHF</b> (reinforcement learning from human feedback) first trains a <b>reward model</b> to score answers, then uses reinforcement learning to make the model write high-scoring ones. <b>DPO</b> (direct preference optimization) skips both: one loss directly on the pairs.</p>",
+ {what: "<p><b>Preference tuning</b> trains on pairs: a prompt, a <b>chosen</b> answer and a <b>rejected</b> one, judged by people (or a model). <b>RLHF</b> (reinforcement learning from human feedback) first trains a <b>reward model</b> (a second network that learns from the pairs to give any answer a score), then uses <b>reinforcement learning</b> (RL: the model writes answers, the reward model scores them, and each update nudges the model toward higher scores). <b>DPO</b> (direct preference optimization) skips both: one loss directly on the pairs.</p>",
   analogy: duo("A wine tasting: nobody can write down the perfect wine, but anyone can say which of two glasses they prefer. Enough of those comparisons steers the winemaker.",
                 "A/B preference data in ranking: you don't label the ideal search result, you log which of two results users chose and train the ranker on the pairwise comparisons."),
-  real: "<p>The pair loss is <code>−ln σ(gap)</code>, where the gap is how much more the model now favors the chosen answer over the rejected one than the starting model did. RLHF needs extra models and generation during training; DPO is ordinary supervised training on pairs, which is why it spread fast.</p>",
+  real: "<p>The pair loss is <code>−ln σ(gap)</code>, where the gap is how much more the model now favors the chosen answer over the rejected one than the starting model did. <b>σ</b> (sigmoid) turns any number into a probability between 0 and 1: σ(0) = 0.50, σ(3) ≈ 0.95. RLHF needs extra models and generation during training; DPO is ordinary supervised training on pairs, which is why it spread fast.</p>",
   evidence: '<p>InstructGPT (SFT, then RLHF): “outputs from the 1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3, despite having 100x fewer parameters.” <a href="https://arxiv.org/abs/2203.02155">Ouyang et al. (2022) ↗</a> DPO solves “the standard RLHF problem with only a simple classification loss”, “eliminating the need for sampling from the LM during fine-tuning”. <a href="https://arxiv.org/abs/2305.18290">Rafailov et al. (2023) ↗</a> Llama 2 collected “over 1 million binary comparisons”. <a href="https://arxiv.org/abs/2307.09288">Touvron et al. (2023) ↗</a></p>'});
 
 /* ---------- 3.3 Inference economics (deep + lab) ---------- */
@@ -739,7 +741,7 @@ add("3.3","Batching: more tokens per second, each user a bit slower",
     out.innerHTML = '<div class="meter"><b>'+Math.round(r.tps).toLocaleString("en-US")+'</b><span>tokens/s across all users · '+(r.tps/r1.tps).toFixed(1)+'× batch 1</span></div>' +
       '<div class="meter"><b>'+ms(r.tick)+'</b><span>TPOT each user sees · '+(r.tick/r1.tick).toFixed(1)+'× batch 1</span></div>';
     note.innerHTML = (r.fits ? '' : '<b style="color:var(--neg)">Doesn\'t fit:</b> only '+r.fit+' requests of '+(P+NOUT).toLocaleString("en-US")+' tokens fit under the 92% line; the rest wait in a queue. ') +
-      'Tick = (weights '+fmtB(r.wb)+' + '+B+' user'+(B>1?'s':'')+' × '+fmtB(r.ctx*r.kt)+' cache each) ÷ '+(r.G*3.35).toFixed(2)+' TB/s = '+ms(r.mem)+'. Math needed: '+ms(r.comp)+', so the tick is '+(r.comp > r.mem ? 'compute-bound' : 'memory-bound')+'. Requests: '+P.toLocaleString("en-US")+' prompt + '+NOUT+' output tokens.';
+      'Tick = (weights '+fmtB(r.wb)+' + '+B+' user'+(B>1?'s':'')+' × '+fmtB(r.ctx*r.kt)+' cache each) ÷ '+(r.G*3.35).toFixed(2)+' TB/s = '+ms(r.mem)+'. Math needed: '+ms(r.comp)+', so the tick is '+(r.comp > r.mem ? 'compute-bound (math is the limit)' : 'memory-bound (waiting on memory reads, not math)')+'. Requests: '+P.toLocaleString("en-US")+' prompt + '+NOUT+' output tokens.';
     const from = shownB, to = B; stop(); stop = animate(p => { shownB = from + (to-from)*p; chart(shownB); }, 250);
   };
   sg.addEventListener("click", e=>{ if(e.target.dataset.k){ m = e.target.dataset.k; shownB = +sB.inp.value; draw(); } });
@@ -750,7 +752,7 @@ add("3.3","Batching: more tokens per second, each user a bit slower",
  {what: "<p><b>Throughput</b>: tokens per second across all users (what the operator pays for). <b>Latency</b>: what one user waits (TTFT, TPOT). Batching trades a little of the second for a lot of the first.</p>",
   analogy: duo("A bus versus a taxi: the bus moves far more people per hour per driver, but each rider waits for stops. The bus is full when there are no seats (KV memory), not when the engine is tired.",
                 "Group commit in a database: batching many transactions into one fsync multiplies throughput, while each transaction waits slightly longer for the shared flush."),
-  real: "<p>Tick = (weight bytes + B × cache bytes per user) ÷ bandwidth. At small B the weights dominate, so adding users is nearly free. At large B the cache reads dominate and TPOT grows in line with B. An H100 does about 295 operations per byte it reads (989 trillion ÷ 3.35 trillion); at 16-bit, decode does about 1 operation per weight byte per user, so weights alone would need ~295 users to become math-bound. But every user adds cache reads too, so at these context lengths decode stays memory-bound; KV memory is the cap.</p>",
+  real: "<p>Tick = (weight bytes + B × cache bytes per user) ÷ bandwidth. At small B the weights dominate, so adding users is nearly free. At large B the cache reads dominate and TPOT grows in line with B. An H100 does about 295 operations per byte it reads (989 trillion ÷ 3.35 trillion); at 16-bit, decode does about 1 operation per weight byte per user, so weights alone would need ~295 users to become compute-bound. But every user adds cache reads too, so at these context lengths decode stays memory-bound; KV memory is the cap.</p>",
   evidence: '<p>“There is a tradeoff between throughput and time per output token”; “Request latency increases with batch size.” <a href="https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices">Databricks, LLM Inference Performance Engineering: Best Practices ↗</a> “High throughput serving of large language models (LLMs) requires batching sufficiently many requests at a time.” <a href="https://arxiv.org/abs/2309.06180">Kwon et al., vLLM / PagedAttention (2023) ↗</a></p>'});
 
 add("3.3","Why output tokens cost more than input tokens",
@@ -779,7 +781,7 @@ add("3.3","Why output tokens cost more than input tokens",
     const B = +sB.inp.value, r = cfg(); sB.set(B);
     const inTok = 2*r.M.N/GPU.FLOPS, outTok = r.tick/B, ratio = outTok/inTok;
     const us = x => x*1e6 >= 1000 ? (x*1e3).toFixed(2)+' ms' : (x*1e6).toFixed(1)+' µs';
-    out.innerHTML = '<div class="meter"><b>'+(inTok*1e6).toFixed(1)+' µs</b><span>GPU time per input token (math-bound)</span></div>' +
+    out.innerHTML = '<div class="meter"><b>'+(inTok*1e6).toFixed(1)+' µs</b><span>GPU time per input token (compute-bound)</span></div>' +
       '<div class="meter"><b>'+us(outTok)+'</b><span>GPU time per output token: tick '+ms(r.tick)+' ÷ '+B+' user'+(B>1?'s':'')+'</span></div>' +
       '<div class="meter" style="grid-column:1 / -1"><b style="color:var(--hot)">'+ratio.toFixed(1)+'×</b><span>an output token costs this many input tokens of GPU time</span></div>';
     work.innerHTML = 'Input: 2 × 8 billion operations ÷ ~989 trillion/s = '+(inTok*1e6).toFixed(1)+' µs, no matter the batch. Output: one tick reads '+fmtB(r.wb)+' of weights + '+B+' cache'+(B>1?'s':'')+', shared by '+B+' user'+(B>1?'s':'')+'. 8B-class, 16-bit, 1 H100, requests of 1,500 in + 500 out.';

@@ -50,6 +50,16 @@ test("grounded = correct and a verified cite", () => {
   assert.deepEqual(r.questions.map(q => [q.correct, q.grounded]), [[true, true], [true, true]]);
 });
 
+test("step ids without zero padding still match", () => {
+  const ans = {answers: {Q01: {answer: ["B"], cites: [{step: "S2", quote: good.answers.Q01.cites[0].quote}]}},
+    flags: [{step: "s2", kind: "C3", note: "x"}], visuals: {S1: good.visuals.S01, S2: good.visuals.S02, S3: good.visuals.S03}};
+  const r = scoreRun({bank, steps, map, answers: ans});
+  assert.ok(r.questions[0].grounded);
+  assert.deepEqual(r.questions[0].steps, ["S02"]);
+  assert.equal(r.flags[0].step, "S02");
+  assert.equal(r.viewed, 1);
+});
+
 test("correct without a valid cite is not grounded", () => {
   const ans = {answers: {
     Q01: {answer: ["B"], cites: [{step: "S04", quote: "why does the mask hide tokens"}]}, // questions step doesn't teach
