@@ -4,7 +4,8 @@
 
 | Metric | Value | Target | Before |
 | --- | --- | --- | --- |
-| Grounded | 98% | 100% | 96% |
+| Grounded (≥ 2 of 3 runs) | 97% | 100% | 96% |
+| Grounded (per run) | 98% | info | – |
 | Agreement | 100% | 100% | 100% |
 | Key disputes (open) | 0 | 0 | 1 |
 | Options-only guess | 97% | info | 93% |

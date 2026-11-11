@@ -3,7 +3,8 @@
   "runs": 3,
   "questions": 36,
   "metrics": {
-    "grounded": 0.9814814814814815,
+    "grounded": 0.9722222222222222,
+    "groundedPerRun": 0.9814814814814815,
     "agreement": 1,
     "openDisputes": 0,
     "optionsOnly": 0.9655172413793104,
@@ -724,6 +725,9 @@
     "metrics": {
       "grounded": {
         "before": 0.9629629629629629,
+        "after": 0.9722222222222222
+      },
+      "groundedPerRun": {
         "after": 0.9814814814814815
       },
       "agreement": {

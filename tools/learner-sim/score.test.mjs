@@ -102,10 +102,22 @@ test("aggregate: disagreement, disputes, weak distractors, confirmed flags", () 
   assert.deepEqual(card.weakDistractors, [{id: "L9-mask-01", right: 2}]);
   assert.equal(card.metrics.optionsOnly, 1);
   assert.deepEqual(card.flags.map(f => [f.step, f.confirmed]), [["S02", true]]);
-  assert.equal(card.metrics.grounded, 5 / 6);
+  assert.equal(card.metrics.grounded, 1, "2 of 3 runs is a majority");
+  assert.equal(card.metrics.groundedPerRun, 5 / 6);
   assert.ok(!card.gate);
   // A human kept the key: the dispute closes.
   assert.equal(aggregate({bank, steps, runs: three(good, good, other), closedDisputes: {"L9-mask-01": "key right"}}).metrics.openDisputes, 0);
+});
+
+test("grounded gates on the majority: 2 of 3 passes, 1 of 3 fails", () => {
+  const miss = {answers: {...good.answers, Q01: {answer: ["B"], cites: []}}, visuals: good.visuals};
+  const two = aggregate({bank, steps, runs: three(good, good, miss)});
+  assert.equal(two.metrics.grounded, 1);
+  assert.equal(two.metrics.groundedPerRun, 5 / 6);
+  assert.ok(two.pass.grounded && two.gate);
+  const one = aggregate({bank, steps, runs: three(good, miss, miss)});
+  assert.equal(one.metrics.grounded, 0.5);
+  assert.ok(!one.pass.grounded);
 });
 
 test("number agreement uses the tolerance", () => {

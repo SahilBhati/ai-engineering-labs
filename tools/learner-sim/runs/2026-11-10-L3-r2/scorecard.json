@@ -4,6 +4,7 @@
   "questions": 41,
   "metrics": {
     "grounded": 1,
+    "groundedPerRun": 1,
     "agreement": 1,
     "openDisputes": 0,
     "optionsOnly": 0.9285714285714286,
@@ -752,6 +753,9 @@
     "metrics": {
       "grounded": {
         "before": 0.983739837398374,
+        "after": 1
+      },
+      "groundedPerRun": {
         "after": 1
       },
       "agreement": {

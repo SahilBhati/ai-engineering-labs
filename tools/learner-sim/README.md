@@ -26,7 +26,8 @@ Needs Node 22+, Chrome, and the `claude` CLI (for `sim`). Runs use Sonnet.
 
 | Metric | Definition | Target |
 | --- | --- | --- |
-| Grounded | correct **and** cites a teaching step with a verified quote (or a described visual) | 100% |
+| Grounded | share of questions grounded in ≥ 2 of 3 runs; a run grounds a question when it is correct **and** cites a teaching step with a verified quote (or a described visual) | 100% |
+| Grounded (per run) | the same, counted over every run's answers; a slip in one run shows here | info only |
 | Agreement | same answer in every run; disagreement marks the question ambiguous | 100% |
 | Key disputes | the actor says the question is flawed by the lesson's own content; a human reviews each | 0 open |
 | Options-only guess | choice question answered right from its options alone in ≥ 2 of 3 runs | info only |

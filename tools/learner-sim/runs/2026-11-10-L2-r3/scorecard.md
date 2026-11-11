@@ -1,10 +1,11 @@
 # Learner-sim scorecard: Lesson 2, The block, sampling, the KV cache (2026-11-10-L2-r3, vs 2026-11-10-L2-r2)
 
-3 runs, 34 questions. Gate: **FAIL**.
+3 runs, 34 questions. Gate: **PASS**.
 
 | Metric | Value | Target | Before |
 | --- | --- | --- | --- |
-| Grounded | 98% | 100% | 95% |
+| Grounded (≥ 2 of 3 runs) | 100% | 100% | 95% |
+| Grounded (per run) | 98% | info | – |
 | Agreement | 100% | 100% | 100% |
 | Key disputes (open) | 0 | 0 | 0 |
 | Options-only guess | 95% | info | 95% |

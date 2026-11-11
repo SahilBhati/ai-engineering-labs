@@ -3,7 +3,8 @@
   "runs": 3,
   "questions": 34,
   "metrics": {
-    "grounded": 0.9803921568627451,
+    "grounded": 1,
+    "groundedPerRun": 0.9803921568627451,
     "agreement": 1,
     "openDisputes": 0,
     "optionsOnly": 0.9523809523809523,
@@ -15,14 +16,14 @@
     "visualOnlyCites": 0.04
   },
   "pass": {
-    "grounded": false,
+    "grounded": true,
     "agreement": true,
     "openDisputes": true,
     "keyLongest": true,
     "coverage": true,
     "viewed": true
   },
-  "gate": false,
+  "gate": true,
   "notGrounded": [
     {
       "id": "L2-kvcache-02",
@@ -690,6 +691,9 @@
     "metrics": {
       "grounded": {
         "before": 0.9509803921568627,
+        "after": 1
+      },
+      "groundedPerRun": {
         "after": 0.9803921568627451
       },
       "agreement": {

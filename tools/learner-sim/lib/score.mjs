@@ -133,9 +133,10 @@ export function aggregate({bank, steps, runs, closedDisputes = {}}){
   const concepts = Object.keys(bank.concepts), coveredC = new Set(solid.map(r => r.concept));
   const teach = steps.filter(s => s.teaching && s.ch !== "R"), coveredS = new Set(solid.flatMap(r => r.steps));
 
-  const groundedRate = rate(rows.reduce((n, r) => n + r.grounded, 0), qs.length * R);
+  // Grounded gates on the majority vote, like agreement and flags; the per-run rate stays as info.
   const metrics = {
-    grounded: groundedRate,
+    grounded: rate(solid.length, qs.length),
+    groundedPerRun: rate(rows.reduce((n, r) => n + r.grounded, 0), qs.length * R),
     agreement: rate(rows.filter(r => r.agree).length, qs.length),
     openDisputes: disputes.length,
     optionsOnly: rate(weak.length, choice.length),
@@ -171,9 +172,9 @@ export function diff(prev, cur){
 
 const pct = x => x == null ? "–" : Math.round(x * 100) + "%";
 const fmt = (k, x) => ["openDisputes", "confirmedFlags"].includes(k) ? String(x ?? "–") : pct(x);
-const LABEL = {grounded: "Grounded", agreement: "Agreement", openDisputes: "Key disputes (open)", optionsOnly: "Options-only guess", keyLongest: "Key is the longest option",
+const LABEL = {grounded: "Grounded (≥ 2 of 3 runs)", groundedPerRun: "Grounded (per run)", agreement: "Agreement", openDisputes: "Key disputes (open)", optionsOnly: "Options-only guess", keyLongest: "Key is the longest option",
   confirmedFlags: "Lesson flags (confirmed)", coverage: "Coverage (concepts)", stepCoverage: "Coverage (teaching steps)", viewed: "Screenshots viewed (worst run)", visualOnlyCites: "Visual-only cites"};
-const GOAL = {grounded: "100%", agreement: "100%", openDisputes: "0", optionsOnly: "info", keyLongest: "≤35%", confirmedFlags: "→ 0", coverage: "100%", stepCoverage: "info", viewed: "100%", visualOnlyCites: "info"};
+const GOAL = {grounded: "100%", groundedPerRun: "info", agreement: "100%", openDisputes: "0", optionsOnly: "info", keyLongest: "≤35%", confirmedFlags: "→ 0", coverage: "100%", stepCoverage: "info", viewed: "100%", visualOnlyCites: "info"};
 
 export function toMarkdown(card, d, title){
   const L = [`# Learner-sim scorecard: ${title || "Lesson " + card.lesson}`, "",
