@@ -1,0 +1,628 @@
+{
+ "lesson": 4,
+ "title": "Give the model knowledge",
+ "url": "../lessons/llm-foundations-4/",
+ "concepts": {
+  "closed": {
+   "label": "Closed book: why models hallucinate your facts",
+   "anchor": "ch-4-1"
+  },
+  "rag": {
+   "label": "RAG: retrieve, augment, generate",
+   "anchor": "ch-4-1"
+  },
+  "chunk": {
+   "label": "Chunking and overlap",
+   "anchor": "ch-4-1"
+  },
+  "choose": {
+   "label": "RAG vs long context vs fine-tuning",
+   "anchor": "ch-4-1"
+  },
+  "embed": {
+   "label": "Embedding index and cosine similarity",
+   "anchor": "ch-4-2"
+  },
+  "hybrid": {
+   "label": "Keyword, vector and hybrid search",
+   "anchor": "ch-4-2"
+  },
+  "ann": {
+   "label": "Approximate nearest-neighbour search",
+   "anchor": "ch-4-2"
+  },
+  "floor": {
+   "label": "Score floor (similarity threshold)",
+   "anchor": "ch-4-2"
+  },
+  "golden": {
+   "label": "Golden set and recall@k",
+   "anchor": "ch-4-3"
+  },
+  "split": {
+   "label": "Retrieval miss vs answer miss",
+   "anchor": "ch-4-3"
+  },
+  "judge": {
+   "label": "LLM-as-judge",
+   "anchor": "ch-4-3"
+  },
+  "gate": {
+   "label": "Evals as a regression gate",
+   "anchor": "ch-4-3"
+  }
+ },
+ "questions": [
+  {
+   "id": "L4-closed-01",
+   "concept": "closed",
+   "kind": "single",
+   "prompt": "You ask a model, with no docs in the prompt, for your API's /search limit (100 per minute, written only in your private docs). What does it most likely do?",
+   "options": [
+    "Writes a plausible number, because no weights hold your limit and sampling still picks a token",
+    "Returns an error message, because it looks the fact up in its weights and finds no entry for it",
+    "Answers 100, because training on many similar API docs placed your exact limit in its weights",
+    "Asks for your docs, because a model can always tell which facts it never saw in training"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "The weights hold no path that favours “100”, so probability spreads over plausible numbers (60, 100, 1,000, 10) and sampling picks one. It reads as confidently as a right answer: a hallucination. There is no lookup to fail."
+  },
+  {
+   "id": "L4-closed-02",
+   "concept": "closed",
+   "kind": "single",
+   "prompt": "Putting passage C2 in the prompt made “100” jump to 96%. What changed inside the model?",
+   "options": [
+    "Nothing in the weights: attention read “100” from the passage now in the context",
+    "The weights updated to store the new fact, so later questions without C2 also answer 100",
+    "Temperature dropped, because a passage in the prompt makes sampling greedy",
+    "The vocabulary gained a token for 100, so the model could finally output it"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "The weights are frozen while serving (Lesson 3). The same model, given different context, puts its probability on the token it can read from the passage."
+  },
+  {
+   "id": "L4-rag-01",
+   "concept": "rag",
+   "kind": "single",
+   "prompt": "In RAG, what does the generate stage actually receive?",
+   "options": [
+    "A prompt with instructions, the top k retrieved passages as text, and the question",
+    "The passages' embedding vectors, written into the model's weights for the length of one request",
+    "The whole docs index, which the model searches itself during its forward pass",
+    "Only the question, because retrieval runs after generation to check the answer"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Retrieve → augment → generate. Retrieval is a separate search system; its output becomes prompt text. Nothing about the model changes."
+  },
+  {
+   "id": "L4-rag-02",
+   "concept": "rag",
+   "kind": "single",
+   "prompt": "With k = 1 the bot answered “10 requests per minute [C3]” to “How often can I call search per minute?”. Where was the bug?",
+   "options": [
+    "Retrieval: C3 (/upload) ranked above C2, so the model answered faithfully from the wrong passage",
+    "Generation: the model had C2 in its prompt but copied the wrong number out of that same passage",
+    "Chunking: C2 was split at a boundary, so the number 100 was missing from every chunk sent",
+    "The model: it ignored the passage it was given and answered from its training data instead"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Only C3 was sent, and C3 really says 10 (for /upload). The model did its job; retrieval ranked a near-duplicate first. k = 2 includes C2 and the answer becomes 100."
+  },
+  {
+   "id": "L4-rag-03",
+   "concept": "rag",
+   "kind": "multi",
+   "prompt": "You raise k from 1 to 3 for the /search question. Select all that are true.",
+   "options": [
+    "The right passage is more likely to be in the prompt",
+    "Each question sends more input tokens, so it costs more",
+    "The model gets more unrelated text it has to ignore",
+    "The model's weights now include the extra passages",
+    "Retrieval gets faster, because fewer passages are ranked"
+   ],
+   "answer": [
+    0,
+    1,
+    2
+   ],
+   "why": "More passages: more chances to include the right one, more tokens to pay for, more noise. Weights never change, and retrieval still ranks every passage."
+  },
+  {
+   "id": "L4-chunk-01",
+   "concept": "chunk",
+   "kind": "single",
+   "prompt": "Chunks of 6 words, no overlap: the chunk holding “100” reads “100 requests per minute per API”. Why is that a problem?",
+   "options": [
+    "It lost its subject: no chunk has /search with 100, so a /search question can't match it",
+    "It is too long: six words is more than one embedding vector can hold for retrieval",
+    "It costs too much: small chunks send more tokens per question than large chunks do",
+    "It breaks the index: chunks must share some words, or the index refuses to store them"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Too small and a fact loses its subject. Overlap or larger chunks keep “/search … 100” together in one chunk."
+  },
+  {
+   "id": "L4-chunk-02",
+   "concept": "chunk",
+   "kind": "single",
+   "prompt": "What does half overlap between chunks fix?",
+   "options": [
+    "A fact cut at a chunk boundary also appears whole in the neighbouring chunk",
+    "Large chunks mix fewer topics, because overlap removes their repeated words",
+    "Fewer chunks need storing, because overlapping chunks are merged into one",
+    "The question and the chunks can now use two different embedding models"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Overlap repeats the end of one chunk at the start of the next, so a boundary can't cut every copy of a sentence. The cost is more chunks to store."
+  },
+  {
+   "id": "L4-chunk-03",
+   "concept": "chunk",
+   "kind": "single",
+   "prompt": "Why is one very large chunk (the whole page) a problem too?",
+   "options": [
+    "Its one vector blends every topic, and each retrieval sends all of that text",
+    "The model can't read chunks longer than one sentence, so they get skipped",
+    "Large chunks split facts more often, because their boundaries fall in the middle of words",
+    "Keyword search stops working, because large chunks contain no rare words"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "A chunk gets one vector, so many topics blur into it and it matches none sharply; and you pay k × chunk size in tokens per question."
+  },
+  {
+   "id": "L4-choose-01",
+   "concept": "choose",
+   "kind": "single",
+   "prompt": "Your docs are 50K tokens and change rarely. The context window is 128K. What's the simplest good choice?",
+   "options": [
+    "Paste all the docs into the prompt; prompt caching cuts the repeated cost",
+    "Fine-tune on the docs, because facts in the weights cost no input tokens",
+    "Build RAG, because a long prompt can never show which passage it used",
+    "None works, because 50K tokens is over the model's context window limit"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "It fits, so long context is simplest. RAG wins once the docs outgrow the window or the per-question bill. Fine-tuning is unreliable for exact facts."
+  },
+  {
+   "id": "L4-choose-02",
+   "concept": "choose",
+   "kind": "single",
+   "prompt": "Your docs are 2M tokens and edited daily. Which approach fits?",
+   "options": [
+    "RAG: about 1,000 input tokens per question, and edits show up once changed chunks are re-embedded",
+    "Long context: paste everything, because a bigger prompt always gives the model more facts to use",
+    "Fine-tuning: retrain daily, because the weights are the most reliable place to keep exact facts",
+    "Raise k until it covers every chunk, because recall@k reaches 100% only when all chunks are sent"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "2M tokens can't fit a 128K window. Fine-tuning needs a training run per edit and can't cite. RAG's cost is k × chunk size whatever the docs size."
+  },
+  {
+   "id": "L4-choose-03",
+   "concept": "choose",
+   "kind": "single",
+   "prompt": "Why is fine-tuning a poor way to add facts the bot must quote exactly?",
+   "options": [
+    "Each edit needs a training run, and the model can't point to where a fact came from",
+    "Fine-tuning erases the model's earlier training, so it forgets how to write sentences",
+    "A fine-tuned model needs a longer context window for every question it is asked",
+    "Fine-tuning only changes the tokenizer, so the new facts never reach the weights"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Fine-tuning changes behaviour (tone, format, a narrow task) well. For facts that change and must be checkable, it is slow to update and gives no source."
+  },
+  {
+   "id": "L4-choose-04",
+   "concept": "choose",
+   "kind": "number",
+   "prompt": "You paste 50,000 tokens of docs into every question, at $3 per million input tokens. What does one question cost, in dollars?",
+   "answer": [
+    0.15
+   ],
+   "tol": 0.02,
+   "why": "50,000 × $3 / 1,000,000 = $0.15 per question. Sending the 3 best passages (~1,000 tokens) costs $0.003: 50× less.",
+   "unit": "$"
+  },
+  {
+   "id": "L4-embed-01",
+   "concept": "embed",
+   "kind": "single",
+   "prompt": "In vector search, what is embedded ahead of time, and what at ask time?",
+   "options": [
+    "Every chunk ahead of time (the index); the question at ask time",
+    "The question ahead of time; every chunk at ask time, to stay fresh",
+    "Both at ask time, because each chunk's vector depends on the question",
+    "Nothing ahead of time; the model embeds the docs during its prefill"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Indexing embeds each chunk once. Each question costs one embedding call plus a similarity score per stored vector."
+  },
+  {
+   "id": "L4-embed-02",
+   "concept": "embed",
+   "kind": "single",
+   "prompt": "Why must the question and the chunks go through the same embedding model?",
+   "options": [
+    "Vectors from different models live in unrelated spaces, so their cosine means nothing",
+    "Different models cut the docs into different chunks, so their ranks can't be compared",
+    "The context window only accepts vectors made by the model that writes the answer",
+    "Keyword scores are computed from the embedding model's vocabulary of rare words"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Directions only mean something within one model's space. Swapping the embedding model means re-embedding every chunk."
+  },
+  {
+   "id": "L4-embed-03",
+   "concept": "embed",
+   "kind": "single",
+   "prompt": "Cosine similarity between a question and a passage measures…",
+   "options": [
+    "How closely their embedding vectors point in the same direction",
+    "How many exact words the question and the passage have in common",
+    "How long the passage is compared with the length of the question",
+    "How likely the model is to generate the passage as its next text"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Cosine = dot product ÷ both lengths: direction only (Lesson 1). Shared exact words is keyword search."
+  },
+  {
+   "id": "L4-hybrid-01",
+   "concept": "hybrid",
+   "kind": "single",
+   "prompt": "“What does E1042 mean?” Vector search ranks the 429 passage first. Why does keyword search find C6?",
+   "options": [
+    "Only C6 contains the exact token E1042, a rare word that keyword scoring rewards",
+    "Keyword search gives E1042 a longer vector, so its cosine with C6 comes out higher",
+    "Keyword search ranks passages by their length, and C6 is the shortest passage",
+    "Keyword search knows E1042 is an error code, so it ranks error passages first"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Rare exact codes are keyword search's best case. Vector search sees “some error” and blurs E1042 into the 429 passage."
+  },
+  {
+   "id": "L4-hybrid-02",
+   "concept": "hybrid",
+   "kind": "single",
+   "prompt": "“How often can I call search per minute?” Which method on its own matches “call” to “requests”?",
+   "options": [
+    "Vector search, because similar meanings get similar embeddings",
+    "Keyword search, because both words appear somewhere in the docs",
+    "Neither one, because only an LLM judge can match two synonyms",
+    "Keyword search, because rarer words count more in its scoring"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Keyword search needs the same word; vector search matches meaning. Hybrid runs both and merges the rankings."
+  },
+  {
+   "id": "L4-hybrid-03",
+   "concept": "hybrid",
+   "kind": "number",
+   "prompt": "Reciprocal rank fusion adds 1/(60 + rank) from each list. A passage is rank 2 in vector search and rank 1 in keyword search. What is its hybrid score?",
+   "answer": [
+    0.0325
+   ],
+   "tol": 0.01,
+   "why": "1/62 + 1/61 = 0.0161 + 0.0164 = 0.0325. That is C2 for the /search question, just above C3 (1/61 + 1/63 = 0.0323)."
+  },
+  {
+   "id": "L4-ann-01",
+   "concept": "ann",
+   "kind": "number",
+   "prompt": "Exact search over 100 million vectors of 1,024 numbers each. About how many multiply-adds per question, in billions?",
+   "answer": [
+    102.4
+   ],
+   "tol": 0.05,
+   "why": "100,000,000 × 1,024 ≈ 102 billion (≈ 100 billion), for every question. An approximate index checks only a few percent of that.",
+   "unit": "billion"
+  },
+  {
+   "id": "L4-ann-02",
+   "concept": "ann",
+   "kind": "single",
+   "prompt": "An approximate index checks only the regions nearest the question. What does it give up for the speed?",
+   "options": [
+    "Recall: a true nearest neighbour in an unchecked region can be missed",
+    "Freshness: a newly added vector can't be found until the next full rebuild",
+    "Cost: every approximate search adds extra input tokens to the prompt",
+    "Precision: the cosine scores it returns are rounded, so ties appear"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Checking fewer regions = fewer vectors compared = faster, at the cost of sometimes missing a true neighbour. The regions-checked knob sets the trade."
+  },
+  {
+   "id": "L4-ann-03",
+   "concept": "ann",
+   "kind": "single",
+   "prompt": "In the regions toy, the question sits near a region border. Checking 1 of 16 regions finds only 1 of the 5 true nearest. Why?",
+   "options": [
+    "Some true neighbours sit in nearby regions that weren't checked",
+    "One region holds fewer than 5 vectors, so it can't return 5 results",
+    "The question's vector moves when fewer regions are being checked",
+    "Inside each region, the index ranks vectors by keyword score instead"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Near a border, neighbours spill into adjacent regions. Checking 4 regions (100 of 400 vectors) finds all 5."
+  },
+  {
+   "id": "L4-floor-01",
+   "concept": "floor",
+   "kind": "single",
+   "prompt": "“Do you support GraphQL?” is not in the docs. With no score floor, what does the bot do?",
+   "options": [
+    "Answers from the nearest passages anyway, because top-k always returns k results",
+    "Says it's not in the docs, because cosine is negative for every unrelated passage",
+    "Returns no passages, because vector search only ever returns exact word matches",
+    "Fails with an error, because the prompt then has no passage it is able to cite"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "There is always a nearest neighbour, however far away. The bot gets three unrelated passages (best 0.41) and answers a different question."
+  },
+  {
+   "id": "L4-floor-02",
+   "concept": "floor",
+   "kind": "single",
+   "prompt": "You raise the floor to 0.90. For the /search question, the best passage scores 0.86. What happens?",
+   "options": [
+    "Every passage is dropped, so an answerable question gets “not in the docs”",
+    "Only C2 passes, because a high floor removes near-duplicate passages such as C3",
+    "Nothing changes, because the floor only applies to off-topic questions",
+    "The bot answers 10, because C3 is the one passage above the floor"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Too high and the floor refuses real questions; too low and it lets unrelated passages through. 0.50 works for both questions here."
+  },
+  {
+   "id": "L4-floor-03",
+   "concept": "floor",
+   "kind": "single",
+   "prompt": "How should you choose the score floor's value?",
+   "options": [
+    "Tune it on test questions, including some whose right answer is “not in the docs”",
+    "Use 0.50 always, because cosine values are the same across embedding models",
+    "Set it to the highest score seen, so only the very best passage ever passes",
+    "Set it to 0, because the model ignores irrelevant passages in the prompt anyway"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Cosine ranges depend on the embedding model, so there's no universal floor. And models are easily distracted by irrelevant text."
+  },
+  {
+   "id": "L4-golden-01",
+   "concept": "golden",
+   "kind": "number",
+   "prompt": "Right-passage ranks for six golden questions are 2, 1, 2, 3, 1, 1. What is recall@2, in percent?",
+   "answer": [
+    83.3
+   ],
+   "tol": 0.02,
+   "why": "Ranks ≤ 2: five of six questions. 5/6 = 83%.",
+   "unit": "%"
+  },
+  {
+   "id": "L4-golden-02",
+   "concept": "golden",
+   "kind": "number",
+   "prompt": "Same ranks: 2, 1, 2, 3, 1, 1. What is recall@1, in percent?",
+   "answer": [
+    50
+   ],
+   "tol": 0,
+   "why": "Ranks = 1: three of six. 3/6 = 50%.",
+   "unit": "%"
+  },
+  {
+   "id": "L4-golden-03",
+   "concept": "golden",
+   "kind": "single",
+   "prompt": "Why keep a golden set instead of trying a few questions by hand after each change?",
+   "options": [
+    "The same questions with known answers every run, so scores compare and regressions show",
+    "Hand checks rely on the LLM judge, which disagrees with human labels far too often",
+    "A golden set makes retrieval itself faster, because the right answers get cached",
+    "The similarity score already shows whether an answer is right, so hand checks add nothing"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Hand checks vary and skip questions that used to work. A similarity score says how close a passage is, not whether it answers the question."
+  },
+  {
+   "id": "L4-golden-04",
+   "concept": "golden",
+   "kind": "single",
+   "prompt": "What does computing recall@k need?",
+   "options": [
+    "For each question, which passage is right and where it ranked",
+    "A person reading and grading every single answer the bot writes",
+    "An LLM judge scoring each answer against a written rubric",
+    "The model's probability for every token of each answer"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Recall@k needs no model to grade: it's a lookup of where the right passage ranked."
+  },
+  {
+   "id": "L4-split-01",
+   "concept": "split",
+   "kind": "single",
+   "prompt": "G6: the right passage (24 hours) was retrieved, but the bot said 48 hours. What kind of miss, and what fixes it?",
+   "options": [
+    "An answer miss: fix the prompt or the model, since a bigger k can't help",
+    "A retrieval miss: raise k so that more of the ranked passages reach the prompt",
+    "A chunking miss: add overlap so the passage keeps its subject",
+    "A grading miss: the judge misread an answer that was correct"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "The passage arrived, so retrieval worked. A strict prompt (answer only from the passages, quote them) fixed it in the lesson."
+  },
+  {
+   "id": "L4-split-02",
+   "concept": "split",
+   "kind": "single",
+   "prompt": "With k = 1 the bot answered “10” from C3, which really says 10. Is that answer faithful, and is it right?",
+   "options": [
+    "Faithful but wrong: it stuck to its passage, but retrieval sent the wrong one",
+    "Unfaithful and wrong: it changed the number given in the passage it read",
+    "Faithful and right: it cited the passage it was given, so it is correct",
+    "Unfaithful but right: the model corrected a mistake in the passage"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Faithful = sticks to the passages it was given. That's why retrieval and generation are scored separately."
+  },
+  {
+   "id": "L4-split-03",
+   "concept": "split",
+   "kind": "multi",
+   "prompt": "Plain prompt, k = 1 → k = 3 on the golden set. Select all that are true.",
+   "options": [
+    "Retrieval misses drop from 3 to 0",
+    "Right answers rise from 2 to 5",
+    "G6's answer miss disappears",
+    "End-to-end accuracy reaches 100%"
+   ],
+   "answer": [
+    0,
+    1
+   ],
+   "why": "A bigger k fixes retrieval misses only. G6 had its passage all along, so it stays wrong until the prompt changes: 5 of 6."
+  },
+  {
+   "id": "L4-judge-01",
+   "concept": "judge",
+   "kind": "single",
+   "prompt": "Reference: “100 requests per minute per API key”. Why does exact match fail “100 requests per minute.”?",
+   "options": [
+    "It compares strings, so a right answer worded differently fails",
+    "It compares meanings, and the final period changes the meaning",
+    "It fails any answer shorter than the reference, right or wrong",
+    "It applies the judge's rubric, which requires the words API key"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Exact match suits short, fixed outputs (like a passage ID). Free-text answers need a grader that accepts paraphrases."
+  },
+  {
+   "id": "L4-judge-02",
+   "concept": "judge",
+   "kind": "single",
+   "prompt": "The plain LLM judge passed “Limits vary by endpoint and plan; check your dashboard…”. What made it match the human label?",
+   "options": [
+    "A rubric that says passing means stating 100 requests per minute for /search",
+    "Switching to exact match, because exact match never passes long answers",
+    "Raising k, so that the judge sees more of the retrieved passages",
+    "A bigger judge model, because only small judges show verbosity bias"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Judges favour fluent, longer answers (verbosity bias). A rubric says what passing means; with it the judge matched all 5 human labels."
+  },
+  {
+   "id": "L4-judge-03",
+   "concept": "judge",
+   "kind": "single",
+   "prompt": "How do you know an LLM judge can be trusted?",
+   "options": [
+    "Measure its agreement with human labels on a sample; fix the rubric until it's high",
+    "It is a model too, so its grades are as accurate as the answers it is grading",
+    "Check that it passes longer, more detailed answers more often than short ones",
+    "Run it twice on the same answers; if both sets of grades match, the grades are correct"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "A judge is trusted only as far as it agrees with people. Strong judges reach over 80% agreement, about the level between two humans."
+  },
+  {
+   "id": "L4-gate-01",
+   "concept": "gate",
+   "kind": "single",
+   "prompt": "Today: vector search, k = 3, recall 100%, 1,000 tokens per question. Gate: recall ≥ today and tokens ≤ today. Which change ships?",
+   "options": [
+    "Hybrid search with k = 2: recall 100% with 700 tokens",
+    "Hybrid search with k = 1: recall 83% with 400 tokens",
+    "Vector search with k = 2: recall 83% with 700 tokens",
+    "Vector search with k = 4: recall 100% with 1,300 tokens"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Only hybrid k = 2 keeps recall and lowers tokens: 30% cheaper at the same quality."
+  },
+  {
+   "id": "L4-gate-02",
+   "concept": "gate",
+   "kind": "number",
+   "prompt": "Each question sends 100 tokens of instructions and question, plus k passages of 300 tokens. How many input tokens at k = 2?",
+   "answer": [
+    700
+   ],
+   "tol": 0,
+   "why": "100 + 2 × 300 = 700. At k = 3 it's 1,000.",
+   "unit": "tokens"
+  },
+  {
+   "id": "L4-gate-03",
+   "concept": "gate",
+   "kind": "single",
+   "prompt": "Hybrid search raises recall@1 from 50% to 83%. Why still read the per-question list?",
+   "options": [
+    "An aggregate can hide a regression: G2 fell from #1 to #2 under hybrid",
+    "Recall@1 is computed per question, so the aggregate is always wrong",
+    "Hybrid scores use a different scale, so the two recall percentages don't compare",
+    "The golden set's questions change whenever the search method changes"
+   ],
+   "answer": [
+    0
+   ],
+   "why": "Hybrid helped G1, G3 and G4 but pushed G2 down (keyword search ranked it last of four passages containing “API”). Good reports list which questions changed."
+  }
+ ]
+}
