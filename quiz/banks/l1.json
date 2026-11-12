@@ -108,10 +108,10 @@
         "Slower generation (one token per step)",
         "Less text fits in the context window",
         "The model has more weights for that language",
-        "Prefill gets faster"
+        "Each token gets a bigger embedding row"
       ],
       "answer": [0, 1, 2],
-      "why": "Every downstream number is per token: price, decode steps, context slots. The model's weights are the same for every language, and more tokens make prefill slower, not faster."
+      "why": "Every downstream number is per token: price, decode steps, context slots. The model's weights are the same for every language, and every token's embedding row has the same fixed width (a design choice of the model)."
     },
     {
       "id": "L1-tokens-07", "concept": "tokens", "kind": "single",

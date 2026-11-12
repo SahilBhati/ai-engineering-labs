@@ -729,12 +729,13 @@ add("3.3","Batching: more tokens per second, each user a bit slower",
       const r = cfg(Math.round(B));
       s += '<circle cx="'+X(B).toFixed(1)+'" cy="'+Y(r[key]).toFixed(1)+'" r="6" style="fill:var(--hot)"/>';
       s += '<text x="'+L+'" y="'+(T-4)+'" style="fill:var(--ink)">'+label+'</text>';
-      s += '<text x="'+(L-4)+'" y="'+(T+4)+'" text-anchor="end" style="fill:var(--muted)">'+fmt(max)+'</text><text x="'+(L-4)+'" y="'+BOT+'" text-anchor="end" style="fill:var(--muted)">0</text>';
+      s += '<text x="'+(L-10)+'" y="'+(T+4)+'" text-anchor="end" style="fill:var(--muted)">'+fmt(max)+'</text><text x="'+(L-10)+'" y="'+(BOT+4)+'" text-anchor="end" style="fill:var(--muted)">0</text>';
       s += '<text x="'+L+'" y="'+(BOT+14)+'" style="fill:var(--muted)">1</text><text x="'+(W-R)+'" y="'+(BOT+14)+'" text-anchor="end" style="fill:var(--muted)">'+XMAX+'</text><text x="'+((L+W)/2)+'" y="'+(BOT+28)+'" text-anchor="middle" style="fill:var(--muted)">users in the batch</text>';
       return s + '</g></svg>';
     };
     pic.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:12px"><div style="flex:1 1 300px;min-width:0">' + one("tps", tpsMax, "total tokens / s", x=>Math.round(x).toLocaleString("en-US"), "var(--accent)") +
-      '</div><div style="flex:1 1 300px;min-width:0">' + one("tick", tickMax, "TPOT per user (ms)", x=>(x*1000).toFixed(0), "var(--cool)") + '</div></div>';
+      '</div><div style="flex:1 1 300px;min-width:0">' + one("tick", tickMax, "TPOT per user (ms)", x=>(x*1000).toFixed(0), "var(--cool)") + '</div></div>' +
+      '<p class="lbl">Orange dot = the batch on the slider. Each y-axis runs from 0 to the curve\'s value at 320 users. Past the red zone the caches no longer fit, so the dashed part is what the GPU would do if they did.</p>';
   };
   const draw = () => {
     const B = +sB.inp.value, r = cfg(B), r1 = cfg(1); sB.set(B); sg.sync(m);

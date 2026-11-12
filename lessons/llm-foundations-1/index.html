@@ -458,7 +458,8 @@ add("1.2","Training moves similar words together",
     lab.textContent = "training progress: " + s.value + "%";
     svg.innerHTML = mapSVG(MAPW.map((w,i)=>[START[i][0] + (w[1]-START[i][0])*e, START[i][1] + (w[2]-START[i][1])*e]), t>.85);
   };
-  s.addEventListener("input", draw); v.append(lab, s, svg); draw();
+  const key = el("p",{class:"lbl"},"Each dot is one word's row, drawn in 2D. Left/right and up/down mean nothing on their own; only the distance between dots matters. Near the end of training the groups take colours: teal = money words, blue = water words, black = bank.");
+  s.addEventListener("input", draw); v.append(lab, s, svg, key); draw();
  },
  "A 2D picture of what really happens in thousands of dimensions. Nobody labels “river” as water: sentences like “the ___ overflowed” and “fish swim in the ___” push river and stream the same way. bank appears in both water and money sentences, so it settles between them. Backend version: recommendation systems learn user and item vectors the same way, and similar behaviour ends up nearby.");
 
@@ -962,7 +963,9 @@ function mapSVG(pos, showGroups, picks){
     '<rect x="1" y="1" width="358" height="248" rx="8" style="fill:var(--bg);stroke:var(--line)"/>';
   if(picks){ const [a,b] = picks.map(i=>pos[i]); s += '<line x1="' + X(a[0]) + '" y1="' + Y(a[1]) + '" x2="' + X(b[0]) + '" y2="' + Y(b[1]) + '" style="stroke:var(--ink)" stroke-dasharray="4 3"/>'; }
   const LBL = {cash:[9,-8,"start"], deposit:[9,-8,"start"], loan:[9,14,"start"], river:[-9,-8,"end"], stream:[-9,-8,"end"], lake:[-9,14,"end"], bank:[0,-14,"middle"]};
-  pos.forEach((p,i)=>{ const pk = picks && picks.includes(i), c = pk ? "--hot" : showGroups ? col[MAPW[i][3]] : "--ink", [dx, dy, anc] = LBL[MAPW[i][0]];
+  pos.forEach((p,i)=>{ const pk = picks && picks.includes(i), c = pk ? "--hot" : showGroups ? col[MAPW[i][3]] : "--ink";
+    let [dx, dy, anc] = LBL[MAPW[i][0]]; const wd = MAPW[i][0].length*7.3; // a label that would run off the card flips to the dot's other side
+    if(anc === "start" && X(p[0]) + dx + wd > 352){ dx = -dx; anc = "end"; } else if(anc === "end" && X(p[0]) + dx - wd < 8){ dx = -dx; anc = "start"; }
     s += '<g data-w="' + i + '" style="cursor:' + (picks ? "pointer" : "default") + '"><circle cx="' + X(p[0]) + '" cy="' + Y(p[1]) + '" r="' + (pk ? 8 : 5) + '" style="fill:var(' + c + ')"/>' +
       '<text x="' + (X(p[0]) + dx) + '" y="' + (Y(p[1]) + dy) + '" text-anchor="' + anc + '" style="fill:var(' + c + ')' + (pk ? ";font-weight:600" : "") + '">' + MAPW[i][0] + '</text></g>'; });
   return s + '</g></svg>';
