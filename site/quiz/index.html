@@ -77,7 +77,7 @@ h2.sec{font-size:1.25rem; letter-spacing:-.01em}
   <div class="header-cta"><a class="gh" href="https://github.com/SahilBhati/ai-engineering-labs" target="_blank" rel="noopener">GitHub ↗</a><button class="btn small" id="themeBtn" aria-pressed="false">Dark mode</button><a class="btn primary small" href="../lessons/llm-foundations-1/">Start lesson 1</a></div>
 </div></header>
 <div class="layout">
-<aside class="sidenav" id="sidenav" aria-label="Site sections"><div class="grp"><p class="lbl">Start here</p><a href="../index.html">Home</a><a href="../about.html">About</a></div><div class="grp"><p class="lbl">Course · LLM Foundations</p><a href="../lessons/">All lessons</a><a href="../lessons/llm-foundations-1/"><span class="num">01</span>Tokens, embeddings, attention</a><a href="../lessons/llm-foundations-2/"><span class="num">02</span>The block, sampling, the KV cache</a><a href="../lessons/llm-foundations-3/"><span class="num">03</span>Training and inference economics</a></div><div class="grp"><p class="lbl">Self-test</p><a href="./?lesson=1" data-quiz="1"><span class="num">Q1</span>Quiz · lesson 1</a><a href="./?lesson=2" data-quiz="2"><span class="num">Q2</span>Quiz · lesson 2</a><a href="./?lesson=3" data-quiz="3"><span class="num">Q3</span>Quiz · lesson 3</a></div></aside>
+<aside class="sidenav" id="sidenav" aria-label="Site sections"><div class="grp"><p class="lbl">Start here</p><a href="../index.html">Home</a><a href="../about.html">About</a></div><div class="grp"><p class="lbl">Course · LLM Foundations</p><a href="../lessons/">All lessons</a><a href="../lessons/llm-foundations-1/"><span class="num">01</span>Tokens, embeddings, attention</a><a href="../lessons/llm-foundations-2/"><span class="num">02</span>The block, sampling, the KV cache</a><a href="../lessons/llm-foundations-3/"><span class="num">03</span>Training and inference economics</a><a href="../lessons/llm-foundations-4/"><span class="num">04</span>Give the model knowledge</a></div><div class="grp"><p class="lbl">Self-test</p><a href="./?lesson=1" data-quiz="1"><span class="num">Q1</span>Quiz · lesson 1</a><a href="./?lesson=2" data-quiz="2"><span class="num">Q2</span>Quiz · lesson 2</a><a href="./?lesson=3" data-quiz="3"><span class="num">Q3</span>Quiz · lesson 3</a><a href="./?lesson=4" data-quiz="4"><span class="num">Q4</span>Quiz · lesson 4</a></div></aside>
 <main>
 <section class="band"><div class="wrap"><div class="quiz">
   <div class="page-head">
@@ -85,7 +85,7 @@ h2.sec{font-size:1.25rem; letter-spacing:-.01em}
     <h1 id="title" style="font-size:clamp(2rem,4vw,2.8rem)">Quiz</h1>
     <p class="lede" id="lede">Ten questions, scored when you finish. Seven come from this lesson and three from earlier ones; questions you miss come back more often.</p>
   </div>
-  <nav class="picker" aria-label="Choose a lesson"><span class="lbl">Lesson</span><a href="./?lesson=1" data-quiz="1">1</a><a href="./?lesson=2" data-quiz="2">2</a><a href="./?lesson=3" data-quiz="3">3</a></nav>
+  <nav class="picker" aria-label="Choose a lesson"><span class="lbl">Lesson</span><a href="./?lesson=1" data-quiz="1">1</a><a href="./?lesson=2" data-quiz="2">2</a><a href="./?lesson=3" data-quiz="3">3</a><a href="./?lesson=4" data-quiz="4">4</a></nav>
   <div id="app" aria-live="polite"><p class="note">Loading questions…</p></div>
 </div></div></section>
 <footer class="site"><div class="wrap">
@@ -100,7 +100,7 @@ h2.sec{font-size:1.25rem; letter-spacing:-.01em}
 (function(){
   "use strict";
   // Lessons that have a bank. A new lesson adds its number here and a banks/lN.json file.
-  const AVAILABLE = [1, 2, 3];
+  const AVAILABLE = [1, 2, 3, 4];
   const Q = window.Quiz, app = document.getElementById("app");
   const h = (tag, attrs, html) => { const e = document.createElement(tag);
     for(const k in (attrs || {})) e.setAttribute(k, attrs[k]); if(html != null) e.innerHTML = html; return e; };

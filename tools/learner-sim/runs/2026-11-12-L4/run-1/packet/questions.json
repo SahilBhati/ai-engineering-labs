@@ -1,0 +1,379 @@
+[
+  {
+    "qid": "Q01",
+    "kind": "single",
+    "prompt": "You raise the floor to 0.90. For the /search question, the best passage scores 0.86. What happens?",
+    "options": {
+      "A": "Only C2 passes, because a high floor removes near-duplicate passages such as C3",
+      "B": "Every passage is dropped, so an answerable question gets “not in the docs”",
+      "C": "Nothing changes, because the floor only applies to off-topic questions",
+      "D": "The bot answers 10, because C3 is the one passage above the floor"
+    }
+  },
+  {
+    "qid": "Q02",
+    "kind": "single",
+    "prompt": "Why keep a golden set instead of trying a few questions by hand after each change?",
+    "options": {
+      "A": "The similarity score already shows whether an answer is right, so hand checks add nothing",
+      "B": "The same questions with known answers every run, so scores compare and regressions show",
+      "C": "Hand checks rely on the LLM judge, which disagrees with human labels far too often",
+      "D": "A golden set makes retrieval itself faster, because the right answers get cached"
+    }
+  },
+  {
+    "qid": "Q03",
+    "kind": "single",
+    "prompt": "What does computing recall@k need?",
+    "options": {
+      "A": "For each question, which passage is right and where it ranked",
+      "B": "An LLM judge scoring each answer against a written rubric",
+      "C": "A person reading and grading every single answer the bot writes",
+      "D": "The model's probability for every token of each answer"
+    }
+  },
+  {
+    "qid": "Q04",
+    "kind": "single",
+    "prompt": "With k = 1 the bot answered “10” from C3, which really says 10. Is that answer faithful, and is it right?",
+    "options": {
+      "A": "Unfaithful and wrong: it changed the number given in the passage it read",
+      "B": "Faithful but wrong: it stuck to its passage, but retrieval sent the wrong one",
+      "C": "Faithful and right: it cited the passage it was given, so it is correct",
+      "D": "Unfaithful but right: the model corrected a mistake in the passage"
+    }
+  },
+  {
+    "qid": "Q05",
+    "kind": "single",
+    "prompt": "Your docs are 2M tokens and edited daily. Which approach fits?",
+    "options": {
+      "A": "RAG: about 1,000 input tokens per question, and edits show up once changed chunks are re-embedded",
+      "B": "Raise k until it covers every chunk, because recall@k reaches 100% only when all chunks are sent",
+      "C": "Fine-tuning: retrain daily, because the weights are the most reliable place to keep exact facts",
+      "D": "Long context: paste everything, because a bigger prompt always gives the model more facts to use"
+    }
+  },
+  {
+    "qid": "Q06",
+    "kind": "single",
+    "prompt": "Cosine similarity between a question and a passage measures…",
+    "options": {
+      "A": "How many exact words the question and the passage have in common",
+      "B": "How likely the model is to generate the passage as its next text",
+      "C": "How closely their embedding vectors point in the same direction",
+      "D": "How long the passage is compared with the length of the question"
+    }
+  },
+  {
+    "qid": "Q07",
+    "kind": "single",
+    "prompt": "Chunks of 6 words, no overlap: the chunk holding “100” reads “100 requests per minute per API”. Why is that a problem?",
+    "options": {
+      "A": "It breaks the index: chunks must share some words, or the index refuses to store them",
+      "B": "It costs too much: small chunks send more tokens per question than large chunks do",
+      "C": "It lost its subject: no chunk has /search with 100, so a /search question can't match it",
+      "D": "It is too long: six words is more than one embedding vector can hold for retrieval"
+    }
+  },
+  {
+    "qid": "Q08",
+    "kind": "single",
+    "prompt": "“How often can I call search per minute?” Which method on its own matches “call” to “requests”?",
+    "options": {
+      "A": "Vector search, because similar meanings get similar embeddings",
+      "B": "Keyword search, because both words appear somewhere in the docs",
+      "C": "Neither one, because only an LLM judge can match two synonyms",
+      "D": "Keyword search, because rarer words count more in its scoring"
+    }
+  },
+  {
+    "qid": "Q09",
+    "kind": "multi",
+    "prompt": "Plain prompt, k = 1 → k = 3 on the golden set. Select all that are true.",
+    "options": {
+      "A": "G6's answer miss disappears",
+      "B": "Retrieval misses drop from 3 to 0",
+      "C": "End-to-end accuracy reaches 100%",
+      "D": "Right answers rise from 2 to 5"
+    }
+  },
+  {
+    "qid": "Q10",
+    "kind": "number",
+    "prompt": "Exact search over 100 million vectors of 1,024 numbers each. About how many multiply-adds per question, in billions?",
+    "unit": "billion"
+  },
+  {
+    "qid": "Q11",
+    "kind": "single",
+    "prompt": "“What does E1042 mean?” Vector search ranks the 429 passage first. Why does keyword search find C6?",
+    "options": {
+      "A": "Only C6 contains the exact token E1042, a rare word that keyword scoring rewards",
+      "B": "Keyword search knows E1042 is an error code, so it ranks error passages first",
+      "C": "Keyword search ranks passages by their length, and C6 is the shortest passage",
+      "D": "Keyword search gives E1042 a longer vector, so its cosine with C6 comes out higher"
+    }
+  },
+  {
+    "qid": "Q12",
+    "kind": "single",
+    "prompt": "With k = 1 the bot answered “10 requests per minute [C3]” to “How often can I call search per minute?”. Where was the bug?",
+    "options": {
+      "A": "The model: it ignored the passage it was given and answered from its training data instead",
+      "B": "Generation: the model had C2 in its prompt but copied the wrong number out of that same passage",
+      "C": "Chunking: C2 was split at a boundary, so the number 100 was missing from every chunk sent",
+      "D": "Retrieval: C3 (/upload) ranked above C2, so the model answered faithfully from the wrong passage"
+    }
+  },
+  {
+    "qid": "Q13",
+    "kind": "single",
+    "prompt": "The plain LLM judge passed “Limits vary by endpoint and plan; check your dashboard…”. What made it match the human label?",
+    "options": {
+      "A": "Switching to exact match, because exact match never passes long answers",
+      "B": "Raising k, so that the judge sees more of the retrieved passages",
+      "C": "A bigger judge model, because only small judges show verbosity bias",
+      "D": "A rubric that says passing means stating 100 requests per minute for /search"
+    }
+  },
+  {
+    "qid": "Q14",
+    "kind": "single",
+    "prompt": "Putting passage C2 in the prompt made “100” jump to 96%. What changed inside the model?",
+    "options": {
+      "A": "The weights updated to store the new fact, so later questions without C2 also answer 100",
+      "B": "Nothing in the weights: attention read “100” from the passage now in the context",
+      "C": "The vocabulary gained a token for 100, so the model could finally output it",
+      "D": "Temperature dropped, because a passage in the prompt makes sampling greedy"
+    }
+  },
+  {
+    "qid": "Q15",
+    "kind": "single",
+    "prompt": "G6: the right passage (24 hours) was retrieved, but the bot said 48 hours. What kind of miss, and what fixes it?",
+    "options": {
+      "A": "A grading miss: the judge misread an answer that was correct",
+      "B": "A chunking miss: add overlap so the passage keeps its subject",
+      "C": "An answer miss: fix the prompt or the model, since a bigger k can't help",
+      "D": "A retrieval miss: raise k so that more of the ranked passages reach the prompt"
+    }
+  },
+  {
+    "qid": "Q16",
+    "kind": "single",
+    "prompt": "In RAG, what does the generate stage actually receive?",
+    "options": {
+      "A": "The passages' embedding vectors, written into the model's weights for the length of one request",
+      "B": "A prompt with instructions, the top k retrieved passages as text, and the question",
+      "C": "The whole docs index, which the model searches itself during its forward pass",
+      "D": "Only the question, because retrieval runs after generation to check the answer"
+    }
+  },
+  {
+    "qid": "Q17",
+    "kind": "single",
+    "prompt": "Reference: “100 requests per minute per API key”. Why does exact match fail “100 requests per minute.”?",
+    "options": {
+      "A": "It compares strings, so a right answer worded differently fails",
+      "B": "It fails any answer shorter than the reference, right or wrong",
+      "C": "It applies the judge's rubric, which requires the words API key",
+      "D": "It compares meanings, and the final period changes the meaning"
+    }
+  },
+  {
+    "qid": "Q18",
+    "kind": "single",
+    "prompt": "What does half overlap between chunks fix?",
+    "options": {
+      "A": "Large chunks mix fewer topics, because overlap removes their repeated words",
+      "B": "A fact cut at a chunk boundary also appears whole in the neighbouring chunk",
+      "C": "Fewer chunks need storing, because overlapping chunks are merged into one",
+      "D": "The question and the chunks can now use two different embedding models"
+    }
+  },
+  {
+    "qid": "Q19",
+    "kind": "single",
+    "prompt": "Today: vector search, k = 3, recall 100%, 1,000 tokens per question. Gate: recall ≥ today and tokens ≤ today. Which change ships?",
+    "options": {
+      "A": "Hybrid search with k = 1: recall 83% with 400 tokens",
+      "B": "Hybrid search with k = 2: recall 100% with 700 tokens",
+      "C": "Vector search with k = 2: recall 83% with 700 tokens",
+      "D": "Vector search with k = 4: recall 100% with 1,300 tokens"
+    }
+  },
+  {
+    "qid": "Q20",
+    "kind": "number",
+    "prompt": "You paste 50,000 tokens of docs into every question, at $3 per million input tokens. What does one question cost, in dollars?",
+    "unit": "$"
+  },
+  {
+    "qid": "Q21",
+    "kind": "single",
+    "prompt": "Why is fine-tuning a poor way to add facts the bot must quote exactly?",
+    "options": {
+      "A": "Fine-tuning only changes the tokenizer, so the new facts never reach the weights",
+      "B": "A fine-tuned model needs a longer context window for every question it is asked",
+      "C": "Fine-tuning erases the model's earlier training, so it forgets how to write sentences",
+      "D": "Each edit needs a training run, and the model can't point to where a fact came from"
+    }
+  },
+  {
+    "qid": "Q22",
+    "kind": "number",
+    "prompt": "Right-passage ranks for six golden questions are 2, 1, 2, 3, 1, 1. What is recall@2, in percent?",
+    "unit": "%"
+  },
+  {
+    "qid": "Q23",
+    "kind": "single",
+    "prompt": "Your docs are 50K tokens and change rarely. The context window is 128K. What's the simplest good choice?",
+    "options": {
+      "A": "Paste all the docs into the prompt; prompt caching cuts the repeated cost",
+      "B": "Fine-tune on the docs, because facts in the weights cost no input tokens",
+      "C": "Build RAG, because a long prompt can never show which passage it used",
+      "D": "None works, because 50K tokens is over the model's context window limit"
+    }
+  },
+  {
+    "qid": "Q24",
+    "kind": "single",
+    "prompt": "Why must the question and the chunks go through the same embedding model?",
+    "options": {
+      "A": "The context window only accepts vectors made by the model that writes the answer",
+      "B": "Vectors from different models live in unrelated spaces, so their cosine means nothing",
+      "C": "Keyword scores are computed from the embedding model's vocabulary of rare words",
+      "D": "Different models cut the docs into different chunks, so their ranks can't be compared"
+    }
+  },
+  {
+    "qid": "Q25",
+    "kind": "single",
+    "prompt": "In vector search, what is embedded ahead of time, and what at ask time?",
+    "options": {
+      "A": "Nothing ahead of time; the model embeds the docs during its prefill",
+      "B": "Both at ask time, because each chunk's vector depends on the question",
+      "C": "The question ahead of time; every chunk at ask time, to stay fresh",
+      "D": "Every chunk ahead of time (the index); the question at ask time"
+    }
+  },
+  {
+    "qid": "Q26",
+    "kind": "single",
+    "prompt": "An approximate index checks only the regions nearest the question. What does it give up for the speed?",
+    "options": {
+      "A": "Precision: the cosine scores it returns are rounded, so ties appear",
+      "B": "Cost: every approximate search adds extra input tokens to the prompt",
+      "C": "Freshness: a newly added vector can't be found until the next full rebuild",
+      "D": "Recall: a true nearest neighbour in an unchecked region can be missed"
+    }
+  },
+  {
+    "qid": "Q27",
+    "kind": "number",
+    "prompt": "Reciprocal rank fusion adds 1/(60 + rank) from each list. A passage is rank 2 in vector search and rank 1 in keyword search. What is its hybrid score?"
+  },
+  {
+    "qid": "Q28",
+    "kind": "multi",
+    "prompt": "You raise k from 1 to 3 for the /search question. Select all that are true.",
+    "options": {
+      "A": "The right passage is more likely to be in the prompt",
+      "B": "Each question sends more input tokens, so it costs more",
+      "C": "Retrieval gets faster, because fewer passages are ranked",
+      "D": "The model gets more unrelated text it has to ignore",
+      "E": "The model's weights now include the extra passages"
+    }
+  },
+  {
+    "qid": "Q29",
+    "kind": "single",
+    "prompt": "Hybrid search raises recall@1 from 50% to 83%. Why still read the per-question list?",
+    "options": {
+      "A": "The golden set's questions change whenever the search method changes",
+      "B": "Hybrid scores use a different scale, so the two recall percentages don't compare",
+      "C": "Recall@1 is computed per question, so the aggregate is always wrong",
+      "D": "An aggregate can hide a regression: G2 fell from #1 to #2 under hybrid"
+    }
+  },
+  {
+    "qid": "Q30",
+    "kind": "single",
+    "prompt": "You ask a model, with no docs in the prompt, for your API's /search limit (100 per minute, written only in your private docs). What does it most likely do?",
+    "options": {
+      "A": "Returns an error message, because it looks the fact up in its weights and finds no entry for it",
+      "B": "Writes a plausible number, because no weights hold your limit and sampling still picks a token",
+      "C": "Answers 100, because training on many similar API docs placed your exact limit in its weights",
+      "D": "Asks for your docs, because a model can always tell which facts it never saw in training"
+    }
+  },
+  {
+    "qid": "Q31",
+    "kind": "number",
+    "prompt": "Same ranks: 2, 1, 2, 3, 1, 1. What is recall@1, in percent?",
+    "unit": "%"
+  },
+  {
+    "qid": "Q32",
+    "kind": "single",
+    "prompt": "How should you choose the score floor's value?",
+    "options": {
+      "A": "Set it to 0, because the model ignores irrelevant passages in the prompt anyway",
+      "B": "Tune it on test questions, including some whose right answer is “not in the docs”",
+      "C": "Use 0.50 always, because cosine values are the same across embedding models",
+      "D": "Set it to the highest score seen, so only the very best passage ever passes"
+    }
+  },
+  {
+    "qid": "Q33",
+    "kind": "single",
+    "prompt": "In the regions toy, the question sits near a region border. Checking 1 of 16 regions finds only 1 of the 5 true nearest. Why?",
+    "options": {
+      "A": "One region holds fewer than 5 vectors, so it can't return 5 results",
+      "B": "The question's vector moves when fewer regions are being checked",
+      "C": "Inside each region, the index ranks vectors by keyword score instead",
+      "D": "Some true neighbours sit in nearby regions that weren't checked"
+    }
+  },
+  {
+    "qid": "Q34",
+    "kind": "single",
+    "prompt": "How do you know an LLM judge can be trusted?",
+    "options": {
+      "A": "Run it twice on the same answers; if both sets of grades match, the grades are correct",
+      "B": "It is a model too, so its grades are as accurate as the answers it is grading",
+      "C": "Check that it passes longer, more detailed answers more often than short ones",
+      "D": "Measure its agreement with human labels on a sample; fix the rubric until it's high"
+    }
+  },
+  {
+    "qid": "Q35",
+    "kind": "single",
+    "prompt": "“Do you support GraphQL?” is not in the docs. With no score floor, what does the bot do?",
+    "options": {
+      "A": "Says it's not in the docs, because cosine is negative for every unrelated passage",
+      "B": "Fails with an error, because the prompt then has no passage it is able to cite",
+      "C": "Returns no passages, because vector search only ever returns exact word matches",
+      "D": "Answers from the nearest passages anyway, because top-k always returns k results"
+    }
+  },
+  {
+    "qid": "Q36",
+    "kind": "single",
+    "prompt": "Why is one very large chunk (the whole page) a problem too?",
+    "options": {
+      "A": "Its one vector blends every topic, and each retrieval sends all of that text",
+      "B": "Large chunks split facts more often, because their boundaries fall in the middle of words",
+      "C": "Keyword search stops working, because large chunks contain no rare words",
+      "D": "The model can't read chunks longer than one sentence, so they get skipped"
+    }
+  },
+  {
+    "qid": "Q37",
+    "kind": "number",
+    "prompt": "Each question sends 100 tokens of instructions and question, plus k passages of 300 tokens. How many input tokens at k = 2?",
+    "unit": "tokens"
+  }
+]

@@ -1,0 +1,741 @@
+{
+  "lesson": 4,
+  "runs": 3,
+  "questions": 37,
+  "metrics": {
+    "grounded": 1,
+    "groundedPerRun": 0.990990990990991,
+    "agreement": 0.972972972972973,
+    "openDisputes": 0,
+    "optionsOnly": 0.9354838709677419,
+    "keyLongest": 0.2413793103448276,
+    "confirmedFlags": 1,
+    "coverage": 1,
+    "stepCoverage": 1,
+    "viewed": 1,
+    "visualOnlyCites": 0.018018018018018018
+  },
+  "pass": {
+    "grounded": true,
+    "agreement": false,
+    "openDisputes": true,
+    "keyLongest": true,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": false,
+  "notGrounded": [
+    {
+      "id": "L4-split-03",
+      "grounded": 2,
+      "correct": 2
+    }
+  ],
+  "ambiguous": [
+    "L4-split-03"
+  ],
+  "disputes": [],
+  "weakDistractors": [
+    {
+      "id": "L4-closed-01",
+      "right": 3
+    },
+    {
+      "id": "L4-closed-02",
+      "right": 3
+    },
+    {
+      "id": "L4-rag-01",
+      "right": 3
+    },
+    {
+      "id": "L4-rag-02",
+      "right": 3
+    },
+    {
+      "id": "L4-rag-03",
+      "right": 3
+    },
+    {
+      "id": "L4-chunk-01",
+      "right": 3
+    },
+    {
+      "id": "L4-chunk-02",
+      "right": 3
+    },
+    {
+      "id": "L4-chunk-03",
+      "right": 3
+    },
+    {
+      "id": "L4-choose-01",
+      "right": 3
+    },
+    {
+      "id": "L4-choose-02",
+      "right": 3
+    },
+    {
+      "id": "L4-choose-03",
+      "right": 3
+    },
+    {
+      "id": "L4-embed-01",
+      "right": 3
+    },
+    {
+      "id": "L4-embed-02",
+      "right": 3
+    },
+    {
+      "id": "L4-embed-03",
+      "right": 3
+    },
+    {
+      "id": "L4-hybrid-01",
+      "right": 3
+    },
+    {
+      "id": "L4-hybrid-02",
+      "right": 3
+    },
+    {
+      "id": "L4-ann-02",
+      "right": 3
+    },
+    {
+      "id": "L4-ann-03",
+      "right": 3
+    },
+    {
+      "id": "L4-floor-01",
+      "right": 3
+    },
+    {
+      "id": "L4-floor-02",
+      "right": 3
+    },
+    {
+      "id": "L4-floor-03",
+      "right": 3
+    },
+    {
+      "id": "L4-golden-03",
+      "right": 3
+    },
+    {
+      "id": "L4-golden-04",
+      "right": 3
+    },
+    {
+      "id": "L4-split-02",
+      "right": 3
+    },
+    {
+      "id": "L4-judge-01",
+      "right": 3
+    },
+    {
+      "id": "L4-judge-02",
+      "right": 3
+    },
+    {
+      "id": "L4-judge-03",
+      "right": 3
+    },
+    {
+      "id": "L4-gate-01",
+      "right": 3
+    },
+    {
+      "id": "L4-gate-03",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L4-rag-02",
+    "L4-chunk-01",
+    "L4-choose-01",
+    "L4-choose-02",
+    "L4-floor-03",
+    "L4-split-02",
+    "L4-judge-02"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [],
+  "flags": [
+    {
+      "step": "S01",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Recap uses 'token embedding' / 2-number toy axes (water, money) with no reminder of what the axes are; fine as recap but unexplained."
+      ]
+    },
+    {
+      "step": "S04",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'attention' used as the reason the model copies 100 with no reminder of what attention is."
+      ]
+    },
+    {
+      "step": "S04",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Q28 mentions 96% for the 'Question + passage C2' tab, but the default screenshot shows only the 'Question only' bars, so a newcomer sees no 96% without clicking."
+      ]
+    },
+    {
+      "step": "S05",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'k' used in the slider intro and 'attention' (S04) are only lightly reminded; 'top k' fine, but 'prefill' and 'attention' appear with only a bare reference"
+      ]
+    },
+    {
+      "step": "S08",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "uses 'G1' (golden-set question id) in the S08 explanation before the golden set is introduced in S12"
+      ]
+    },
+    {
+      "step": "S09",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Step text uses recall@20 and BM25 in the evidence before recall@k is taught (it is defined in S10 and S12)."
+      ]
+    },
+    {
+      "step": "S09",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Keyword and Hybrid views show a ranking but the lesson text never shows keyword scores/ranks, so the 'keyword #1' and 'keyword #3' used in the RRF example can't be verified from the step text"
+      ]
+    },
+    {
+      "step": "S13",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Tabs k=1/k=3 and Plain/Strict both pre-set; the table shows only one combo and the 'Strict' result (6 of 6) appears only in text."
+      ]
+    },
+    {
+      "step": "S15",
+      "kind": "unclear-visual",
+      "runs": 3,
+      "confirmed": true,
+      "notes": [
+        "Columns 'rank now' and 'rank today' are all orange-highlighted, but G2 (#2) and others are in top 2 — highlight is fine; however 'today' vs vector k=3 baseline is not labelled in the table itself.",
+        "Table columns 'rank now' vs 'rank today' don't say whether 'today' is vector k=3; and all rows orange at k=2 even where rank #2 vs #3 meaning isn't labelled",
+        "Table columns 'rank now' and 'rank today' are not defined in the visual; 'today' is only inferable from the intro text (vector, k=3)."
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L4-closed-01",
+      "concept": "closed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-closed-02",
+      "concept": "closed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-rag-01",
+      "concept": "rag",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-rag-02",
+      "concept": "rag",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-rag-03",
+      "concept": "rag",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06",
+        "S11",
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-chunk-01",
+      "concept": "chunk",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-chunk-02",
+      "concept": "chunk",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-chunk-03",
+      "concept": "chunk",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-choose-01",
+      "concept": "choose",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-choose-02",
+      "concept": "choose",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-choose-03",
+      "concept": "choose",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-choose-04",
+      "concept": "choose",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S02"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-embed-01",
+      "concept": "embed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-embed-02",
+      "concept": "embed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-embed-03",
+      "concept": "embed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S01"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-hybrid-01",
+      "concept": "hybrid",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-hybrid-02",
+      "concept": "hybrid",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-hybrid-03",
+      "concept": "hybrid",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-ann-01",
+      "concept": "ann",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-ann-02",
+      "concept": "ann",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-ann-03",
+      "concept": "ann",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-floor-01",
+      "concept": "floor",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-floor-02",
+      "concept": "floor",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-floor-03",
+      "concept": "floor",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-golden-01",
+      "concept": "golden",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-golden-02",
+      "concept": "golden",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-golden-03",
+      "concept": "golden",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-golden-04",
+      "concept": "golden",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-split-01",
+      "concept": "split",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 0
+    },
+    {
+      "id": "L4-split-02",
+      "concept": "split",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-split-03",
+      "concept": "split",
+      "kind": "multi",
+      "grounded": 2,
+      "correct": 2,
+      "agree": false,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 0
+    },
+    {
+      "id": "L4-judge-01",
+      "concept": "judge",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-judge-02",
+      "concept": "judge",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-judge-03",
+      "concept": "judge",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-gate-01",
+      "concept": "gate",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-gate-02",
+      "concept": "gate",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S02",
+        "S06",
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-gate-03",
+      "concept": "gate",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": null,
+  "diff": null
+}

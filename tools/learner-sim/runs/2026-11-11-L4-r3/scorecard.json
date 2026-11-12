@@ -1,0 +1,752 @@
+{
+  "lesson": 4,
+  "runs": 3,
+  "questions": 37,
+  "metrics": {
+    "grounded": 1,
+    "groundedPerRun": 1,
+    "agreement": 1,
+    "openDisputes": 1,
+    "optionsOnly": 0.9032258064516129,
+    "keyLongest": 0.2413793103448276,
+    "confirmedFlags": 1,
+    "coverage": 1,
+    "stepCoverage": 1,
+    "viewed": 1,
+    "visualOnlyCites": 0.018018018018018018
+  },
+  "pass": {
+    "grounded": true,
+    "agreement": true,
+    "openDisputes": false,
+    "keyLongest": true,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": false,
+  "notGrounded": [],
+  "ambiguous": [],
+  "disputes": [
+    {
+      "id": "L4-closed-02",
+      "reasons": [
+        "The 96% figure appears nowhere in the lesson text; the lesson shows only that attention reads 100 from the context."
+      ]
+    }
+  ],
+  "weakDistractors": [
+    {
+      "id": "L4-closed-01",
+      "right": 3
+    },
+    {
+      "id": "L4-closed-02",
+      "right": 2
+    },
+    {
+      "id": "L4-rag-01",
+      "right": 2
+    },
+    {
+      "id": "L4-rag-02",
+      "right": 2
+    },
+    {
+      "id": "L4-rag-03",
+      "right": 2
+    },
+    {
+      "id": "L4-chunk-01",
+      "right": 2
+    },
+    {
+      "id": "L4-chunk-02",
+      "right": 2
+    },
+    {
+      "id": "L4-chunk-03",
+      "right": 3
+    },
+    {
+      "id": "L4-choose-01",
+      "right": 2
+    },
+    {
+      "id": "L4-choose-02",
+      "right": 2
+    },
+    {
+      "id": "L4-choose-03",
+      "right": 3
+    },
+    {
+      "id": "L4-embed-01",
+      "right": 2
+    },
+    {
+      "id": "L4-embed-02",
+      "right": 3
+    },
+    {
+      "id": "L4-embed-03",
+      "right": 3
+    },
+    {
+      "id": "L4-hybrid-01",
+      "right": 2
+    },
+    {
+      "id": "L4-hybrid-02",
+      "right": 2
+    },
+    {
+      "id": "L4-ann-02",
+      "right": 2
+    },
+    {
+      "id": "L4-ann-03",
+      "right": 3
+    },
+    {
+      "id": "L4-floor-01",
+      "right": 3
+    },
+    {
+      "id": "L4-floor-02",
+      "right": 2
+    },
+    {
+      "id": "L4-floor-03",
+      "right": 3
+    },
+    {
+      "id": "L4-golden-03",
+      "right": 2
+    },
+    {
+      "id": "L4-golden-04",
+      "right": 2
+    },
+    {
+      "id": "L4-split-02",
+      "right": 3
+    },
+    {
+      "id": "L4-judge-01",
+      "right": 3
+    },
+    {
+      "id": "L4-judge-02",
+      "right": 2
+    },
+    {
+      "id": "L4-judge-03",
+      "right": 2
+    },
+    {
+      "id": "L4-gate-03",
+      "right": 2
+    }
+  ],
+  "keyLongestIds": [
+    "L4-rag-02",
+    "L4-chunk-01",
+    "L4-choose-01",
+    "L4-choose-02",
+    "L4-floor-03",
+    "L4-split-02",
+    "L4-judge-02"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [],
+  "flags": [
+    {
+      "step": "S08",
+      "kind": "unclear-visual",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "Radial map: only distance from centre means anything (1 − cosine); angle is layout. Easy to misread as clusters though stated in the caption.",
+        "Radial plot: angle is only layout; a newcomer may read distance from centre without noting rings are cosine, though caption explains."
+      ]
+    },
+    {
+      "step": "S09",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Keyword ranks (#1, #3) for C2/C3 are asserted in text, but the keyword tab view was not visible in the screenshot, so can't verify."
+      ]
+    },
+    {
+      "step": "S12",
+      "kind": "inconsistent-highlight",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Rows retrieved are orange, but ★ also marks all right passages even when not retrieved; at k=1 the orange row (G2) and the star meanings are easy to confuse. Minor."
+      ]
+    },
+    {
+      "step": "S12",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'top k' and 'rank' used on a hit/miss table before it is shown how ranking maps to the toggle; minor."
+      ]
+    },
+    {
+      "step": "S14",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Only one grader's table is shown at a time; which answer the plain LLM judge gets wrong (4/5) is not visible in the default view, so the vague 'Limits vary…' answer's grading by the plain judge is unclear."
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L4-closed-01",
+      "concept": "closed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-closed-02",
+      "concept": "closed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [
+        "The 96% figure appears nowhere in the lesson text; the lesson shows only that attention reads 100 from the context."
+      ],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-rag-01",
+      "concept": "rag",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-rag-02",
+      "concept": "rag",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-rag-03",
+      "concept": "rag",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06",
+        "S11",
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-chunk-01",
+      "concept": "chunk",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-chunk-02",
+      "concept": "chunk",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-chunk-03",
+      "concept": "chunk",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-choose-01",
+      "concept": "choose",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-choose-02",
+      "concept": "choose",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-choose-03",
+      "concept": "choose",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-choose-04",
+      "concept": "choose",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S02"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-embed-01",
+      "concept": "embed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-embed-02",
+      "concept": "embed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-embed-03",
+      "concept": "embed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S01",
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-hybrid-01",
+      "concept": "hybrid",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-hybrid-02",
+      "concept": "hybrid",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-hybrid-03",
+      "concept": "hybrid",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-ann-01",
+      "concept": "ann",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-ann-02",
+      "concept": "ann",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-ann-03",
+      "concept": "ann",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-floor-01",
+      "concept": "floor",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-floor-02",
+      "concept": "floor",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-floor-03",
+      "concept": "floor",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-golden-01",
+      "concept": "golden",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-golden-02",
+      "concept": "golden",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-golden-03",
+      "concept": "golden",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-golden-04",
+      "concept": "golden",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-split-01",
+      "concept": "split",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L4-split-02",
+      "concept": "split",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05",
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-split-03",
+      "concept": "split",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L4-judge-01",
+      "concept": "judge",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-judge-02",
+      "concept": "judge",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-judge-03",
+      "concept": "judge",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L4-gate-01",
+      "concept": "gate",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L4-gate-02",
+      "concept": "gate",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S02",
+        "S12",
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-gate-03",
+      "concept": "gate",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    }
+  ],
+  "previous": "2026-11-11-L4-r2",
+  "diff": {
+    "metrics": {
+      "grounded": {
+        "before": 1,
+        "after": 1
+      },
+      "groundedPerRun": {
+        "before": 1,
+        "after": 1
+      },
+      "agreement": {
+        "before": 1,
+        "after": 1
+      },
+      "openDisputes": {
+        "before": 0,
+        "after": 1
+      },
+      "optionsOnly": {
+        "before": 0.9354838709677419,
+        "after": 0.9032258064516129
+      },
+      "keyLongest": {
+        "before": 0.2413793103448276,
+        "after": 0.2413793103448276
+      },
+      "confirmedFlags": {
+        "before": 2,
+        "after": 1
+      },
+      "coverage": {
+        "before": 1,
+        "after": 1
+      },
+      "stepCoverage": {
+        "before": 1,
+        "after": 1
+      },
+      "viewed": {
+        "before": 1,
+        "after": 1
+      },
+      "visualOnlyCites": {
+        "before": 0.02702702702702703,
+        "after": 0.018018018018018018
+      }
+    },
+    "nowGrounded": [],
+    "lostGrounding": []
+  }
+}

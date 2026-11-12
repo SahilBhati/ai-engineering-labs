@@ -1,0 +1,473 @@
+{
+ "answers": {
+  "Q01": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "Exact match fails two right answers that are worded differently"
+    }
+   ],
+   "dispute": null
+  },
+  "Q02": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S04",
+     "quote": "so no path through the weights favours “100” over “60” or “10”"
+    }
+   ],
+   "dispute": null
+  },
+  "Q03": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S11",
+     "quote": "Without one, top-k always returns k passages"
+    }
+   ],
+   "dispute": null
+  },
+  "Q04": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S12",
+     "quote": "it is a lookup of where the right passage ranked"
+    }
+   ],
+   "dispute": null
+  },
+  "Q05": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S06",
+     "quote": "one vector averages several topics, so it matches none of them sharply"
+    }
+   ],
+   "dispute": null
+  },
+  "Q06": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "RAG: cost is k × chunk size, whatever the docs size"
+    }
+   ],
+   "dispute": null
+  },
+  "Q07": {
+   "answer": "0.15",
+   "cites": [
+    {
+     "step": "S02",
+     "quote": "per question, pasting all docs (50,000 input tokens at $3 per million)"
+    }
+   ],
+   "dispute": null
+  },
+  "Q08": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S09",
+     "quote": "Vector search matches meaning, so “call” finds “requests”"
+    }
+   ],
+   "dispute": null
+  },
+  "Q09": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "so some true neighbours live in regions it didn't check"
+    }
+   ],
+   "dispute": null
+  },
+  "Q10": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "real teams label 50–100 answers by hand, measure agreement, and fix the rubric until it is high"
+    }
+   ],
+   "dispute": null
+  },
+  "Q11": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "Retrieval is a separate search system; its output becomes prompt text."
+    }
+   ],
+   "dispute": null
+  },
+  "Q12": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S12",
+     "quote": "same questions every time, so scores are comparable across versions"
+    }
+   ],
+   "dispute": null
+  },
+  "Q13": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "the judge with a rubric on 5 of 5"
+    }
+   ],
+   "dispute": null
+  },
+  "Q14": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "The model answered faithfully (it stuck to the passage it was given), but from the wrong passage."
+    }
+   ],
+   "dispute": null
+  },
+  "Q15": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S11",
+     "quote": "Above 0.86, it refuses the real question too."
+    }
+   ],
+   "dispute": null
+  },
+  "Q16": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S06",
+     "quote": "so a sentence cut at a boundary appears whole in one of them"
+    }
+   ],
+   "dispute": null
+  },
+  "Q17": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "If retrieval ranks the wrong passage first, the model answers faithfully from the wrong passage"
+    }
+   ],
+   "dispute": null
+  },
+  "Q18": {
+   "answer": [
+    "A",
+    "B",
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S06",
+     "quote": "k chunks × size is what you pay per question"
+    }
+   ],
+   "dispute": null
+  },
+  "Q19": {
+   "answer": "50",
+   "cites": [
+    {
+     "step": "S12",
+     "quote": "So recall@1 = 3/6 = 50%"
+    }
+   ],
+   "dispute": null
+  },
+  "Q20": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "An aggregate score can hide a per-question regression"
+    }
+   ],
+   "dispute": null
+  },
+  "Q21": {
+   "answer": "700",
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "hybrid with k = 2 keeps 100% recall and sends 700 tokens instead of 1,000 per question"
+    }
+   ],
+   "dispute": null
+  },
+  "Q22": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "because it had its passage all along"
+    }
+   ],
+   "dispute": null
+  },
+  "Q23": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S08",
+     "quote": "returns the chunks with the highest cosine similarity"
+    }
+   ],
+   "dispute": null
+  },
+  "Q24": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S08",
+     "quote": "vectors from two different models live in unrelated spaces"
+    }
+   ],
+   "dispute": null
+  },
+  "Q25": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S08",
+     "quote": "turns each chunk into one vector, once, ahead of time: that's the index"
+    }
+   ],
+   "dispute": null
+  },
+  "Q26": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S09",
+     "quote": "Keyword search matches exact words and misses synonyms."
+    }
+   ],
+   "dispute": null
+  },
+  "Q27": {
+   "answer": "83",
+   "cites": [
+    {
+     "step": "S12",
+     "quote": "recall@2 = 5/6 = 83%"
+    }
+   ],
+   "dispute": null
+  },
+  "Q28": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S04",
+     "quote": "because attention (Lesson 1: each token pulls in information from the tokens before it) reads it from the context"
+    }
+   ],
+   "dispute": "The 96% figure appears nowhere in the lesson text; the lesson shows only that attention reads 100 from the context."
+  },
+  "Q29": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "trading a little recall (the share of true nearest neighbours it finds) for a lot of speed"
+    }
+   ],
+   "dispute": null
+  },
+  "Q30": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S11",
+     "quote": "so the floor is tuned on test questions (chapter 4.3)"
+    }
+   ],
+   "dispute": null
+  },
+  "Q31": {
+   "answer": "0.0325",
+   "cites": [
+    {
+     "step": "S09",
+     "quote": "so 1/62 + 1/61 = 0.0325"
+    }
+   ],
+   "dispute": null
+  },
+  "Q32": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "pasting everything is simplest (prompt caching from Lesson 3 cuts the repeat cost)"
+    }
+   ],
+   "dispute": null
+  },
+  "Q33": {
+   "answer": [
+    "C",
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "Plain prompt, k = 3: 5 right, 0 retrieval misses, and G6 is still 1 answer miss"
+    }
+   ],
+   "dispute": null
+  },
+  "Q34": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "each edit needs a training run, and the model can't point to where a fact came from"
+    }
+   ],
+   "dispute": null
+  },
+  "Q35": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S06",
+     "quote": "the chunk with 100 never says /search, so a search for /search can't match it"
+    }
+   ],
+   "dispute": null
+  },
+  "Q36": {
+   "answer": "100",
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "100 million vectors × 1,024 numbers ≈ 100 billion multiply-adds per question"
+    }
+   ],
+   "dispute": null
+  },
+  "Q37": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "So hybrid with k = 2 keeps 100% recall and sends 700 tokens instead of 1,000 per question"
+    }
+   ],
+   "dispute": null
+  }
+ },
+ "flags": [
+  {
+   "step": "S08",
+   "kind": "unclear-visual",
+   "note": "Radial plot: angle is only layout; a newcomer may read distance from centre without noting rings are cosine, though caption explains."
+  },
+  {
+   "step": "S12",
+   "kind": "term-before-taught",
+   "note": "'top k' and 'rank' used on a hit/miss table before it is shown how ranking maps to the toggle; minor."
+  },
+  {
+   "step": "S09",
+   "kind": "term-before-taught",
+   "note": "Keyword ranks (#1, #3) for C2/C3 are asserted in text, but the keyword tab view was not visible in the screenshot, so can't verify."
+  }
+ ],
+ "visuals": {
+  "S01": "2D scatter of river/flooded/collapsed/closed/account on water vs money axes with a cosine bar list vs river (1.00, 0.99, 0.61, 0.12).",
+  "S02": "Slider for docs size with cards: fits in 128K, $0.150 pasting 50,000 tokens vs $0.0030 for 3 passages, 50x.",
+  "S03": "Two multiple-choice prequestions: what a model does with no docs, and how to check the bot after changes.",
+  "S04": "Toggle with bar chart of next-token probabilities (60 30%, 100 26%, 1,000 24%, 10 20%) for question only; flat spread means guessing.",
+  "S05": "k slider over a table of 8 passages ranked by cosine; orange row = retrieved, star = answer; k=1 sends C3 and the generated answer 10 is marked wrong.",
+  "S06": "Chunk-size/overlap toggles showing text cut into chunks with a star on chunks containing 100, plus cards: no chunk keeps /search with 100.",
+  "S07": "Sliders for docs size and edits per week over a comparison table of long context, RAG, fine-tuning (tokens, edit latency, source).",
+  "S08": "Radial plot: question at the centre, chunks C1-C8 at distance 1-cosine on rings 0.8-0.2, orange = top 3, with ranked table beneath.",
+  "S09": "Keyword/Vector/Hybrid toggle over the ranked table; orange rows are the top 2 retrieved, star marks C2 at rank 2 for vector.",
+  "S10": "Grid of 16 regions with 400 dots; teal question, shaded checked region, ringed true 5 nearest, orange found ones; cards 25 of 400 and 20% recall.",
+  "S11": "Floor slider over the ranked table; orange rows at or above floor 0.50, lower rows labelled below floor; bot answer 100 [C2] right.",
+  "S12": "k slider over six golden questions with rank of right passage; orange = in top k; cards recall@1 3/6=50% and 400 tokens.",
+  "S13": "k and prompt toggles over six golden questions with verdict column (right, retrieval miss, answer miss in red) and count cards 2/3/1/33%.",
+  "S14": "Grader toggle over five bot answers with human vs grader pass/fail and agrees/disagrees (green/red); card 3/5 = 60% for exact match.",
+  "S15": "Vector/Hybrid toggle and k slider; table of new rank vs today's rank with up/down arrows, orange = in top k; cards recall 100%, 700 tokens, $2.10, PASS."
+ }
+}

@@ -1,0 +1,313 @@
+[
+  {
+    "qid": "Q34",
+    "kind": "single",
+    "options": {
+      "A": "Each edit needs a training run, and the model can't point to where a fact came from",
+      "B": "Fine-tuning erases the model's earlier training, so it forgets how to write sentences",
+      "C": "A fine-tuned model needs a longer context window for every question it is asked",
+      "D": "Fine-tuning only changes the tokenizer, so the new facts never reach the weights"
+    }
+  },
+  {
+    "qid": "Q23",
+    "kind": "single",
+    "options": {
+      "A": "How closely their embedding vectors point in the same direction",
+      "B": "How likely the model is to generate the passage as its next text",
+      "C": "How long the passage is compared with the length of the question",
+      "D": "How many exact words the question and the passage have in common"
+    }
+  },
+  {
+    "qid": "Q14",
+    "kind": "single",
+    "options": {
+      "A": "Faithful but wrong: it stuck to its passage, but retrieval sent the wrong one",
+      "B": "Faithful and right: it cited the passage it was given, so it is correct",
+      "C": "Unfaithful and wrong: it changed the number given in the passage it read",
+      "D": "Unfaithful but right: the model corrected a mistake in the passage"
+    }
+  },
+  {
+    "qid": "Q25",
+    "kind": "single",
+    "options": {
+      "A": "The question ahead of time; every chunk at ask time, to stay fresh",
+      "B": "Every chunk ahead of time (the index); the question at ask time",
+      "C": "Both at ask time, because each chunk's vector depends on the question",
+      "D": "Nothing ahead of time; the model embeds the docs during its prefill"
+    }
+  },
+  {
+    "qid": "Q13",
+    "kind": "single",
+    "options": {
+      "A": "Raising k, so that the judge sees more of the retrieved passages",
+      "B": "Switching to exact match, because exact match never passes long answers",
+      "C": "A rubric that says passing means stating 100 requests per minute for /search",
+      "D": "A bigger judge model, because only small judges show verbosity bias"
+    }
+  },
+  {
+    "qid": "Q12",
+    "kind": "single",
+    "options": {
+      "A": "The similarity score already shows whether an answer is right, so hand checks add nothing",
+      "B": "The same questions with known answers every run, so scores compare and regressions show",
+      "C": "A golden set makes retrieval itself faster, because the right answers get cached",
+      "D": "Hand checks rely on the LLM judge, which disagrees with human labels far too often"
+    }
+  },
+  {
+    "qid": "Q15",
+    "kind": "single",
+    "options": {
+      "A": "Nothing changes, because the floor only applies to off-topic questions",
+      "B": "Only C2 passes, because a high floor removes near-duplicate passages such as C3",
+      "C": "Every passage is dropped, so an answerable question gets “not in the docs”",
+      "D": "The bot answers 10, because C3 is the one passage above the floor"
+    }
+  },
+  {
+    "qid": "Q28",
+    "kind": "single",
+    "options": {
+      "A": "The vocabulary gained a token for 100, so the model could finally output it",
+      "B": "Temperature dropped, because a passage in the prompt makes sampling greedy",
+      "C": "Nothing in the weights: attention read “100” from the passage now in the context",
+      "D": "The weights updated to store the new fact, so later questions without C2 also answer 100"
+    }
+  },
+  {
+    "qid": "Q30",
+    "kind": "single",
+    "options": {
+      "A": "Tune it on test questions, including some whose right answer is “not in the docs”",
+      "B": "Set it to the highest score seen, so only the very best passage ever passes",
+      "C": "Use 0.50 always, because cosine values are the same across embedding models",
+      "D": "Set it to 0, because the model ignores irrelevant passages in the prompt anyway"
+    }
+  },
+  {
+    "qid": "Q18",
+    "kind": "multi",
+    "options": {
+      "A": "The right passage is more likely to be in the prompt",
+      "B": "The model gets more unrelated text it has to ignore",
+      "C": "The model's weights now include the extra passages",
+      "D": "Each question sends more input tokens, so it costs more",
+      "E": "Retrieval gets faster, because fewer passages are ranked"
+    }
+  },
+  {
+    "qid": "Q01",
+    "kind": "single",
+    "options": {
+      "A": "It compares strings, so a right answer worded differently fails",
+      "B": "It applies the judge's rubric, which requires the words API key",
+      "C": "It compares meanings, and the final period changes the meaning",
+      "D": "It fails any answer shorter than the reference, right or wrong"
+    }
+  },
+  {
+    "qid": "Q32",
+    "kind": "single",
+    "options": {
+      "A": "Build RAG, because a long prompt can never show which passage it used",
+      "B": "None works, because 50K tokens is over the model's context window limit",
+      "C": "Fine-tune on the docs, because facts in the weights cost no input tokens",
+      "D": "Paste all the docs into the prompt; prompt caching cuts the repeated cost"
+    }
+  },
+  {
+    "qid": "Q06",
+    "kind": "single",
+    "options": {
+      "A": "Long context: paste everything, because a bigger prompt always gives the model more facts to use",
+      "B": "RAG: about 1,000 input tokens per question, and edits show up once changed chunks are re-embedded",
+      "C": "Fine-tuning: retrain daily, because the weights are the most reliable place to keep exact facts",
+      "D": "Raise k until it covers every chunk, because recall@k reaches 100% only when all chunks are sent"
+    }
+  },
+  {
+    "qid": "Q11",
+    "kind": "single",
+    "options": {
+      "A": "The passages' embedding vectors, written into the model's weights for the length of one request",
+      "B": "A prompt with instructions, the top k retrieved passages as text, and the question",
+      "C": "The whole docs index, which the model searches itself during its forward pass",
+      "D": "Only the question, because retrieval runs after generation to check the answer"
+    }
+  },
+  {
+    "qid": "Q20",
+    "kind": "single",
+    "options": {
+      "A": "The golden set's questions change whenever the search method changes",
+      "B": "Hybrid scores use a different scale, so the two recall percentages don't compare",
+      "C": "An aggregate can hide a regression: G2 fell from #1 to #2 under hybrid",
+      "D": "Recall@1 is computed per question, so the aggregate is always wrong"
+    }
+  },
+  {
+    "qid": "Q17",
+    "kind": "single",
+    "options": {
+      "A": "Chunking: C2 was split at a boundary, so the number 100 was missing from every chunk sent",
+      "B": "Generation: the model had C2 in its prompt but copied the wrong number out of that same passage",
+      "C": "Retrieval: C3 (/upload) ranked above C2, so the model answered faithfully from the wrong passage",
+      "D": "The model: it ignored the passage it was given and answered from its training data instead"
+    }
+  },
+  {
+    "qid": "Q09",
+    "kind": "single",
+    "options": {
+      "A": "Some true neighbours sit in nearby regions that weren't checked",
+      "B": "One region holds fewer than 5 vectors, so it can't return 5 results",
+      "C": "Inside each region, the index ranks vectors by keyword score instead",
+      "D": "The question's vector moves when fewer regions are being checked"
+    }
+  },
+  {
+    "qid": "Q22",
+    "kind": "single",
+    "options": {
+      "A": "An answer miss: fix the prompt or the model, since a bigger k can't help",
+      "B": "A retrieval miss: raise k so that more of the ranked passages reach the prompt",
+      "C": "A grading miss: the judge misread an answer that was correct",
+      "D": "A chunking miss: add overlap so the passage keeps its subject"
+    }
+  },
+  {
+    "qid": "Q26",
+    "kind": "single",
+    "options": {
+      "A": "Keyword search ranks passages by their length, and C6 is the shortest passage",
+      "B": "Only C6 contains the exact token E1042, a rare word that keyword scoring rewards",
+      "C": "Keyword search knows E1042 is an error code, so it ranks error passages first",
+      "D": "Keyword search gives E1042 a longer vector, so its cosine with C6 comes out higher"
+    }
+  },
+  {
+    "qid": "Q29",
+    "kind": "single",
+    "options": {
+      "A": "Precision: the cosine scores it returns are rounded, so ties appear",
+      "B": "Cost: every approximate search adds extra input tokens to the prompt",
+      "C": "Freshness: a newly added vector can't be found until the next full rebuild",
+      "D": "Recall: a true nearest neighbour in an unchecked region can be missed"
+    }
+  },
+  {
+    "qid": "Q03",
+    "kind": "single",
+    "options": {
+      "A": "Answers from the nearest passages anyway, because top-k always returns k results",
+      "B": "Fails with an error, because the prompt then has no passage it is able to cite",
+      "C": "Returns no passages, because vector search only ever returns exact word matches",
+      "D": "Says it's not in the docs, because cosine is negative for every unrelated passage"
+    }
+  },
+  {
+    "qid": "Q02",
+    "kind": "single",
+    "options": {
+      "A": "Writes a plausible number, because no weights hold your limit and sampling still picks a token",
+      "B": "Answers 100, because training on many similar API docs placed your exact limit in its weights",
+      "C": "Returns an error message, because it looks the fact up in its weights and finds no entry for it",
+      "D": "Asks for your docs, because a model can always tell which facts it never saw in training"
+    }
+  },
+  {
+    "qid": "Q04",
+    "kind": "single",
+    "options": {
+      "A": "An LLM judge scoring each answer against a written rubric",
+      "B": "For each question, which passage is right and where it ranked",
+      "C": "A person reading and grading every single answer the bot writes",
+      "D": "The model's probability for every token of each answer"
+    }
+  },
+  {
+    "qid": "Q10",
+    "kind": "single",
+    "options": {
+      "A": "Run it twice on the same answers; if both sets of grades match, the grades are correct",
+      "B": "Check that it passes longer, more detailed answers more often than short ones",
+      "C": "Measure its agreement with human labels on a sample; fix the rubric until it's high",
+      "D": "It is a model too, so its grades are as accurate as the answers it is grading"
+    }
+  },
+  {
+    "qid": "Q35",
+    "kind": "single",
+    "options": {
+      "A": "It costs too much: small chunks send more tokens per question than large chunks do",
+      "B": "It is too long: six words is more than one embedding vector can hold for retrieval",
+      "C": "It breaks the index: chunks must share some words, or the index refuses to store them",
+      "D": "It lost its subject: no chunk has /search with 100, so a /search question can't match it"
+    }
+  },
+  {
+    "qid": "Q24",
+    "kind": "single",
+    "options": {
+      "A": "Vectors from different models live in unrelated spaces, so their cosine means nothing",
+      "B": "Different models cut the docs into different chunks, so their ranks can't be compared",
+      "C": "The context window only accepts vectors made by the model that writes the answer",
+      "D": "Keyword scores are computed from the embedding model's vocabulary of rare words"
+    }
+  },
+  {
+    "qid": "Q37",
+    "kind": "single",
+    "options": {
+      "A": "Vector search with k = 4: recall 100% with 1,300 tokens",
+      "B": "Hybrid search with k = 2: recall 100% with 700 tokens",
+      "C": "Hybrid search with k = 1: recall 83% with 400 tokens",
+      "D": "Vector search with k = 2: recall 83% with 700 tokens"
+    }
+  },
+  {
+    "qid": "Q33",
+    "kind": "multi",
+    "options": {
+      "A": "G6's answer miss disappears",
+      "B": "End-to-end accuracy reaches 100%",
+      "C": "Retrieval misses drop from 3 to 0",
+      "D": "Right answers rise from 2 to 5"
+    }
+  },
+  {
+    "qid": "Q08",
+    "kind": "single",
+    "options": {
+      "A": "Neither one, because only an LLM judge can match two synonyms",
+      "B": "Keyword search, because both words appear somewhere in the docs",
+      "C": "Vector search, because similar meanings get similar embeddings",
+      "D": "Keyword search, because rarer words count more in its scoring"
+    }
+  },
+  {
+    "qid": "Q05",
+    "kind": "single",
+    "options": {
+      "A": "Its one vector blends every topic, and each retrieval sends all of that text",
+      "B": "The model can't read chunks longer than one sentence, so they get skipped",
+      "C": "Large chunks split facts more often, because their boundaries fall in the middle of words",
+      "D": "Keyword search stops working, because large chunks contain no rare words"
+    }
+  },
+  {
+    "qid": "Q16",
+    "kind": "single",
+    "options": {
+      "A": "Fewer chunks need storing, because overlapping chunks are merged into one",
+      "B": "Large chunks mix fewer topics, because overlap removes their repeated words",
+      "C": "The question and the chunks can now use two different embedding models",
+      "D": "A fact cut at a chunk boundary also appears whole in the neighbouring chunk"
+    }
+  }
+]

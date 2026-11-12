@@ -1,0 +1,759 @@
+{
+  "lesson": 4,
+  "runs": 3,
+  "questions": 37,
+  "metrics": {
+    "grounded": 1,
+    "groundedPerRun": 0.990990990990991,
+    "agreement": 1,
+    "openDisputes": 0,
+    "optionsOnly": 0.9354838709677419,
+    "keyLongest": 0.2413793103448276,
+    "confirmedFlags": 1,
+    "coverage": 1,
+    "stepCoverage": 1,
+    "viewed": 1,
+    "visualOnlyCites": 0.02727272727272727
+  },
+  "pass": {
+    "grounded": true,
+    "agreement": true,
+    "openDisputes": true,
+    "keyLongest": true,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": true,
+  "notGrounded": [
+    {
+      "id": "L4-split-02",
+      "grounded": 2,
+      "correct": 3
+    }
+  ],
+  "ambiguous": [],
+  "disputes": [],
+  "weakDistractors": [
+    {
+      "id": "L4-closed-01",
+      "right": 3
+    },
+    {
+      "id": "L4-closed-02",
+      "right": 3
+    },
+    {
+      "id": "L4-rag-01",
+      "right": 3
+    },
+    {
+      "id": "L4-rag-02",
+      "right": 3
+    },
+    {
+      "id": "L4-rag-03",
+      "right": 3
+    },
+    {
+      "id": "L4-chunk-01",
+      "right": 3
+    },
+    {
+      "id": "L4-chunk-02",
+      "right": 3
+    },
+    {
+      "id": "L4-chunk-03",
+      "right": 3
+    },
+    {
+      "id": "L4-choose-01",
+      "right": 3
+    },
+    {
+      "id": "L4-choose-02",
+      "right": 3
+    },
+    {
+      "id": "L4-choose-03",
+      "right": 3
+    },
+    {
+      "id": "L4-embed-01",
+      "right": 3
+    },
+    {
+      "id": "L4-embed-02",
+      "right": 3
+    },
+    {
+      "id": "L4-embed-03",
+      "right": 3
+    },
+    {
+      "id": "L4-hybrid-01",
+      "right": 3
+    },
+    {
+      "id": "L4-hybrid-02",
+      "right": 3
+    },
+    {
+      "id": "L4-ann-02",
+      "right": 3
+    },
+    {
+      "id": "L4-ann-03",
+      "right": 3
+    },
+    {
+      "id": "L4-floor-01",
+      "right": 3
+    },
+    {
+      "id": "L4-floor-02",
+      "right": 3
+    },
+    {
+      "id": "L4-floor-03",
+      "right": 3
+    },
+    {
+      "id": "L4-golden-03",
+      "right": 3
+    },
+    {
+      "id": "L4-golden-04",
+      "right": 3
+    },
+    {
+      "id": "L4-split-02",
+      "right": 3
+    },
+    {
+      "id": "L4-judge-01",
+      "right": 3
+    },
+    {
+      "id": "L4-judge-02",
+      "right": 3
+    },
+    {
+      "id": "L4-judge-03",
+      "right": 3
+    },
+    {
+      "id": "L4-gate-01",
+      "right": 3
+    },
+    {
+      "id": "L4-gate-03",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L4-rag-02",
+    "L4-chunk-01",
+    "L4-choose-01",
+    "L4-choose-02",
+    "L4-floor-03",
+    "L4-split-02",
+    "L4-judge-02"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [],
+  "flags": [
+    {
+      "step": "S08",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "BM25 is mentioned in evidence before it is explained (says 'explained in the next step', forward reference)."
+      ]
+    },
+    {
+      "step": "S09",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Hybrid vs keyword ranking for E1042 question and 'keyword' rank values used in RRF; keyword scores are never shown (Keyword tab only visible in widget), so the 1/61 and 1/63 ranks can't be checked from the text."
+      ]
+    },
+    {
+      "step": "S09",
+      "kind": "unclear-visual",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "Screenshot opens on the Vector tab only; keyword and hybrid rankings (needed for the RRF numbers and the E1042 case) are hidden until toggled, and keyword ranks aren't shown anywhere static.",
+        "Only the vector ranking is shown for the default question; keyword/hybrid tables and their scores aren't visible in the static shot, and the keyword list isn't explained, so the 1/61 + 1/63 terms can't be checked."
+      ]
+    },
+    {
+      "step": "S10",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'ANN' and 'region' grouping are introduced fine, but the 16-region grid squares are never said to be fixed partitions until Go deeper; minor."
+      ]
+    },
+    {
+      "step": "S14",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Static screenshot shows only the Exact match tab; the plain-judge and rubric results (which answers flip) are not visible, only stated in text."
+      ]
+    },
+    {
+      "step": "S15",
+      "kind": "inconsistent-highlight",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "G2 is ranked worse (#2) yet in top 2 so row is orange; the ↓ worse row gets same highlight as better rows, so regression isn't visually marked."
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L4-closed-01",
+      "concept": "closed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-closed-02",
+      "concept": "closed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-rag-01",
+      "concept": "rag",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-rag-02",
+      "concept": "rag",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-rag-03",
+      "concept": "rag",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06",
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-chunk-01",
+      "concept": "chunk",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-chunk-02",
+      "concept": "chunk",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-chunk-03",
+      "concept": "chunk",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-choose-01",
+      "concept": "choose",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-choose-02",
+      "concept": "choose",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-choose-03",
+      "concept": "choose",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-choose-04",
+      "concept": "choose",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S02"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-embed-01",
+      "concept": "embed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-embed-02",
+      "concept": "embed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-embed-03",
+      "concept": "embed",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S01"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-hybrid-01",
+      "concept": "hybrid",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-hybrid-02",
+      "concept": "hybrid",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-hybrid-03",
+      "concept": "hybrid",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-ann-01",
+      "concept": "ann",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-ann-02",
+      "concept": "ann",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-ann-03",
+      "concept": "ann",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-floor-01",
+      "concept": "floor",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-floor-02",
+      "concept": "floor",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-floor-03",
+      "concept": "floor",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-golden-01",
+      "concept": "golden",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-golden-02",
+      "concept": "golden",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-golden-03",
+      "concept": "golden",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-golden-04",
+      "concept": "golden",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-split-01",
+      "concept": "split",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 0
+    },
+    {
+      "id": "L4-split-02",
+      "concept": "split",
+      "kind": "single",
+      "grounded": 2,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05",
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-split-03",
+      "concept": "split",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L4-judge-01",
+      "concept": "judge",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-judge-02",
+      "concept": "judge",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-judge-03",
+      "concept": "judge",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-gate-01",
+      "concept": "gate",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L4-gate-02",
+      "concept": "gate",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12",
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L4-gate-03",
+      "concept": "gate",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": "2026-11-12-L4",
+  "diff": {
+    "metrics": {
+      "grounded": {
+        "before": 1,
+        "after": 1
+      },
+      "groundedPerRun": {
+        "before": 0.990990990990991,
+        "after": 0.990990990990991
+      },
+      "agreement": {
+        "before": 1,
+        "after": 1
+      },
+      "openDisputes": {
+        "before": 0,
+        "after": 0
+      },
+      "optionsOnly": {
+        "before": 0.9354838709677419,
+        "after": 0.9354838709677419
+      },
+      "keyLongest": {
+        "before": 0.2413793103448276,
+        "after": 0.2413793103448276
+      },
+      "confirmedFlags": {
+        "before": 3,
+        "after": 1
+      },
+      "coverage": {
+        "before": 1,
+        "after": 1
+      },
+      "stepCoverage": {
+        "before": 1,
+        "after": 1
+      },
+      "viewed": {
+        "before": 1,
+        "after": 1
+      },
+      "visualOnlyCites": {
+        "before": 0,
+        "after": 0.02727272727272727
+      }
+    },
+    "nowGrounded": [],
+    "lostGrounding": []
+  }
+}

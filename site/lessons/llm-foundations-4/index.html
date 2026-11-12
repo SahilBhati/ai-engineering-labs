@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en" data-default-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM Foundations 4: Give the Model Knowledge, RAG, Vector Search and Evals</title>
+<style>
+/* Layout idea: one step per screen. A big visual you control, two sentences, Next. */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --ink:#16201e; --muted:#5c6a67;
+  --line:#d3dcda; --neg:#b42318; --accent:#0f6e66; --hot:#c2570c; --cool:#2f5fb3;
+  --font-display:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1514; --surface:#172020; --ink:#e2ebe9; --muted:#9aaaa6;
+    --line:#2b3836; --neg:#f2786d; --accent:#4cc2b4; --hot:#f29a50; --cool:#7fa6ee; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#172020; --ink:#e2ebe9; --muted:#9aaaa6;
+  --line:#2b3836; --neg:#f2786d; --accent:#4cc2b4; --hot:#f29a50; --cool:#7fa6ee; color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg); color:var(--ink); font:16px/1.55 var(--font-body)}
+main{max-width:760px; margin:0 auto; padding:16px 16px 40px; display:flex; flex-direction:column; gap:14px}
+h1,h2{font-family:var(--font-display); font-weight:600; line-height:1.2; margin:0; text-wrap:balance}
+h1{font-size:1.15rem; color:var(--muted)}
+h2{font-size:1.6rem}
+p{margin:0}
+.chapters{display:flex; gap:6px; flex-wrap:wrap}
+.chapters button{font:500 .8rem var(--font-mono); padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--muted); cursor:pointer}
+.chapters button[aria-current="true"]{border-color:var(--accent); color:var(--accent)}
+.progress{display:flex; gap:3px}
+.progress span{flex:1; height:4px; border-radius:2px; background:var(--line)}
+.progress span.on{background:var(--accent)}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 16px; display:flex; flex-direction:column; gap:14px; min-height:420px}
+.step-tag{font:500 .75rem var(--font-mono); letter-spacing:.06em; text-transform:uppercase; color:var(--accent)}
+.say{font-size:1.05rem; max-width:62ch}
+.visual{display:flex; flex-direction:column; gap:12px}
+details.deeper{border-top:1px solid var(--line); padding-top:10px; color:var(--muted); font-size:.93rem}
+details.deeper summary{cursor:pointer; color:var(--accent); font-weight:500}
+details.deeper p{margin-top:8px}
+.nav{display:flex; gap:8px; justify-content:space-between; align-items:center}
+button{font:500 .95rem var(--font-body); padding:9px 16px; border-radius:8px; border:1px solid var(--accent); background:var(--accent); color:var(--surface); cursor:pointer}
+button.ghost{background:transparent; color:var(--accent)}
+button:disabled{opacity:.4; cursor:not-allowed}
+button:focus-visible, input:focus-visible, textarea:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; flex-wrap:wrap}
+.seg button{border:0; border-radius:0; background:transparent; color:var(--muted); padding:7px 12px; font-size:.88rem}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--surface)}
+.chips{display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start}
+.chip{display:inline-flex; flex-direction:column; align-items:center; gap:2px; padding:6px 9px; border-radius:7px; border:1px solid var(--line); background:var(--bg); font:500 .95rem var(--font-mono); cursor:default}
+.chip small{font-size:.68rem; color:var(--muted)}
+.chip.unk{border-color:var(--hot); color:var(--hot)}
+.chip.byte{border-style:dashed}
+.chip.tap{cursor:pointer}
+.chip.sel{border-color:var(--hot); color:var(--hot); outline:1px solid var(--hot)}
+.chip.dim{opacity:.35}
+.meters{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.meter{background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px 12px}
+.meter b{display:block; font:600 1.4rem var(--font-mono); font-variant-numeric:tabular-nums}
+.meter span{font-size:.8rem; color:var(--muted)}
+input[type=text]{width:100%; font:1rem var(--font-mono); padding:9px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+input[type=range]{width:100%; accent-color:var(--accent)}
+.lbl{font:500 .8rem var(--font-mono); color:var(--muted)}
+svg{max-width:100%; height:auto; display:block}
+.vec{font:500 .95rem var(--font-mono); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px; overflow-x:auto; white-space:nowrap}
+table.emb{border-collapse:collapse; font:500 .85rem var(--font-mono); width:100%}
+table.emb td{padding:5px 6px; border-bottom:1px solid var(--line); text-align:right; font-variant-numeric:tabular-nums}
+table.emb td:first-child, table.emb td:nth-child(2){text-align:left; color:var(--muted)}
+table.emb tr.hit td{background:color-mix(in srgb, var(--hot) 18%, transparent); color:var(--ink)}
+.scroll{overflow-x:auto}
+.bars{display:flex; flex-direction:column; gap:5px}
+.bar{display:grid; grid-template-columns:96px 1fr 52px; gap:8px; align-items:center; font:500 .85rem var(--font-mono)}
+.bar .t{height:12px; border-radius:4px; background:var(--bg); border:1px solid var(--line); overflow:hidden}
+.bar .f{height:100%; background:var(--hot)}
+.bar .n{text-align:right; font-variant-numeric:tabular-nums}
+.grid{display:grid; gap:2px; font:500 .7rem var(--font-mono)}
+.grid div{padding:6px 2px; text-align:center; border-radius:3px}
+.g-ok{background:color-mix(in srgb, var(--accent) 25%, transparent)}
+.g-self{background:color-mix(in srgb, var(--accent) 45%, transparent)}
+.g-no{background:var(--bg); color:var(--muted)}
+.g-cheat{background:color-mix(in srgb, var(--hot) 35%, transparent); color:var(--hot)}
+.g-h{color:var(--muted)}
+canvas{max-width:100%; display:block; border:1px solid var(--line); border-radius:8px; background:var(--bg)}
+.pipe{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font:500 .85rem var(--font-mono)}
+.box{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--bg)}
+.box.lock{border-color:var(--accent)}
+.flyer{display:inline-block; padding:4px 8px; border-radius:6px; background:var(--hot); color:var(--surface); font:500 .78rem var(--font-mono); transition:transform 250ms cubic-bezier(0.2,0,0,1), opacity 250ms cubic-bezier(0.2,0,0,1)}
+.counter{font:500 .9rem var(--font-mono)}
+.q{display:flex; flex-direction:column; gap:6px; border-left:3px solid var(--accent); padding-left:12px}
+.q .tag{font:500 .72rem var(--font-mono); color:var(--accent); text-transform:uppercase; letter-spacing:.05em}
+textarea{width:100%; min-height:84px; font:15px/1.5 var(--font-body); color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:9px 11px; resize:vertical}
+.saved{font:500 .76rem var(--font-mono); color:var(--muted)}
+.pill{font:500 .76rem var(--font-mono); padding:3px 9px; border-radius:999px; border:1px solid var(--line); color:var(--muted)}
+.pill.ok{border-color:var(--accent); color:var(--accent)}
+.pill.warn{border-color:var(--hot); color:var(--hot)}
+.row{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+@media (prefers-reduced-motion: reduce){ .flyer{transition:none} }
+
+/* Phone fixes: content never wider than the screen; Back/Next always reachable. */
+.card, .visual{min-width:0}
+.visual{overflow-x:hidden}
+.say, .card p{overflow-wrap:break-word}
+.chapters{flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding-bottom:2px}
+.chapters::-webkit-scrollbar{display:none}
+.chapters button{flex:0 0 auto}
+@media (max-width:640px){
+  main{padding-bottom:88px}
+  .card{min-height:0; padding:16px 12px}
+  .visual table{display:block; overflow-x:auto; max-width:100%}
+  .bar{grid-template-columns:84px 1fr 52px}
+  .nav{position:fixed; left:0; right:0; bottom:0; z-index:5; background:var(--surface); border-top:1px solid var(--line); padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+  .nav button{min-width:96px; min-height:44px}
+}
+
+/* Lesson contents sidebar (desktop): where am I, what's next, jump anywhere. */
+.visual > .seg{align-self:flex-start}
+.toc{display:none}
+.toc .grp{display:flex; flex-direction:column; gap:2px}
+.toc .grp + .grp{margin-top:14px}
+.toc .gl{font:500 .75rem var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 4px 10px}
+.toc a{display:flex; gap:8px; padding:5px 10px; border-radius:6px; color:var(--ink); text-decoration:none; line-height:1.35; cursor:pointer; font-size:.875rem}
+.toc a:hover{background:var(--surface)}
+.toc a[aria-current="step"]{background:var(--surface); box-shadow:inset 2px 0 0 var(--accent); color:var(--accent)}
+.toc a.seen{color:var(--muted)}
+.toc .n{font:500 .75rem var(--font-mono); color:var(--accent); min-width:1.6em}
+.toc .home{font-weight:600; margin-bottom:6px}
+@media (min-width:1180px){
+  /* Flexible desktop layout: contents column at the left edge, lesson fills the rest (capped), no fixed offsets. */
+  body{display:grid; grid-template-columns:280px minmax(0,1fr); align-items:start}
+  .toc{display:flex; flex-direction:column; gap:18px; grid-column:1; grid-row:1 / span 3; position:sticky; top:0; height:100vh; overflow-y:auto; padding:24px 16px 24px 24px; border-right:1px solid var(--line)}
+  main{grid-column:2; width:100%; max-width:1120px; margin:0; padding:24px 48px 40px}
+  .chapters{display:none}
+}
+
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:nowrap}
+.topbar h1{flex:1; min-width:0}
+.tb-actions{display:flex; gap:6px; flex:none}
+.tb-actions button{padding:6px 10px; font-size:.8rem; background:transparent; border-color:var(--line); color:var(--muted)}
+.tb-actions button:hover{color:var(--ink); border-color:var(--muted)}
+#tocBtn{display:none}
+@media (min-width:1180px){
+  #tocBtn{display:inline-flex}
+  html.toc-collapsed body{grid-template-columns:minmax(0,1fr)}
+  html.toc-collapsed .toc{display:none}
+  html.toc-collapsed main{grid-column:1; max-width:1240px; padding-inline:64px}
+}
+
+/* Smooth, stable steps: the card slides in the direction you move; Next stays put. */
+html{scroll-behavior:smooth; scrollbar-gutter:stable}
+@view-transition{navigation:auto}
+#card{view-transition-name:lesson-card}
+.progress{view-transition-name:lesson-progress}
+.nav{view-transition-name:lesson-nav}
+.toc{view-transition-name:lesson-toc}
+::view-transition-old(lesson-card){animation:120ms cubic-bezier(0.4,0,1,1) both ael-out}
+::view-transition-new(lesson-card){animation:220ms cubic-bezier(0.2,0,0,1) both ael-in}
+html[data-dir="fwd"]::view-transition-new(lesson-card){animation-name:ael-in-fwd}
+html[data-dir="back"]::view-transition-new(lesson-card){animation-name:ael-in-back}
+@keyframes ael-out{to{opacity:0}}
+@keyframes ael-in{from{opacity:0}}
+@keyframes ael-in-fwd{from{opacity:0; transform:translateX(16px)}}
+@keyframes ael-in-back{from{opacity:0; transform:translateX(-16px)}}
+.progress span{transition:background-color 200ms cubic-bezier(0.2,0,0,1)}
+@media (min-width:641px){
+  .nav{position:sticky; bottom:0; z-index:4; padding:12px 0; background:color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter:blur(6px)}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  @view-transition{navigation:none}
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){animation:none !important}
+  .progress span{transition:none}
+}
+
+/* Explanation panels: one job each */
+.panel{border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--bg); display:flex; flex-direction:column; gap:6px; max-width:80ch}
+.panel p{margin:0}
+.panel-l{font:500 .75rem var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+.panel.analogy{border-left:3px solid var(--accent)}
+.panel.analogy .panel-l{color:var(--accent)}
+.panel.evidence{border-style:dashed}
+.panel a, .deeper a{color:var(--accent)}
+.panel .duo{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.panel .duo > div{display:flex; flex-direction:column; gap:4px}
+.panel .duo b{font-size:.875rem}
+.crumbs{font:500 .85rem var(--font-mono);color:var(--muted)}.crumbs a{color:var(--accent)}footer.lesson{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:.875rem}footer.lesson a{color:var(--accent)}@media (min-width:1180px){footer.lesson{grid-column:2;max-width:1120px;margin:0;padding:0 48px 32px}html.toc-collapsed footer.lesson{grid-column:1;max-width:1240px;padding-inline:64px}}</style>
+<script>(function(){var r=document.documentElement;try{var t=localStorage.getItem("ael-theme");if(t)r.dataset.theme=t;else if(r.dataset.defaultTheme)r.dataset.theme=r.dataset.defaultTheme;if(localStorage.getItem("ael-toc")==="0")r.classList.add("toc-collapsed");}catch(e){}})();</script>
+</head>
+<body>
+<aside class="toc" aria-label="Lesson contents"><div class="grp"><a class="home" href="../../">← AI Engineering Labs</a><a href="../">All lessons</a></div><div id="tocList"></div></aside>
+<main>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="../../">AI Engineering Labs</a> / <a href="../">Lessons</a></nav>
+  <div class="topbar"><h1>LLM Foundations · Lesson 4: give the model knowledge (RAG → vector search → evals)</h1><span class="tb-actions"><button class="ghost" id="tocBtn" aria-expanded="true" aria-label="Hide contents">☰ Contents</button><button class="ghost" id="themeBtn" aria-pressed="false">Dark mode</button></span></div>
+  <nav class="chapters" id="chapters" aria-label="Jump to a chapter"></nav>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+  <section class="card" id="card" aria-live="polite"></section>
+  <div class="nav">
+    <button class="ghost" id="back">Back</button>
+    <span class="lbl" id="count"></span>
+    <button id="next">Next</button>
+  </div>
+</main>
+<footer class="lesson">LLM Foundations for engineers · lesson 4 · <a href="../../">Home</a> · <a href="index.md">Markdown version</a></footer>
+
+<script>
+(function(){
+"use strict";
+const $ = (s, r=document) => r.querySelector(s);
+const el = (tag, attrs={}, html="") => { const e = document.createElement(tag);
+  for(const k in attrs){ if(k==="class") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
+  if(html) e.innerHTML = html; return e; };
+const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ================= helpers ================= */
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]); }
+function slider(id, label, min, max, stepv, val){
+  const w = el("div",{class:"visual",style:"gap:2px"});
+  w.innerHTML = '<label class="lbl" for="'+id+'"></label><input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="'+stepv+'" value="'+val+'">';
+  const inp = w.querySelector("input"), lab = w.querySelector("label");
+  return {w, inp, set:(t)=>{ lab.textContent = label + ": " + t; }};
+}
+function bars(rows){ // rows: [label, fraction 0..1, text]
+  return '<div class="bars">' + rows.map(([l,f,t])=>'<div class="bar"><span>'+esc(l)+'</span><div class="t"><div class="f" style="width:'+(Math.max(0,Math.min(1,f))*100).toFixed(1)+'%"></div></div><span class="n">'+t+'</span></div>').join("") + '</div>';
+}
+function softmax(xs){ const m = Math.max(...xs), ex = xs.map(x=>Math.exp(x-m)), z = ex.reduce((a,b)=>a+b,0); return ex.map(x=>x/z); }
+function seg(name, options, cur){ // options: [[key,label],...]
+  const s = el("div",{class:"seg",role:"group","aria-label":name}, options.map(([k,l])=>'<button data-k="'+k+'">'+esc(l)+'</button>').join(""));
+  s.sync = c => s.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.k===c));
+  s.sync(cur); return s;
+}
+const fmtB = b => b >= 1e9 ? (b/1e9).toFixed(1) + " GB" : b >= 1e6 ? (b/1e6).toFixed(1) + " MB" : (b/1e3).toFixed(0) + " KB";
+const fmtN = n => n >= 1e9 ? (n/1e9).toFixed(2) + "B" : n >= 1e6 ? (n/1e6).toFixed(1) + "M" : n.toLocaleString("en-US");
+
+/* ================= steps ================= */
+const STEPS = [];
+const add = (ch, title, say, render, deeper, x) => STEPS.push({ch, title, say, render, deeper, x: x || {}});
+
+
+/* ---------- Shared: the story. One docs bot, one question, eight passages ---------- */
+const duo = (a, b) => '<div class="duo"><div><b>Everyday</b><span>' + a + '</span></div><div><b>Technical</b><span>' + b + '</span></div></div>';
+const CHUNKS = {
+  C1:"Authentication: send your API key in the Authorization header.",
+  C2:"Rate limits: the /search endpoint allows 100 requests per minute per API key.",
+  C3:"Rate limits: the /upload endpoint allows 10 requests per minute per API key.",
+  C4:"429 Too Many Requests: you went over a rate limit. Retry after the Retry-After header.",
+  C5:"Pagination: /search returns 20 results per page. Pass page=2 for more.",
+  C6:"E1042: your index is still building. Retry in a few minutes.",
+  C7:"Billing: plans are billed monthly per API key.",
+  C8:"Webhooks: we POST events to your URL and retry failed deliveries for 24 hours."
+};
+const IDS = Object.keys(CHUNKS);
+const ASK = "How often can I call search per minute?"; // the lesson's question; the answer (100) is only in C2
+// Toy scores. vec = cosine similarity between the question's embedding and each passage's embedding.
+// kw = keyword-match score (only passages that share a word with the question get one).
+const GOLD = [
+  {id:"G1", q:ASK, right:"C2", ans:"100 requests per minute.", wrong:"10 requests per minute.",
+   vec:{C3:.86,C2:.84,C4:.71,C5:.58,C1:.33,C7:.29,C6:.21,C8:.17}, kw:{C2:2.1,C5:0.9,C3:0.8}},
+  {id:"G2", q:"How do I log in to the API?", right:"C1", ans:"Send your API key in the Authorization header.", wrong:"Call /search with your API key.",
+   vec:{C1:.74,C7:.45,C2:.40,C3:.38,C8:.30,C4:.29,C5:.22,C6:.20}, kw:{C2:.31,C3:.30,C7:.29,C1:.28}},
+  {id:"G3", q:"What does E1042 mean?", right:"C6", ans:"Your index is still building; retry in a few minutes.", wrong:"You went over a rate limit; retry later.",
+   vec:{C4:.62,C6:.55,C1:.31,C2:.28,C3:.27,C7:.22,C5:.20,C8:.19}, kw:{C6:3.4}},
+  {id:"G4", q:"How do I get more than 20 results?", right:"C5", ans:"Pass page=2.", wrong:"Send more requests: /search allows 100 per minute.",
+   vec:{C2:.66,C3:.61,C5:.59,C4:.35,C1:.20,C6:.18,C7:.17,C8:.15}, kw:{C5:2.9}},
+  {id:"G5", q:"What does a 429 response mean?", right:"C4", ans:"You went over a rate limit; retry after Retry-After.", wrong:"Your index is still building.",
+   vec:{C4:.83,C3:.52,C2:.51,C6:.47,C1:.25,C5:.24,C7:.20,C8:.18}, kw:{C4:2.5}},
+  {id:"G6", q:"How long do you retry webhooks?", right:"C8", ans:"24 hours.", wrong:"A few minutes.",
+   vec:{C8:.79,C4:.45,C6:.41,C7:.25,C1:.22,C2:.20,C3:.19,C5:.16}, kw:{C8:2.8,C4:0.7,C6:0.6}}
+];
+const OFF = {id:"X", q:"Do you support GraphQL?", right:null, vec:{C1:.41,C2:.38,C5:.36,C3:.35,C8:.30,C4:.27,C7:.22,C6:.18}, kw:{}};
+const rankBy = s => IDS.filter(c => (s[c] || 0) > 0).sort((a,b) => s[b] - s[a]);
+function rrf(g){ // reciprocal rank fusion: each list adds 1 / (60 + rank)
+  const v = rankBy(g.vec), k = rankBy(g.kw), s = {};
+  IDS.forEach(c => { const iv = v.indexOf(c), ik = k.indexOf(c); s[c] = (iv >= 0 ? 1/(61+iv) : 0) + (ik >= 0 ? 1/(61+ik) : 0); });
+  return s;
+}
+const scoresFor = (g, m) => m === "vector" ? g.vec : m === "keyword" ? g.kw : rrf(g);
+const ranking = (g, m) => rankBy(scoresFor(g, m));
+const rankOf = (g, m) => { const r = ranking(g, m).indexOf(g.right); return r < 0 ? Infinity : r + 1; };
+const recallAt = (m, k) => GOLD.filter(g => rankOf(g, m) <= k).length / GOLD.length;
+const usd = x => x >= 100 ? "$" + Math.round(x).toLocaleString("en-US") : x >= 1 ? "$" + x.toFixed(2) : x >= 0.01 ? "$" + x.toFixed(3) : "$" + x.toFixed(4);
+const pct = x => Math.round(x*100) + "%";
+// Real-size numbers for cost: a real chunk is ~300 tokens; instructions + question ~100; illustrative price.
+const CTX = 128000, CHUNK_TOK = 300, BASE_TOK = 100, PRICE = 3; // PRICE: $ per million input tokens
+const ragTok = k => BASE_TOK + k*CHUNK_TOK;
+const LEGEND = '<p class="lbl">Orange row = retrieved: sent to the model. ★ = the passage that holds the answer.</p>';
+function chunkTable(order, scores, sent, right, fmt, note){ // order: ids by rank; sent: Set of retrieved ids
+  const rows = order.map((c,i) => '<tr' + (sent.has(c) ? ' class="hit"' : '') + '><td>#' + (i+1) + '</td><td>' + c + (c === right ? ' ★' : '') + '</td><td style="text-align:left">' + esc(CHUNKS[c]) + '</td><td>' + (fmt ? fmt(scores[c], c) : scores[c].toFixed(2)) + '</td></tr>');
+  return '<table class="emb"><tbody>' + rows.join("") + '</tbody></table>' + (note ? '<p class="lbl">' + note + '</p>' : '');
+}
+const PRE = 'white-space:pre-wrap;font:500 .8rem/1.5 var(--font-mono);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0';
+const okTxt = ok => ok ? '<b style="color:var(--accent)">✓ right</b>' : '<b style="color:var(--neg)">✗ wrong</b>';
+
+/* ---------- Recap (skippable): Lessons 1–3 ideas RAG relies on, then this lesson's two questions ---------- */
+let guessA = null, guessB = null;
+const WVEC = {river:[0.2,2.7], flooded:[0.2,2.0], collapsed:[0.3,1.4], closed:[1.2,0.8], account:[2.0,0.1]};
+const cosine = (a,b) => (a[0]*b[0]+a[1]*b[1]) / (Math.hypot(a[0],a[1]) * Math.hypot(b[0],b[1]));
+add("R","Where Lessons 1–3 left off: similar meaning, similar direction",
+ "Lesson 1: an embedding turns a token into a vector, and similar meanings point in similar directions. Cosine similarity (dot product ÷ both lengths) scores how alike two directions are. Pick a word.",
+ v=>{
+  let q = "river";
+  const s = seg("Compare which word", [["river","river"],["account","account"]], q), pic = el("div"), out = el("div"), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ s.sync(q);
+    const X = x => 40 + x*110, Y = y => 250 - y*80;
+    let g = '<svg viewBox="0 0 330 270" style="max-width:360px" role="img" aria-label="Word vectors as arrows from the origin"><g style="font:500 11px var(--font-mono)">';
+    g += '<path d="M40 250 H320 M40 250 V20" style="stroke:var(--line)"/><text x="316" y="264" text-anchor="end" style="fill:var(--muted)">money →</text><text x="44" y="18" style="fill:var(--muted)">↑ water</text>';
+    Object.entries(WVEC).forEach(([w,p]) => { const me = w === q;
+      g += '<line x1="40" y1="250" x2="'+X(p[0])+'" y2="'+Y(p[1])+'" style="stroke:'+(me?'var(--accent)':'var(--muted)')+'" stroke-width="'+(me?3:1.5)+'"/><circle cx="'+X(p[0])+'" cy="'+Y(p[1])+'" r="4" style="fill:'+(me?'var(--accent)':'var(--muted)')+'"/><text x="'+(X(p[0])+7)+'" y="'+(Y(p[1])+4)+'" style="fill:'+(me?'var(--accent)':'var(--ink)')+'">'+w+'</text>'; });
+    pic.innerHTML = g + '</g></svg>';
+    const rows = Object.keys(WVEC).filter(w => w !== q).map(w => [w, Math.max(0, cosine(WVEC[q], WVEC[w])), cosine(WVEC[q], WVEC[w]).toFixed(2)]).sort((a,b) => b[1]-a[1]);
+    out.innerHTML = '<p class="lbl">cosine similarity with “' + q + '” (1 = same direction, 0 = unrelated)</p>' + bars(rows);
+    cap.textContent = "This lesson does the same thing with whole passages: embed each passage once, embed the question, and pick the passages pointing the same way.";
+  };
+  s.addEventListener("click", e => { if(e.target.dataset.k){ q = e.target.dataset.k; draw(); } });
+  v.append(s, pic, out, cap); draw();
+ },
+ "These are the 2-number toy rows from Lessons 2 and 3 (the water and money directions). An embedding is a list of numbers, one per dimension (Lesson 1). Real embeddings have hundreds to thousands of them, but the dot product and cosine work the same way in any number of dimensions.");
+
+add("R","Two limits: frozen knowledge and a finite context",
+ "Lesson 3: the weights are frozen after training, so your private docs were never in them. Lesson 2: the context window is finite, and Lesson 3: every input token costs money. Drag the size of your docs.",
+ v=>{
+  const SIZES = [20000, 50000, 128000, 500000, 2000000, 10000000];
+  const s = slider("docs","your docs, in tokens",0,SIZES.length-1,1,1), m = el("div",{class:"meters"}), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ const n = SIZES[+s.inp.value], fits = n <= CTX; s.set(fmtN(n));
+    m.innerHTML = '<div class="meter"><b>' + (fits ? 'fits' : pct(CTX/n) + ' fits') + '</b><span>paste all docs into a 128K context window</span></div>' +
+      '<div class="meter"><b>' + (fits ? usd(n*PRICE/1e6) : 'can’t') + '</b><span>per question, pasting all docs (' + fmtN(n) + ' input tokens at $' + PRICE + ' per million)</span></div>' +
+      '<div class="meter"><b>' + usd(ragTok(3)*PRICE/1e6) + '</b><span>per question, sending only the 3 best passages (' + ragTok(3).toLocaleString("en-US") + ' tokens)</span></div>' +
+      '<div class="meter"><b>' + (fits ? Math.round(n/ragTok(3)) + '×' : '—') + '</b><span>more input tokens when pasting everything</span></div>';
+    cap.textContent = fits ? "It fits, but every question pays for every token, and prefill (Lesson 2) has to read them all before the first word." : "It doesn't fit: no single prompt can hold your docs. You must choose which part to send.";
+  };
+  s.inp.addEventListener("input", draw); v.append(s.w, m, cap); draw();
+ },
+ "$" + PRICE + " per million input tokens is an illustrative price; real prices vary by model and provider. A passage here is about 300 tokens, and the 3 best passages plus instructions and the question come to about 1,000.");
+
+add("R","This lesson's two questions",
+ "You build a docs bot for your team's API. A user asks: “" + ASK + "” The answer, 100, is only in your private docs. Make two guesses; chapter 4.1 answers the first, chapter 4.3 the second.",
+ v=>{
+  const q1 = el("p",{},"<b>1.</b> You send that question to a model with no docs attached. What does it do?");
+  const s1 = seg("What the bare model does", [["knows","Answers 100: it learned it in training"],["plausible","Writes a plausible number that may be wrong"],["refuses","Always says it doesn't know"]], guessA || "");
+  const q2 = el("p",{},"<b>2.</b> You add your docs and the bot answers 100 in a demo. How do you know it will keep finding the right passage after you change something?");
+  const s2 = seg("How you know", [["hand","Try a few questions by hand after each change"],["golden","Keep fixed questions with known right passages; score every change"],["score","Trust the similarity score it reports"]], guessB || "");
+  const out = el("p",{class:"lbl"});
+  const draw = ()=>{ s1.sync(guessA || ""); s2.sync(guessB || ""); out.textContent = guessA && guessB ? "Both guesses saved. They come back in steps 1 and 9." : "Pick an answer for each."; };
+  s1.addEventListener("click", e => { if(e.target.dataset.k){ guessA = e.target.dataset.k; draw(); } });
+  s2.addEventListener("click", e => { if(e.target.dataset.k){ guessB = e.target.dataset.k; draw(); } });
+  v.append(q1, s1, q2, s2, out); draw();
+ },
+ "The first question is about RAG (4.1), retrieval-augmented generation: why the model needs your text in its prompt. The second is about evals (4.3): measuring the system instead of eyeballing it.");
+
+/* ---------- 4.1 RAG: retrieve, then generate ---------- */
+const CLOSED = [["60",.30],["100",.26],["1,000",.24],["10",.20]], OPEN = [["60",.01],["100",.96],["1,000",.01],["10",.02]];
+add("4.1","Closed book: the model guesses a plausible number",
+ "The model writes the next token from its frozen weights. With no passage in the prompt, nothing in the weights holds your limit, so the probabilities spread over plausible numbers. Put the passage in the prompt.",
+ v=>{
+  let mode = "closed";
+  const s = seg("What is in the prompt", [["closed","Question only"],["open","Question + passage C2"]], mode), pr = el("pre",{style:PRE}), out = el("div"), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ s.sync(mode); const P = mode === "closed" ? CLOSED : OPEN;
+    pr.textContent = (mode === "open" ? "Passage C2: " + CHUNKS.C2 + "\n\n" : "") + "Question: " + ASK + "\nAnswer: You can call /search ___ times per minute.";
+    out.innerHTML = '<p class="lbl">probability of the next token (the number) · illustrative values</p>' + bars(P.map(([t,p]) => [t, p, pct(p)]));
+    cap.innerHTML = mode === "closed" ? "No single number wins: sampling (Lesson 2) picks one, and it reads just as confident as a right answer. That is a hallucination." + (guessA ? " Your guess: <b>" + ({knows:"it knows 100", plausible:"a plausible number", refuses:"it refuses"})[guessA] + "</b>. The answer: <b>a plausible number that may be wrong</b>." : "")
+      : "Attention (Lesson 1: each token pulls in information from the tokens before it) can now read “100” from the passage, so one token takes almost all the probability. The weights didn't change; the context did.";
+  };
+  s.addEventListener("click", e => { if(e.target.dataset.k){ mode = e.target.dataset.k; draw(); } });
+  v.append(s, pr, out, cap); draw();
+ },
+ "A model can also say “I don't know”, if post-training (Lesson 3) taught it to when unsure. But it has no lookup to check against: it can't tell a fact it never saw from one it forgot. Putting the source text in the prompt is what makes the answer checkable.",
+ {what:"<p>A model answering <b>closed book</b> uses only its weights. Your private docs, and anything written after its <b>training cutoff</b> (the date its training text ends), aren't in them. Asked anyway, it writes the most plausible tokens, which can be a confident wrong answer (a <b>hallucination</b>).</p>",
+  analogy: duo("A closed-book exam on a book you never read: you can still write a fluent answer, just not a reliable one. Open book, you copy the line.",
+                "A service answering from a stale in-process cache with no backing store: every miss still returns a value, so callers can't tell a miss from a hit."),
+  real:"<p>The weights are fixed numbers learned from training text (Lesson 3). Your rate limit, 100, is in no training text, so no path through the weights favours “100” over “60” or “10”. Put C2 in the prompt and “100” goes from 26% to 96% (illustrative values): the same frozen model copies 100, because attention (Lesson 1: each token pulls in information from the tokens before it) reads it from the context.</p>",
+  evidence:'<p>RAG\'s original paper: pre-trained models “store factual knowledge in their parameters,” but “providing provenance for their decisions and updating their world knowledge remain open research problems.” <a href="https://arxiv.org/abs/2005.11401">Lewis et al., Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (2020) ↗</a></p>'});
+
+add("4.1","RAG: retrieve, then generate",
+ "RAG (retrieval-augmented generation) finds the passages most like the question, pastes the top k into the prompt, and asks the model to answer only from them. Change k, the number of passages sent.",
+ v=>{
+  const g = GOLD[0], order = ranking(g, "vector");
+  const s = slider("k","k (passages sent)",1,4,1,1), tbl = el("div"), pr = el("pre",{style:PRE}), ans = el("p"), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ const k = +s.inp.value, sent = new Set(order.slice(0,k)); s.set(k);
+    tbl.innerHTML = '<p class="lbl">1 · Retrieve: every passage ranked by similarity to the question</p>' + chunkTable(order, g.vec, sent, g.right) + LEGEND;
+    pr.textContent = "Answer using only these passages. Cite the passage you used.\n" + order.slice(0,k).map(c => "[" + c + "] " + CHUNKS[c]).join("\n") + "\nQuestion: " + ASK;
+    const ok = sent.has(g.right);
+    ans.innerHTML = '3 · Generate: <b>' + esc(ok ? g.ans.replace(".", "") + " [C2]" : g.wrong.replace(".", "") + " [C3]") + '</b> ' + okTxt(ok);
+    cap.textContent = ok ? (k === 2 ? "The right passage made it in, so the model can copy it. The /upload line rides along; the model has to ignore it." : k + " passages sent: more chances to include the right one, and more tokens to pay for and more noise to ignore.")
+      : "Top 1 is the /upload limit, not /search: the passages are nearly identical. The model answered faithfully (it stuck to the passage it was given), but from the wrong passage. Chapter 4.2 shows why the ranking slipped.";
+  };
+  s.inp.addEventListener("input", draw);
+  v.append(s.w, tbl, el("p",{class:"lbl"},"2 · Augment: the prompt the model actually receives"), pr, ans, cap); draw();
+ },
+ "Production systems often retrieve 20–50 candidates cheaply, then re-score them with a slower, more accurate model (a reranker) and send only the best few. Everything still ends as text in the prompt, so it pays the same per-token costs and the same prefill (Lesson 3).",
+ {what:"<p><b>RAG</b> (retrieval-augmented generation) has three stages: <b>retrieve</b> the passages most similar to the question, <b>augment</b> the prompt with the top <b>k</b> of them, then <b>generate</b> an answer that cites them.</p>",
+  analogy: duo("A librarian fetches the three most relevant pages, and you answer from those pages instead of from memory.",
+                "Cache-aside: on each request, read from the source of truth (the docs index), then render the response from what you read. The model is the renderer, not the database."),
+  real:"<p>Nothing about the model changes. Retrieval is a separate search system; its output becomes prompt text. If retrieval ranks the wrong passage first, the model answers faithfully from the wrong passage, as k = 1 shows: “10”, from C3.</p>",
+  evidence:'<p>The RAG paper pairs a generator with “a dense vector index of Wikipedia” and finds it generates “more specific, diverse and factual language” than the model alone. <a href="https://arxiv.org/abs/2005.11401">Lewis et al. (2020) ↗</a></p>'});
+
+const DOCW = "Rate limits. Every endpoint has its own limit. The /search endpoint allows 100 requests per minute per API key. The /upload endpoint allows 10 requests per minute per API key. Over the limit you get 429 Too Many Requests; retry after the Retry-After header.".split(" ");
+function chunkWords(size, overlap){ const step = overlap ? size/2 : size, out = [];
+  for(let i = 0; i < DOCW.length; i += step){ out.push(DOCW.slice(i, i + size)); if(i + size >= DOCW.length) break; }
+  return out; }
+add("4.1","Chunking: cut the docs into passages",
+ "Retrieval returns whole chunks, so the docs are first cut into pieces. Too small and a fact loses its subject; too big and one chunk mixes topics and costs more tokens. Change the size.",
+ v=>{
+  let size = 12, ov = false;
+  const s = seg("Chunk size in words", [["6","6 words"],["12","12"],["24","24"],["48","48"]], "12"), o = seg("Overlap", [["no","No overlap"],["yes","Half overlap"]], "no");
+  const tbl = el("div"), m = el("div",{class:"meters"}), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ s.sync(String(size)); o.sync(ov ? "yes" : "no");
+    const ch = chunkWords(size, ov), whole = ch.some(c => c.includes("/search") && c.includes("100"));
+    tbl.innerHTML = '<table class="emb"><tbody>' + ch.map((c,i) => '<tr><td>chunk ' + (i+1) + '</td><td>' + (c.includes("100") ? '★' : '') + '</td><td style="text-align:left">' + esc(c.join(" ")) + '</td></tr>').join("") + '</tbody></table><p class="lbl">★ = a chunk holding the number 100. Every word counts as one token here.</p>';
+    const topics = ch.map(c => ["/search","/upload","429"].filter(t => c.some(w => w.startsWith(t))).length);
+    m.innerHTML = '<div class="meter"><b>' + (whole ? 'yes' : 'no') + '</b><span>some chunk keeps “/search” with “100”</span></div><div class="meter"><b>' + Math.max(...topics) + '</b><span>most topics in one chunk (/search, /upload, 429)</span></div>';
+    cap.textContent = !whole ? "The fact is split: the chunk with 100 never says /search, so a search for /search can't match it, and a ★ chunk may even sit next to /upload." :
+      size >= 24 ? "The fact is whole, but this chunk mixes topics: its one vector is a blend of all of them, and every retrieval sends the extra text." : "The fact is whole and the chunk is about one thing: the sweet spot for this page.";
+  };
+  s.addEventListener("click", e => { if(e.target.dataset.k){ size = +e.target.dataset.k; draw(); } });
+  o.addEventListener("click", e => { if(e.target.dataset.k){ ov = e.target.dataset.k === "yes"; draw(); } });
+  const r = el("div",{class:"row"}); r.append(s, o); v.append(r, tbl, m, cap); draw();
+ },
+ "Overlap repeats the end of one chunk at the start of the next, so a sentence cut at a boundary appears whole in one of them, at the cost of more chunks to store. Splitting on headings and paragraphs instead of a fixed count keeps facts whole more often. Another fix: prepend a one-line summary of the document to each chunk, so even a small chunk knows its subject.",
+ {what:"<p><b>Chunking</b> splits each document into passages (<b>chunks</b>) before indexing. Each chunk gets one vector and is retrieved, and sent, as one unit. <b>Overlap</b> makes neighbouring chunks share some words.</p>",
+  analogy: duo("Cutting a recipe book into index cards: one card per step loses which dish it belongs to; one card per chapter makes every card about ten dishes.",
+                "Choosing a page size for pagination or a shard key: too fine and related rows split across fetches; too coarse and every fetch drags in rows you don't need."),
+  real:"<p>Chunk size trades two failures. Small: the passage with “100” lacks “/search”, so it can't match a /search question. Large: one vector averages several topics, so it matches none of them sharply, and k chunks × size is what you pay per question.</p>",
+  evidence:'<p>Anthropic: traditional RAG splits documents into chunks, which fails “when individual chunks lack sufficient context”; chunk size, boundaries and overlap “can affect retrieval performance.” <a href="https://www.anthropic.com/news/contextual-retrieval">Anthropic, Introducing Contextual Retrieval (2024) ↗</a></p>'});
+
+add("4.1","RAG, long context, or fine-tuning?",
+ "Three ways to give a model your docs: paste them all (long context), retrieve a few passages (RAG), or train them into the weights (fine-tuning). Change the docs size and how often they change.",
+ v=>{
+  const SIZES = [20000, 50000, 128000, 500000, 2000000];
+  const sS = slider("cs","your docs, in tokens",0,SIZES.length-1,1,1), sE = slider("ce","doc edits per week",0,50,1,10), tbl = el("div"), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ const n = SIZES[+sS.inp.value], e = +sE.inp.value, fits = n <= CTX; sS.set(fmtN(n)); sE.set(e);
+    const rows = [
+      ["Long context", fits ? "yes" : "no: too big", fits ? fmtN(n) : "—", "instant: edit the file", "yes: it's in the prompt"],
+      ["RAG", "yes", ragTok(3).toLocaleString("en-US"), "minutes: re-embed changed chunks", "yes: cites the passage"],
+      ["Fine-tuning", "unreliable for exact facts", "~" + BASE_TOK, e ? e + " edits wait for a retrain" : "retrain when docs change", "no"]];
+    const pick = fits ? 0 : 1;
+    tbl.innerHTML = '<table class="emb"><tbody><tr><td>approach</td><td>answers from your docs?</td><td>input tokens / question</td><td>an edit shows up</td><td>shows its source?</td></tr>' +
+      rows.map((r,i) => '<tr><td>' + (i === pick ? '<b>' + r[0] + ' ← pick</b>' : r[0]) + '</td>' + r.slice(1).map(c => '<td style="text-align:left">' + c + '</td>').join("") + '</tr>').join("") + '</tbody></table>';
+    cap.textContent = fits ? "It fits, so pasting everything is simplest (prompt caching from Lesson 3 cuts the repeat cost). RAG wins once the docs outgrow the window or the per-question bill." : "It doesn't fit, so long context is out. RAG sends ~1,000 tokens per question and picks up edits as soon as they're re-embedded.";
+  };
+  [sS, sE].forEach(x => x.inp.addEventListener("input", draw));
+  v.append(sS.w, sE.w, tbl, cap); draw();
+ },
+ "Fine-tuning changes how a model behaves (tone, format, a narrow task), and that is where it shines. For facts that must be quoted exactly and change weekly, it is slow to update and gives no source to check. Teams often combine them: fine-tune for style, RAG for facts.",
+ {what:"<p><b>Long context</b>: put every document in the prompt. <b>RAG</b>: retrieve the best few passages per question. <b>Fine-tuning</b>: keep training the model on your text (Lesson 3's supervised fine-tuning) so the facts live in its weights.</p>",
+  analogy: duo("Bring the whole binder to the meeting, bring the three pages you need, or memorize the binder beforehand.",
+                "Full table scan vs an index lookup vs baking config into the binary at build time: the last is fastest per request but needs a redeploy for every change."),
+  real:"<p>Long context: cost per question grows with docs size, and it stops at the window (128K in Lesson 2). RAG: cost is k × chunk size, whatever the docs size. Fine-tuning: no extra input tokens, but each edit needs a training run, and the model can't point to where a fact came from.</p>",
+  evidence:'<p>Comparing knowledge injection, “RAG consistently outperforms” unsupervised fine-tuning, “both for existing knowledge encountered during training and entirely new knowledge.” <a href="https://arxiv.org/abs/2312.05934">Ovadia et al., Fine-Tuning or Retrieval? (2023) ↗</a> For a knowledge base “smaller than 200,000 tokens”, Anthropic suggests skipping RAG and putting it all in the prompt. <a href="https://www.anthropic.com/news/contextual-retrieval">Anthropic (2024) ↗</a></p>'});
+
+/* ---------- 4.2 Vector search ---------- */
+add("4.2","Embed every chunk once, the question at ask time",
+ "An embedding model turns each chunk into one vector, once, ahead of time: that's the index. At ask time it embeds the question the same way, and the nearest vectors win. Pick a question.",
+ v=>{
+  let gi = 0;
+  const s = seg("Question", GOLD.map((g,i) => [String(i), g.q]), "0"), pic = el("div"), tbl = el("div");
+  const draw = ()=>{ s.sync(String(gi)); const g = GOLD[gi], order = ranking(g, "vector"), sent = new Set(order.slice(0,3));
+    const X = sc => 60 + sc*560; // x = cosine with the question; one fixed row per passage
+    let p = '<svg viewBox="0 0 660 300" style="max-width:680px" role="img" aria-label="Each passage as a dot on a cosine axis; further right = more similar to the question"><g style="font:500 11px var(--font-mono)">';
+    [0,0.2,0.4,0.6,0.8,1].forEach(c => p += '<line x1="'+X(c)+'" y1="14" x2="'+X(c)+'" y2="262" style="stroke:var(--line)" stroke-dasharray="3 3"/><text x="'+X(c)+'" y="280" text-anchor="middle" style="fill:var(--muted)">'+c.toFixed(1)+'</text>');
+    p += '<text x="340" y="296" text-anchor="middle" style="fill:var(--muted)">cosine similarity with the question →</text>';
+    IDS.forEach((c,i) => { const y = 28 + i*30, x = X(g.vec[c]), hit = sent.has(c);
+      p += '<text x="10" y="'+(y+4)+'" style="fill:var(--ink)">'+c+(c===g.right?' ★':'')+'</text><line x1="'+X(0)+'" y1="'+y+'" x2="'+x.toFixed(1)+'" y2="'+y+'" style="stroke:var(--line)"/>';
+      p += '<circle cx="'+x.toFixed(1)+'" cy="'+y+'" r="8" style="fill:'+(hit?'var(--hot)':'var(--surface)')+';fill-opacity:'+(hit?0.3:1)+';stroke:'+(hit?'var(--hot)':'var(--muted)')+'" stroke-width="1.5"/>'; });
+    pic.innerHTML = p + '</g></svg><p class="lbl">One row per passage; further right = more similar to the question. Orange circle = retrieved (top 3), ★ = the passage that holds the answer. Pick another question and watch the dots move.</p>';
+    tbl.innerHTML = chunkTable(order, g.vec, sent, g.right, null, "Top 3 retrieved (k = 3). Scores are cosine similarity between embeddings.") + LEGEND;
+  };
+  s.addEventListener("click", e => { if(e.target.dataset.k){ gi = +e.target.dataset.k; draw(); } });
+  v.append(s, pic, tbl); draw();
+ },
+ "The question and the chunks must go through the same embedding model: vectors from two different models live in unrelated spaces, so comparing them is meaningless. Swapping the embedding model means re-embedding every chunk.",
+ {what:"<p>An <b>embedding model</b> maps a whole passage to one vector (often 768–3,072 numbers) so that passages with similar meaning point in similar directions. The <b>index</b> stores every chunk's vector; a query embeds the question and returns the chunks with the highest <b>cosine similarity</b>.</p>",
+  analogy: duo("Shelving every book by topic once, then walking to the shelf that matches your question instead of reading every book.",
+                "Building a secondary index at write time so reads are a lookup: the expensive work (embedding each chunk) happens once at ingest; each query embeds one short string."),
+  real:"<p>Same idea as Lesson 1's token embeddings, one level up: one vector per passage instead of per token. Indexing 8 chunks = 8 embedding calls, once. Each question = 1 embedding call + 8 cosines. For the /search question, C3 (/upload) scores 0.86, just above C2 at 0.84. The vectors capture “rate limit per minute” strongly and the endpoint name weakly.</p>",
+  evidence:'<p>Dense Passage Retrieval embeds questions and passages with learned encoders and outperforms “a strong Lucene-BM25 system” (BM25 is standard keyword scoring, explained in the next step) “largely by 9%-19% absolute in terms of top-20 passage retrieval accuracy.” <a href="https://arxiv.org/abs/2004.04906">Karpukhin et al., Dense Passage Retrieval for Open-Domain Question Answering (2020) ↗</a></p>'});
+
+add("4.2","Keyword search, vector search, and both together",
+ "Vector search matches meaning, so “call” finds “requests”, but it blurs exact words like /search or E1042. Keyword search matches exact words and misses synonyms. Hybrid search merges both rankings. Switch method and question.",
+ v=>{
+  let gi = 0, m = "vector";
+  const sq = seg("Question", [["0",GOLD[0].q],["2",GOLD[2].q]], "0"), sm = seg("Method", [["keyword","Keyword"],["vector","Vector"],["hybrid","Hybrid"]], m), tbl = el("div"), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ sq.sync(String(gi)); sm.sync(m); const g = GOLD[gi], sc = scoresFor(g, m), order = ranking(g, m), rest = IDS.filter(c => !order.includes(c)), sent = new Set(order.slice(0,2));
+    const fmt = m === "hybrid" ? x => x.toFixed(4) : m === "keyword" ? x => x.toFixed(1) : null;
+    tbl.innerHTML = chunkTable(order, sc, sent, g.right, fmt, (m === "keyword" ? "Keyword score: shared words, rarer words count more. " : m === "hybrid" ? "Hybrid score: 1/(60 + vector rank) + 1/(60 + keyword rank). " : "Vector score: cosine similarity. ") + "Top 2 retrieved." + (rest.length ? " Not ranked (no shared word): " + rest.join(", ") + "." : "")) + LEGEND;
+    const r = rankOf(g, m);
+    cap.textContent = (r === 1 ? "★ is ranked first. " : "★ is ranked " + (r === Infinity ? "nowhere" : "#" + r) + ". ") + ({
+      "0vector":"The /upload limit edges out /search: the two sentences mean nearly the same thing.", "0keyword":"Only “search” and “minute” match exactly; “call” doesn't match “requests”, so the ranking leans on a couple of words.",
+      "0hybrid":"C2 ranks well in both lists, so it wins the merge.", "2vector":"E1042 is a rare code: its embedding looks like “some error”, so the 429 passage wins.",
+      "2keyword":"An exact code is keyword search's best case: only C6 contains “E1042”.", "2hybrid":"Keyword's #1 plus vector's #2 beats vector's #1 alone."})[gi + m];
+  };
+  sq.addEventListener("click", e => { if(e.target.dataset.k){ gi = +e.target.dataset.k; draw(); } });
+  sm.addEventListener("click", e => { if(e.target.dataset.k){ m = e.target.dataset.k; draw(); } });
+  v.append(sq, sm, tbl, cap); draw();
+ },
+ "The keyword score in real systems is usually BM25, a formula that rewards words that are frequent in the passage and rare across all passages. The merge here is reciprocal rank fusion: it uses only ranks, so the two lists' different score scales don't matter. Hybrid isn't free: in this lesson's test set it pushes one passage down (the lab at the end of chapter 4.3 shows which).",
+ {what:"<p><b>Keyword search</b> ranks passages by shared words (rare words count more). <b>Vector search</b> ranks by cosine similarity of embeddings. <b>Hybrid search</b> runs both and merges the two rankings into one.</p>",
+  analogy: duo("Asking a librarian who knows the subject (vector) and also checking the index at the back of the book for the exact term (keyword).",
+                "Full-text search (an inverted index, like Elasticsearch) next to a similarity lookup, with a merge step that combines two sorted result lists."),
+  real:"<p>Keyword ranks (the Keyword tab): for the /search question, C2 #1, C5 #2, C3 #3, and no other passage shares a word; for E1042, only C6 matches. Reciprocal rank fusion gives each passage 1/(60 + rank) from each list and sums. For the /search question: C2 is vector #2 and keyword #1, so 1/62 + 1/61 = 0.0325, just above C3 (vector #1, keyword #3: 1/61 + 1/63 = 0.0323).</p>",
+  evidence:'<p>Anthropic measured failed retrievals (how often the right passage was missing from the top 20 results): adding keyword (BM25) search to its contextual embeddings cut the failure rate from 5.7% to 2.9%, versus 3.7% with the embeddings alone. <a href="https://www.anthropic.com/news/contextual-retrieval">Anthropic, Introducing Contextual Retrieval (2024) ↗</a></p>'});
+
+// Approximate search toy: 400 points in 16 regions (4 × 4); probe the regions nearest the question.
+function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const ANN = (()=>{ const rnd = mulberry32(42), pts = [];
+  for(let r = 0; r < 4; r++) for(let c = 0; c < 4; c++) for(let i = 0; i < 25; i++) pts.push({x:(c + rnd())/4, y:(r + rnd())/4, cell:r*4 + c});
+  const Q = {x:0.49, y:0.51}, d = p => Math.hypot(p.x - Q.x, p.y - Q.y);
+  const truth = pts.map((p,i) => [d(p), i]).sort((a,b) => a[0]-b[0]).slice(0,5).map(x => x[1]);
+  const cells = [...Array(16).keys()].sort((a,b) => Math.hypot((a%4+.5)/4-Q.x, (Math.floor(a/4)+.5)/4-Q.y) - Math.hypot((b%4+.5)/4-Q.x, (Math.floor(b/4)+.5)/4-Q.y));
+  return {pts, Q, d, truth, cells}; })();
+function annSearch(nprobe){ const probe = new Set(ANN.cells.slice(0, nprobe)), cand = ANN.pts.map((p,i) => [p,i]).filter(([p]) => probe.has(p.cell));
+  const found = cand.map(([p,i]) => [ANN.d(p), i]).sort((a,b) => a[0]-b[0]).slice(0,5).map(x => x[1]);
+  return {probe, compared:cand.length, found, recall: found.filter(i => ANN.truth.includes(i)).length/5}; }
+add("4.2","Approximate search: check a few regions, not every vector",
+ "Exact search compares the question with every vector: fine for 8 chunks, slow for 100 million. An approximate index groups vectors into regions and checks only the regions nearest the question. Change how many regions it checks.",
+ v=>{
+  const s = slider("np","regions checked",1,16,1,1), pic = el("div"), m = el("div",{class:"meters"}), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ const n = +s.inp.value, r = annSearch(n); s.set(n + " of 16");
+    const X = x => 10 + x*300, Y = y => 10 + y*300;
+    let p = '<svg viewBox="0 0 320 320" style="max-width:380px" role="img" aria-label="Points in 16 regions; checked regions shaded; nearest points marked"><g>';
+    for(let c = 0; c < 16; c++){ const cx = c%4, cy = Math.floor(c/4), on = r.probe.has(c);
+      p += '<rect x="'+X(cx/4)+'" y="'+Y(cy/4)+'" width="75" height="75" style="fill:'+(on?'var(--accent)':'transparent')+';fill-opacity:.12;stroke:var(--line)"/>'; }
+    ANN.pts.forEach((pt,i) => { const f = r.found.includes(i), t = ANN.truth.includes(i);
+      p += '<circle cx="'+X(pt.x).toFixed(1)+'" cy="'+Y(pt.y).toFixed(1)+'" r="'+(f?4:2.2)+'" style="fill:'+(f?'var(--hot)':'var(--muted)')+';fill-opacity:'+(f?1:.45)+'"/>';
+      if(t) p += '<circle cx="'+X(pt.x).toFixed(1)+'" cy="'+Y(pt.y).toFixed(1)+'" r="7" style="fill:none;stroke:var(--ink)" stroke-width="1.5"/>'; });
+    p += '<circle cx="'+X(ANN.Q.x)+'" cy="'+Y(ANN.Q.y)+'" r="6" style="fill:var(--accent);stroke:var(--surface)" stroke-width="2"/>';
+    pic.innerHTML = p + '</g></svg><p class="lbl">Teal dot = the question. Shaded squares = regions checked. Ringed = the true 5 nearest (exact search). Orange = the 5 nearest the index found.</p>';
+    m.innerHTML = '<div class="meter"><b>' + r.compared + ' of 400</b><span>vectors compared (' + pct(r.compared/400) + ' of the work of exact search)</span></div><div class="meter"><b>' + pct(r.recall) + '</b><span>recall: share of the true 5 nearest it found</span></div>';
+    cap.textContent = r.recall < 1 ? "The question sits near a region border, so some true neighbours live in regions it didn't check. Check more regions: more work, higher recall." : n === 16 ? "Every region checked: this is exact search again, and all the work." : "All 5 true neighbours found while comparing " + r.compared + " vectors instead of 400.";
+  };
+  s.inp.addEventListener("input", draw); v.append(s.w, pic, m, cap); draw();
+ },
+ "Real indexes don't use a fixed grid. One family clusters the vectors first and checks the nearest clusters (IVF, inverted file index), exactly the knob above. Another, HNSW (Hierarchical Navigable Small World), links each vector to its near neighbours in a graph and walks the graph toward the question. Both expose a knob that trades recall for speed. Internals are past this lesson's depth.",
+ {what:"<p><b>Exact (brute-force) search</b> compares the question with every stored vector. An <b>approximate nearest neighbour (ANN) index</b> checks only a promising subset, trading a little <b>recall</b> (the share of true nearest neighbours it finds) for a lot of speed.</p>",
+  analogy: duo("Looking for the nearest coffee shop: you check your own neighbourhood and the next one over, not every shop in the city. Usually right, occasionally you miss one just across a border.",
+                "Partitioning a table and pruning partitions in a query: scan only the partitions that can hold the answer. A geohash lookup of nearby cells is the same move."),
+  real:"<p>Exact search cost = number of vectors × dimensions. 100 million vectors × 1,024 numbers ≈ 100 billion multiply-adds per question, before any other user. Checking the nearest few regions cuts that to a few percent, and the knob (regions checked) sets the recall you get back.</p>",
+  evidence:'<p>HNSW reports “logarithmic complexity scaling” of search with the number of vectors. <a href="https://arxiv.org/abs/1603.09320">Malkov &amp; Yashunin, HNSW (2016) ↗</a> ANN-Benchmarks plots every index as recall against queries per second: the same trade-off as the slider. <a href="https://ann-benchmarks.com/">ANN-Benchmarks ↗</a></p>'});
+
+add("4.2","Nearest isn't always relevant: a score floor",
+ "Vector search always returns its top k, even when nothing in the docs answers the question. A score floor drops passages below a minimum similarity, so the bot can say “not in the docs”. Move the floor.",
+ v=>{
+  let qi = "G1";
+  const sq = seg("Question", [["G1",GOLD[0].q],["X",OFF.q]], qi), s = slider("fl","score floor (minimum cosine)",0.30,0.90,0.05,0.50), tbl = el("div"), ans = el("p"), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ sq.sync(qi); const f = +s.inp.value, g = qi === "G1" ? GOLD[0] : OFF, order = ranking(g, "vector"); s.set(f.toFixed(2));
+    const sent = new Set(order.slice(0,3).filter(c => g.vec[c] >= f - 1e-9));
+    tbl.innerHTML = chunkTable(order, g.vec, sent, g.right, (x,c) => x.toFixed(2) + (x < f - 1e-9 ? " · below floor" : ""), "Top 3 retrieved, but only those at or above the floor.") + LEGEND;
+    let text, ok;
+    if(!sent.size){ text = "That isn't in the docs I was given."; ok = qi === "X"; }
+    else if(qi === "X"){ text = "Send your API key in the Authorization header."; ok = false; }
+    else if(sent.has("C2")){ text = "100 requests per minute. [C2]"; ok = true; }
+    else { text = "10 requests per minute. [C3]"; ok = false; }
+    ans.innerHTML = 'Bot: <b>' + esc(text) + '</b> ' + okTxt(ok);
+    cap.textContent = qi === "X" ? (sent.size ? "The floor is too low: unrelated passages get through, and the bot answers a different question." : "Nothing clears the floor, so the bot says so instead of answering from an unrelated passage.")
+      : (!sent.size ? "The floor is too high: even the right passage is dropped, so an answerable question gets refused." : sent.has("C2") ? "The right passage clears the floor." : "Only C3 clears the floor: the wrong limit again.");
+  };
+  sq.addEventListener("click", e => { if(e.target.dataset.k){ qi = e.target.dataset.k; draw(); } });
+  s.inp.addEventListener("input", draw); v.append(sq, s.w, tbl, ans, cap); draw();
+ },
+ "There is no universal floor: cosine values depend on the embedding model, so the floor is tuned on test questions (chapter 4.3), including some whose correct answer is “not in the docs”. The prompt also tells the model to say so when the passages don't answer the question.",
+ {what:"<p>A <b>score floor</b> (similarity threshold) is a minimum cosine a passage must reach to be sent. Without one, top-k always returns k passages, because there is always a nearest neighbour, however far away.</p>",
+  analogy: duo("A search party that must return with someone: without a rule like “only if they match the photo”, they bring back the closest stranger.",
+                "A fuzzy match with no cutoff: a typo-tolerant lookup that never returns “no results” returns the least-bad match for every query, including nonsense."),
+  real:"<p>For “Do you support GraphQL?” the best passage scores 0.41. With no floor, the bot gets three unrelated passages and answers from them. Floor 0.50 drops all three (“not in the docs”) and still keeps C3 0.86, C2 0.84 and C4 0.71 for the real question. Above 0.86, it refuses the real question too.</p>",
+  evidence:'<p>Models are easily misled by irrelevant text in the prompt: “the model performance is dramatically decreased when irrelevant information is included.” <a href="https://arxiv.org/abs/2302.00093">Shi et al., Large Language Models Can Be Easily Distracted by Irrelevant Context (2023) ↗</a></p>'});
+
+/* ---------- 4.3 Evals ---------- */
+add("4.3","A golden set: questions with known right passages",
+ "To know if retrieval works, write down real questions and, for each one, the passage that answers it: a golden set. Then count how often the right passage lands in the top k: recall@k. Change k.",
+ v=>{
+  const s = slider("gk","k (passages retrieved)",1,4,1,1), tbl = el("div"), m = el("div",{class:"meters"}), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ const k = +s.inp.value; s.set(k);
+    tbl.innerHTML = '<table class="emb"><tbody><tr><td>id</td><td>right passage</td><td style="text-align:left">question</td><td>its rank</td><td>in top ' + k + '?</td></tr>' +
+      GOLD.map(g => { const r = rankOf(g, "vector"); return '<tr' + (r <= k ? ' class="hit"' : '') + '><td>' + g.id + '</td><td>' + g.right + ' ★</td><td style="text-align:left">' + esc(g.q) + '</td><td>#' + r + '</td><td>' + (r <= k ? "yes" : "no") + '</td></tr>'; }).join("") + '</tbody></table><p class="lbl">Orange row = its right passage was retrieved. Vector search.</p>';
+    const hits = GOLD.filter(g => rankOf(g, "vector") <= k).length;
+    m.innerHTML = '<div class="meter"><b>' + hits + ' / ' + GOLD.length + ' = ' + pct(hits/GOLD.length) + '</b><span>recall@' + k + '</span></div><div class="meter"><b>' + ragTok(k).toLocaleString("en-US") + '</b><span>input tokens per question (300-token chunks)</span></div>';
+    cap.innerHTML = (k === 1 ? "At k = 1, G1, G3 and G4 miss: G1 is the /upload slip from step 2." : k < 3 ? "Raising k buys recall with tokens." : "Every right passage is in the top 3. This number is your baseline: re-run it after every change.") +
+      (guessB ? " Your recap guess: <b>" + ({hand:"try a few by hand", golden:"a fixed scored set", score:"trust the similarity score"})[guessB] + "</b>. The answer: <b>a fixed set, scored on every change</b>: hand checks miss regressions, and a similarity score says how close, not whether it's right." : "");
+  };
+  s.inp.addEventListener("input", draw); v.append(s.w, tbl, m, cap); draw();
+ },
+ "Why not just try a few questions by hand after each change? Hand checks vary from run to run and skip the questions that used to work, so a regression slips through; a similarity score only says how close a passage is, not whether it answers the question. Six questions are a toy: each one is worth 17 points, so one flip looks huge. Real golden sets start at a few dozen questions drawn from real user logs and grow with every bug found, and include questions whose right answer is “not in the docs”.",
+ {what:"<p>An <b>eval</b> (evaluation) measures a system's output against a standard. A <b>golden set</b> is a fixed list of inputs with known right outputs. For retrieval: each question plus the passage(s) that answer it. <b>Recall@k</b> = the share of questions whose right passage is in the top k.</p>",
+  analogy: duo("An answer key for a test you give the system: same questions every time, so scores are comparable across versions.",
+                "A regression test suite with fixtures: fixed inputs, asserted outputs, run on every change. Recall@k is the pass rate."),
+  real:"<p>Recall@k needs no model to grade: it is a lookup of where the right passage ranked. Here (vector search): ranks 2, 1, 2, 3, 1, 1. So recall@1 = 3/6 = 50%, recall@2 = 5/6 = 83%, recall@3 = 6/6 = 100%.</p>",
+  evidence:'<p>Hamel Husain on evals for LLM products: “Unit tests for LLMs are assertions (like you would write in pytest).” <a href="https://hamel.dev/blog/posts/evals/">Husain, Your AI Product Needs Evals (2024) ↗</a> Anthropic reports retrieval quality as 1 − recall@20. <a href="https://www.anthropic.com/news/contextual-retrieval">Anthropic (2024) ↗</a></p>'});
+
+function botAnswer(g, sent, strict){
+  if(sent.has(g.right)){ if(g.id === "G6" && !strict) return {text:"We retry failed deliveries for 48 hours.", ok:false}; return {text:g.ans, ok:true}; }
+  return strict ? {text:"The passages don't say.", ok:false} : {text:g.wrong, ok:false};
+}
+add("4.3","Retrieval miss or answer miss? Score them separately",
+ "A wrong answer has two possible causes: the right passage never arrived (retrieval miss), or it arrived and the model didn't use it faithfully (answer miss). They need different fixes. Change k and the prompt.",
+ v=>{
+  let k = 1, strict = false;
+  const sk = seg("k", [["1","k = 1"],["3","k = 3"]], "1"), sp = seg("Prompt", [["plain","Plain prompt"],["strict","Strict: quote the passage"]], "plain"), tbl = el("div"), grid = el("div"), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ sk.sync(String(k)); sp.sync(strict ? "strict" : "plain"); let ok = 0, rm = 0, am = 0;
+    pt.textContent = strict ? "Strict prompt: Answer only from these passages. Quote the sentence you used. If the passages don't answer the question, say “The passages don't say.”" : "Plain prompt: Answer the question using these passages.";
+    const rows = GOLD.map(g => { const sent = new Set(ranking(g, "vector").slice(0,k)), got = sent.has(g.right), a = botAnswer(g, sent, strict);
+      const kind = a.ok ? "right" : got ? "answer miss" : "retrieval miss"; if(a.ok) ok++; else if(got) am++; else rm++;
+      return '<tr><td>' + g.id + '</td><td>' + (got ? "yes" : "no") + '</td><td style="text-align:left">' + esc(a.text) + '</td><td><b style="color:' + (a.ok ? 'var(--accent)' : 'var(--neg)') + '">' + kind + '</b></td></tr>'; });
+    tbl.innerHTML = '<table class="emb"><tbody><tr><td>id</td><td>right passage retrieved?</td><td style="text-align:left">bot answer</td><td>verdict</td></tr>' + rows.join("") + '</tbody></table>';
+    grid.innerHTML = '<div class="meters"><div class="meter"><b>' + ok + '</b><span>right</span></div><div class="meter"><b>' + rm + '</b><span>retrieval misses → fix search: k, chunking, hybrid</span></div><div class="meter"><b>' + am + '</b><span>answer misses → fix the prompt or the model</span></div><div class="meter"><b>' + pct(ok/GOLD.length) + '</b><span>end-to-end accuracy</span></div></div>';
+    cap.textContent = am && rm ? "Both kinds at once. Raising k fixes the retrieval misses; it can't fix G6, which had its passage and still said 48 hours." :
+      am ? "Retrieval is now perfect, yet G6 is still wrong: the passage says 24 hours and the model wrote 48. A bigger k won't help; the prompt has to." :
+      rm ? "The strict prompt fixed G6, and the retrieval misses now say “the passages don't say” instead of a confident wrong answer. Only better retrieval can turn them right." : "Every question right: retrieval found each passage and the model stuck to it.";
+  };
+  sk.addEventListener("click", e => { if(e.target.dataset.k){ k = +e.target.dataset.k; draw(); } });
+  sp.addEventListener("click", e => { if(e.target.dataset.k){ strict = e.target.dataset.k === "strict"; draw(); } });
+  const pt = el("pre",{style:PRE});
+  const r = el("div",{class:"row"}); r.append(sk, sp); v.append(r, pt, tbl, grid, cap); draw();
+ },
+ "An answer that sticks to the passages is called faithful (or grounded). An answer can be faithful and still wrong if retrieval sent the wrong passage, like “10” from C3. That's why the two scores are kept apart.",
+ {what:"<p>A RAG eval scores two stages separately. <b>Retrieval</b>: was the right passage in the prompt (recall@k)? <b>Generation</b>: is the answer right, and <b>faithful</b> to the passages it was given (no added or changed facts)?</p>",
+  analogy: duo("A wrong dinner: either the shopper brought the wrong ingredients, or the cook ruined good ones. Taste alone can't tell you whom to retrain.",
+                "Tracing a bad API response: was the upstream data wrong (a bad query) or the rendering wrong (a bad template)? You log both stages to find the faulty one."),
+  real:"<p>Plain prompt, k = 1: 2 right, 3 retrieval misses (G1, G3, G4), 1 answer miss (G6). Plain prompt, k = 3: 5 right, 0 retrieval misses, and G6 is still 1 answer miss, because it had its passage all along. Strict prompt plus k = 3: 6 of 6. Each fix moved only the count it targets.</p>",
+  evidence:'<p>RAGAS proposes metrics for “the retrieval and generation dimensions” of a RAG pipeline separately, including faithfulness, and evaluates them “without having to rely on ground truth human annotations.” <a href="https://arxiv.org/abs/2309.15217">Es et al., Ragas: Automated Evaluation of Retrieval Augmented Generation (2023) ↗</a></p>'});
+
+const JUDGED = [
+  ["100 requests per minute per API key", true, true, true],
+  ["100 requests per minute.", true, true, true],
+  ["You can call /search about one hundred times each minute.", true, true, true],
+  ["10 requests per minute.", false, false, false],
+  ["Limits vary by endpoint and plan; check your dashboard for the exact per-minute number.", false, true, false]
+]; // [answer, human label, plain judge, judge with rubric]
+const normAns = s => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+add("4.3","LLM-as-judge: grade free-text answers at scale",
+ "Answers are free text, so exact matching fails on “100 requests per minute.” vs the reference. An LLM judge reads the question, the reference answer and the response, and grades it. Check every grader against human labels. Switch graders.",
+ v=>{
+  let gr = "exact";
+  const s = seg("Grader", [["exact","Exact match"],["judge","LLM judge"],["rubric","LLM judge + rubric"]], gr), tbl = el("div"), m = el("div",{class:"meters"}), cap = el("p",{class:"lbl"});
+  const REF = "100 requests per minute per API key";
+  const draw = ()=>{ s.sync(gr); let agree = 0;
+    const rows = JUDGED.map(([a, human, j, jr]) => { const g = gr === "exact" ? normAns(a) === normAns(REF) : gr === "judge" ? j : jr, same = g === human; if(same) agree++;
+      return '<tr><td>' + (human ? "pass" : "fail") + '</td><td>' + (g ? "pass" : "fail") + '</td><td style="text-align:left">' + esc(a) + '</td><td><b style="color:' + (same ? 'var(--accent)' : 'var(--neg)') + '">' + (same ? "agrees" : "disagrees") + '</b></td></tr>'; });
+    tbl.innerHTML = '<p class="lbl">Question G1 · reference answer: “' + REF + '”</p><table class="emb"><tbody><tr><td>human</td><td>grader</td><td style="text-align:left">bot answer</td><td>vs human</td></tr>' + rows.join("") + '</tbody></table>';
+    m.innerHTML = '<div class="meter"><b>' + agree + ' / 5 = ' + pct(agree/5) + '</b><span>agreement with human labels</span></div>';
+    cap.textContent = gr === "exact" ? "Exact match fails two right answers that are worded differently. It's only good for short, fixed outputs like a passage ID." :
+      gr === "judge" ? "The judge accepts paraphrases, but passes the long, confident answer that never gives the number: judges favour fluent, longer answers." : "The rubric says what passing means: “pass only if it states 100 requests per minute for /search”. Now the judge matches every human label.";
+  };
+  s.addEventListener("click", e => { if(e.target.dataset.k){ gr = e.target.dataset.k; draw(); } });
+  v.append(s, tbl, m, cap); draw();
+ },
+ "Five answers can't prove a judge works; real teams label 50–100 answers by hand, measure agreement, and fix the rubric until it is high. Known judge biases: preferring the first of two answers shown (position), longer answers (verbosity) and answers written by itself (self-enhancement).",
+ {what:"<p><b>LLM-as-judge</b>: a model grades another model's output, given the question, a <b>reference answer</b> and a <b>rubric</b> (the pass criteria). It is trusted only as far as it <b>agrees with human labels</b> on a sample.</p>",
+  analogy: duo("A teaching assistant grading essays with the professor's marking guide. You spot-check their grades before trusting them with the whole class.",
+                "A fuzzy assertion in tests: instead of assertEquals on a string, a checker that decides “equivalent?”. You validate the checker on known pairs before it gates CI."),
+  real:"<p>Exact match agrees with humans on 3 of 5 (60%), a plain judge on 4 of 5 (80%), the judge with a rubric on 5 of 5. The judge is a model too: same weights and sampling as Lessons 2–3, so it has blind spots, and grading costs tokens per answer.</p>",
+  evidence:'<p>Strong LLM judges reach “over 80% agreement, the same level of agreement between humans”, with measured “position, verbosity, and self-enhancement biases.” <a href="https://arxiv.org/abs/2306.05685">Zheng et al., Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena (2023) ↗</a> Husain: correctness “is somewhat subjective, and you must align the model with a human.” <a href="https://hamel.dev/blog/posts/evals/">Husain (2024) ↗</a></p>'});
+
+const BASE = {m:"vector", k:3};
+add("4.3","Lab: change one thing, re-run the golden set",
+ "Evals are a regression gate: a change ships only if it doesn't lower the score. Today's bot: vector search, k = 3. Try hybrid search or a different k and see if it passes the gate.",
+ v=>{
+  let m = "hybrid";
+  const sm = seg("Method", [["vector","Vector"],["hybrid","Hybrid"]], m), s = slider("lk","k (passages sent)",1,5,1,2), tbl = el("div"), mt = el("div",{class:"meters"}), cap = el("p",{class:"lbl"});
+  const draw = ()=>{ sm.sync(m); const k = +s.inp.value; s.set(k);
+    const rec = recallAt(m, k), base = recallAt(BASE.m, BASE.k), tok = ragTok(k), btok = ragTok(BASE.k), pass = rec >= base && tok <= btok;
+    tbl.innerHTML = '<table class="emb"><tbody><tr><td>id · right passage</td><td>rank with your setting</td><td>rank today (vector)</td></tr>' + GOLD.map(g => { const r = rankOf(g, m), b = rankOf(g, BASE.m);
+      return '<tr' + (r <= k ? ' class="hit"' : '') + '><td>' + g.id + ' · ' + g.right + ' ★</td><td>#' + r + (r > b ? ' ↓ worse' : r < b ? ' ↑ better' : '') + '</td><td>#' + b + '</td></tr>'; }).join("") + '</tbody></table><p class="lbl">Orange row = its right passage is in the top ' + k + ' now. ↑/↓ = ranked better/worse than today.</p>';
+    mt.innerHTML = '<div class="meter"><b>' + pct(rec) + '</b><span>recall@' + k + ' (today: ' + pct(base) + ' at k = 3)</span></div><div class="meter"><b>' + tok.toLocaleString("en-US") + '</b><span>input tokens per question (today ' + btok.toLocaleString("en-US") + ')</span></div>' +
+      '<div class="meter"><b>' + usd(tok*1000*PRICE/1e6) + '</b><span>per 1,000 questions (today ' + usd(btok*1000*PRICE/1e6) + ')</span></div><div class="meter"><b style="color:' + (pass ? 'var(--accent)' : 'var(--neg)') + '">' + (pass ? "PASS" : "FAIL") + '</b><span>gate: recall ≥ today and tokens ≤ today</span></div>';
+    cap.textContent = pass ? (tok < btok ? "Same recall with fewer tokens: hybrid ranks every right passage in the top 2, so k = 2 is enough. Ship it." : "Matches today: no regression.") :
+      rec < base ? "Recall dropped: some right passage fell out of the top " + k + ". Blocked." : "Recall holds, but every question costs more. Blocked unless you decide the cost is worth it.";
+  };
+  sm.addEventListener("click", e => { if(e.target.dataset.k){ m = e.target.dataset.k; draw(); } });
+  s.inp.addEventListener("input", draw); v.append(sm, s.w, tbl, mt, cap); draw();
+ },
+ "Look at G2 under hybrid: it drops from #1 to #2, because the keyword list ranks it last of the four passages containing “API”. An aggregate score can hide a per-question regression, so good eval reports also list which questions changed. A full gate would add the answer score from the judge (step 11) next to recall.",
+ {what:"<p>An <b>eval-driven change</b>: run the golden set before and after a change, and ship only if the scores hold or improve. The gate can weigh quality (recall, judge pass rate) against cost (tokens per question).</p>",
+  analogy: duo("A chef changing a recipe has the same tasters try the old and new dish side by side before it goes on the menu.",
+                "A CI gate on a benchmark: a performance regression test fails the build if p99 latency rises, even when every unit test passes."),
+  real:"<p>Vector: recall@1 50%, @2 83%, @3 100%. Hybrid: @1 83%, @2 100%. So hybrid with k = 2 keeps 100% recall and sends 700 tokens instead of 1,000 per question: 30% cheaper, same quality. Hybrid with k = 1 fails the gate (83%).</p>",
+  evidence:'<p>Husain describes evals as a loop: write assertions, log traces, and use them to catch regressions with every change, like unit tests in CI. <a href="https://hamel.dev/blog/posts/evals/">Husain, Your AI Product Needs Evals (2024) ↗</a></p>'});
+
+/* ---------- Videos ---------- */
+const VIDS = [
+  ["Watch","What is Retrieval-Augmented Generation (RAG)?","IBM Technology · 6 min","https://www.youtube.com/watch?v=T-D1OfcDW1M",
+   "The closed-book vs open-book idea from step 1 in plain words, with the update and “I don't know” benefits.","Steps 1–2"],
+  ["Watch","Vector databases are so hot right now. WTF are they?","Fireship · 3 min","https://www.youtube.com/watch?v=klTvEwg3oJ4",
+   "Embeddings, an index, and nearest-neighbour search in three minutes.","Steps 5–7"],
+  ["Read","Your AI Product Needs Evals","Hamel Husain · article, 2024","https://hamel.dev/blog/posts/evals/",
+   "How a real team builds evals: assertions as unit tests, logging traces, and aligning an LLM judge with human labels.","Steps 9–12"]
+];
+add("V","Videos: build the intuition",
+ "Watch the two short videos; the article is for depth. Links open in a new tab.",
+ v=>{
+  VIDS.forEach(([when,title,meta,url,why,maps])=>{
+    const d = el("div",{class:"q"});
+    d.innerHTML = '<span class="tag">'+esc(when)+' · lesson '+esc(maps)+'</span>' +
+      '<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600;font-size:1.05rem">'+esc(title)+'</a>' +
+      '<span class="lbl">'+esc(meta)+'</span><p>'+esc(why)+'</p>';
+    v.appendChild(d);
+  });
+ });
+
+/* ---------- Questions ---------- */
+const QS = [
+  ["warm-up · L3","w1","Why does pre-training need no human labels?"],
+  ["warm-up · L3","w2","What does the causal mask stop the model from doing during training?"],
+  ["warm-up · L3","w3","Why does an output token cost more GPU time than an input token?"],
+  ["warm-up · L3","w4","What does prompt caching reuse, and when does it hit?"],
+  ["mechanism","q1","Why does a model asked about your private docs produce a confident, plausible wrong answer instead of nothing?"],
+  ["mechanism","q2","Walk through the three stages of RAG for “How often can I call search per minute?”. What does the model actually receive?"],
+  ["consequence","q3","With k = 1 the bot answered “10”. Was the model unfaithful? Where was the bug?"],
+  ["design","q4","Chunks of 6 words vs 48 words: name the failure each causes, and what overlap fixes."],
+  ["distinction","q5","Long context, RAG, fine-tuning: which would you pick for a 50K-token doc set? A 2M-token set edited daily? Why?"],
+  ["mechanism","q6","What is embedded ahead of time, what at ask time, and why must both use the same embedding model?"],
+  ["distinction","q7","Give one question where keyword search beats vector search and one where it loses. How does hybrid search merge them?"],
+  ["numbers","q8","100 million vectors of 1,024 numbers: how many multiply-adds does exact search do per question? What does an approximate index trade for speed?"],
+  ["consequence","q9","What does a bot with no score floor do on a question the docs can't answer? What goes wrong if the floor is too high?"],
+  ["numbers","q10","Right-passage ranks for six golden questions are 2, 1, 2, 3, 1, 1. Compute recall@1, recall@2 and recall@3."],
+  ["design","q11","A wrong answer comes back. How do you tell a retrieval miss from an answer miss, and what fixes each?"],
+  ["distinction","q12","When is exact match a good grader, and when do you need an LLM judge? How do you know the judge can be trusted?"],
+  ["design","q13","Hybrid search with k = 2 vs vector search with k = 3: which ships, by what gate, and what could the aggregate score hide?"],
+  ["backend","q14","Which backend patterns are RAG, the vector index, and a golden-set eval like?"]
+];
+
+add("✓","Check yourself",
+ "Answer each question out loud or in your notes before looking anything up. If one is hard, go back to its step.",
+ v=>{
+  QS.forEach(([tag,id,p],n)=>{
+    const q = el("div",{class:"q"});
+    q.innerHTML = '<span class="tag">' + (n+1) + ' · ' + esc(tag.replace("warm-up · L3","review · lesson 3")) + '</span><p>' + esc(p) + '</p>';
+    v.appendChild(q);
+  });
+  v.appendChild(el("p",{class:"say",style:"margin-top:8px"},'Then test yourself: ten scored questions with explanations and a list of what to study again. <a href="../../quiz/?lesson=4"><b>Take the quiz →</b></a>'));
+ });
+
+
+/* ---------- Explanation panels (attached by step title; most steps carry theirs inline) ---------- */
+const DUO = (a, b) => '<div class="duo"><div><b>Everyday</b><span>' + a + '</span></div><div><b>Technical</b><span>' + b + '</span></div></div>';
+const PANELS = {};
+STEPS.forEach(s => { if(PANELS[s.title]) s.x = Object.assign({}, PANELS[s.title], s.x); });
+
+
+/* ================= answer store ================= */
+const CH = "L4";
+const answers = {}; let db = null, finished = false, storeText = "Connecting to your answer store…";
+const LS = "ael-lesson-4";
+try{ const s = JSON.parse(localStorage.getItem(LS) || "{}"); Object.assign(answers, s.answers || {}); finished = !!s.finished; }catch(e){}
+function lsSave(){ try{ localStorage.setItem(LS, JSON.stringify({answers, finished, step:cur})); }catch(e){} }
+function setStore(cls, t){ storeText = t; const p = $("#storePill"); if(p){ p.className = "pill " + cls; p.textContent = t; } storeCls = cls; }
+let storeCls = "";
+async function persist(id, body){
+  answers[id] = body; lsSave(); if(!db) return false;
+  const ref = db.doc("answers/" + CH + "-" + id), data = Object.assign({lesson:CH, qid:id}, body);
+  try{ await ref.set(data); return true; }
+  catch(e){ if(e && e.code==="unavailable"){ await new Promise(r=>setTimeout(r, 500 + Math.random()*700)); try{ await ref.set(data); return true; }catch(e2){} }
+    setStore("warn","Couldn't save to the store. Kept on this device; use Copy."); return false; }
+}
+
+/* ================= stepper ================= */
+let cur = 0;
+try{ const s = JSON.parse(localStorage.getItem(LS) || "{}"); if(Number.isInteger(s.step) && s.step < STEPS.length) cur = s.step; }catch(e){}
+const CHS = [["R","Recap · skippable"],["4.1","4.1 RAG"],["4.2","4.2 Vector search"],["4.3","4.3 Evals"],["V","Videos"],["✓","Questions"]];
+function render(){
+  const st = STEPS[cur], card = $("#card");
+  card.innerHTML = "";
+  const content = STEPS.filter(s=>!["V","✓","R"].includes(s.ch)), ci = content.indexOf(st);
+  const chLabel = st.ch==="B" ? "Basics" : "Chapter " + st.ch;
+  card.append(el("span",{class:"step-tag"}, st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : st.ch==="R" ? "Recap · skip it if you remember Lessons 1–3" : chLabel + " · step " + (ci+1) + " of " + content.length));
+  card.append(el("h2",{}, esc(st.title)));
+  card.append(el("p",{class:"say"}, esc(st.say)));
+  // Panels, each with one job: what it is, an analogy, then the visual, what's really happening, evidence.
+  const panel = (cls, label, html) => { const d = el("div",{class:"panel " + cls}); d.innerHTML = '<p class="panel-l">' + label + '</p>' + html; return d; };
+  if(st.x.what) card.append(panel("what", "What it is", st.x.what));
+  if(st.x.analogy) card.append(panel("analogy", "Think of it like", st.x.analogy));
+  const v = el("div",{class:"visual"}); card.append(v); st.render(v);
+  if(st.x.real) card.append(panel("real", "What's actually happening", st.x.real));
+  if(st.x.evidence) card.append(panel("evidence", "Evidence", st.x.evidence));
+  // Links to other sites open in a new tab, so the lesson stays where it is.
+  card.querySelectorAll('a[href^="http"]').forEach(a=>{ a.target = "_blank"; a.rel = "noopener"; });
+  if(st.deeper){ const d = el("details",{class:"deeper"},'<summary>Go deeper</summary><p>' + st.deeper + '</p>'); card.append(d); }
+  if(st.ch==="R"){ const sk = el("button",{class:"ghost",id:"skipRecap"},"Skip recap →"); sk.addEventListener("click", ()=>go(STEPS.findIndex(s=>s.ch!=="R"))); card.append(sk); }
+  $("#back").disabled = cur===0; $("#next").disabled = cur===STEPS.length-1;
+  $("#count").textContent = st.ch==="✓" ? "Questions" : st.ch==="V" ? "Videos" : st.ch==="R" ? "Recap" : (ci+1) + " / " + content.length;
+  renderToc();
+  $("#progress").innerHTML = content.map((_,i)=>'<span class="' + ((ci < 0 || i <= ci) ? "on" : "") + '"></span>').join("");
+  $("#chapters").querySelectorAll("button").forEach(b=>b.setAttribute("aria-current", b.dataset.ch===st.ch));
+  if(storeCls) setStore(storeCls, storeText);
+  lsSave();
+}
+$("#chapters").innerHTML = CHS.map(([k,l])=>'<button data-ch="' + k + '">' + l + '</button>').join("");
+
+/* ---- step navigation: one path for every control, animated where supported ---- */
+function go(n){
+  if(n === cur || n < 0 || n >= STEPS.length) return;
+  const r = document.documentElement, run = ()=>{ cur = n; render(); };
+  if(document.startViewTransition && !reduceMotion){ r.dataset.dir = n > cur ? "fwd" : "back"; const t = document.startViewTransition(run); t.ready.catch(()=>{}); t.updateCallbackDone.catch(()=>{}); t.finished.catch(()=>{}).finally(()=>{ delete r.dataset.dir; }); }
+  else run();
+  if(window.scrollY > 0) window.scrollTo({top:0, behavior: reduceMotion ? "auto" : "smooth"});
+}
+$("#chapters").addEventListener("click", e=>{ const k = e.target.dataset.ch; if(!k) return; go(STEPS.findIndex(s=>s.ch===k)); });
+$("#back").addEventListener("click", ()=>go(cur-1));
+$("#next").addEventListener("click", ()=>go(cur+1));
+document.addEventListener("keydown", e=>{ if(/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if(e.key==="ArrowRight") $("#next").click(); if(e.key==="ArrowLeft") $("#back").click(); });
+
+/* ---- contents sidebar + chapter links (#ch-1-2) ---- */
+const slugOf = k => "ch-" + String(k).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const seen = new Set();
+function renderToc(){
+  const host = document.getElementById("tocList"); if(!host) return;
+  seen.add(cur);
+  host.innerHTML = CHS.map(([k,l])=>{
+    const items = STEPS.map((s,i)=>[s,i]).filter(([s])=>s.ch===k);
+    const content = STEPS.filter(s=>!["V","✓","R"].includes(s.ch));
+    return '<div class="grp"><p class="gl">' + esc(l) + '</p>' + items.map(([s,i])=>{
+      const n = (k==="V"||k==="✓"||k==="R") ? "" : (content.indexOf(s)+1);
+      return '<a data-go="' + i + '"' + (i===cur ? ' aria-current="step"' : '') + (seen.has(i) && i!==cur ? ' class="seen"' : '') + '><span class="n">' + n + '</span><span>' + esc(s.title) + '</span></a>';
+    }).join("") + '</div>';
+  }).join("");
+  const now = host.querySelector('[aria-current="step"]'), box = host.closest(".toc");
+  if(now && box && (now.offsetTop < box.scrollTop + 40 || now.offsetTop > box.scrollTop + box.clientHeight - 60)) box.scrollTop = now.offsetTop - box.clientHeight/2;
+}
+document.addEventListener("click", e=>{ const a = e.target.closest("[data-go]"); if(!a) return; go(+a.dataset.go); });
+function fromHash(){ const h = location.hash.slice(1); if(!h) return false;
+  const k = CHS.map(c=>c[0]).find(k=>slugOf(k)===h); if(!k) return false;
+  cur = STEPS.findIndex(s=>s.ch===k); return true; }
+window.addEventListener("hashchange", ()=>{ if(fromHash()) render(); });
+fromHash();
+render();
+
+/* ---- theme toggle + collapsible contents (preferences remembered) ---- */
+(function(){
+  const r = document.documentElement, store = (k,v)=>{ try{ localStorage.setItem(k,v); }catch(e){} };
+  const tb = document.getElementById("themeBtn"), cb = document.getElementById("tocBtn");
+  const dark = ()=> r.dataset.theme ? r.dataset.theme === "dark" : !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+  const syncT = ()=>{ tb.textContent = dark() ? "Light mode" : "Dark mode"; tb.setAttribute("aria-pressed", String(dark())); };
+  const smooth = fn => { if(!(document.startViewTransition && !reduceMotion)) return fn();
+    const t = document.startViewTransition(fn); t.ready.catch(()=>{}); t.finished.catch(()=>{}); t.updateCallbackDone.catch(()=>{}); return t; };
+  tb.addEventListener("click", ()=>smooth(()=>{ r.dataset.theme = dark() ? "light" : "dark"; store("ael-theme", r.dataset.theme); syncT(); render(); }));
+  const syncC = ()=>{ const c = r.classList.contains("toc-collapsed"); cb.setAttribute("aria-expanded", String(!c)); cb.setAttribute("aria-label", c ? "Show contents" : "Hide contents"); cb.title = c ? "Show contents" : "Hide contents"; };
+  cb.addEventListener("click", ()=>smooth(()=>{ r.classList.toggle("toc-collapsed"); store("ael-toc", r.classList.contains("toc-collapsed") ? "0" : "1"); syncC(); }));
+  syncT(); syncC();
+})();
+
+})();
+</script>
+</body>
+</html>
