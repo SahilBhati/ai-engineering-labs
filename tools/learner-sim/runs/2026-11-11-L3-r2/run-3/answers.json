@@ -1,0 +1,472 @@
+{
+ "answers": {
+  "Q01": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "A content-addressed cache keyed by a hash of the prefix"
+    }
+   ]
+  },
+  "Q02": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "the mask makes the two compute the same thing"
+    }
+   ]
+  },
+  "Q03": {
+   "answer": "20.9",
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "decode ≈ 21 ms per token (140 GB ÷ 6.7 TB/s, plus cache reads)"
+    }
+   ]
+  },
+  "Q04": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "Keys and values of position i depend only on tokens 1…i"
+    }
+   ]
+  },
+  "Q05": {
+   "answer": "4.44",
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "cost per token = GPU dollars per hour ÷ tokens produced per hour"
+    }
+   ]
+  },
+  "Q06": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "Prefill is compute-bound, so it gains only if the GPU also does the math in lower precision"
+    }
+   ]
+  },
+  "Q07": {
+   "answer": "141.6",
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "prefill ≈ 71 µs per prompt token (2 × 70B operations ÷ 1,978 trillion/s)"
+    }
+   ]
+  },
+  "Q08": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "so future tokens get exactly zero weight"
+    }
+   ]
+  },
+  "Q09": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "so a base model writes more questions"
+    }
+   ]
+  },
+  "Q10": {
+   "answer": "500",
+   "cites": [
+    {
+     "step": "S11",
+     "quote": "Tick = (weight bytes + B × cache bytes per user) ÷ bandwidth."
+    }
+   ]
+  },
+  "Q11": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "The API's messages list is flattened into one token string with the template"
+    }
+   ]
+  },
+  "Q12": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "yet post-training decides how the model behaves"
+    }
+   ]
+  },
+  "Q13": {
+   "answer": "6.3",
+   "cites": [
+    {
+     "step": "S06",
+     "quote": "Training compute ≈ 6 × parameters × training tokens"
+    }
+   ]
+  },
+  "Q14": {
+   "answer": "295",
+   "cites": [
+    {
+     "step": "S11",
+     "quote": "An H100 does about 295 operations per byte it reads"
+    }
+   ]
+  },
+  "Q15": {
+   "answer": "70",
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "weights 140 → 70 GB"
+    }
+   ]
+  },
+  "Q16": {
+   "answer": [
+    "A",
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "Later hits read it (0.1× input) and prefill only their 50 new tokens"
+    }
+   ]
+  },
+  "Q17": {
+   "answer": "10.3",
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "End-to-end = TTFT + (output tokens − 1) × TPOT"
+    }
+   ]
+  },
+  "Q18": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S09",
+     "quote": "RLHF needs extra models and generation during training; DPO is ordinary supervised training on pairs"
+    }
+   ]
+  },
+  "Q19": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "a chat UI lives on TTFT (does it feel alive?)"
+    }
+   ]
+  },
+  "Q20": {
+   "answer": [
+    "A",
+    "B",
+    "E"
+   ],
+   "cites": [
+    {
+     "step": "S12",
+     "quote": "so per-token cost falls only as the batch grows, and the batch is capped by KV memory"
+    }
+   ]
+  },
+  "Q21": {
+   "answer": "22.5",
+   "cites": [
+    {
+     "step": "S06",
+     "quote": "÷ (16,384 GPUs × ~989 trillion/s × 40% utilization)"
+    }
+   ]
+  },
+  "Q22": {
+   "answer": "4.61",
+   "cites": [
+    {
+     "step": "S04",
+     "quote": "loss = −ln p(correct token)"
+    },
+    {
+     "step": "S04",
+     "visual": true,
+     "quote": "chart labels 0.01 → 4.61"
+    }
+   ]
+  },
+  "Q23": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S08",
+     "quote": "The model learns to answer, not to write questions."
+    }
+   ]
+  },
+  "Q24": {
+   "answer": "999",
+   "cites": [
+    {
+     "step": "S03",
+     "quote": "A text of n tokens gives n − 1 examples."
+    }
+   ]
+  },
+  "Q25": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S04",
+     "quote": "is simply p − 1 for the correct token and p for every other"
+    }
+   ]
+  },
+  "Q26": {
+   "answer": "2.22",
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "Cost per million tokens = (dollars per GPU-hour × GPUs) ÷ (millions of tokens produced per hour)."
+    }
+   ]
+  },
+  "Q27": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S08",
+     "quote": "keep training the base model with the same next-token loss"
+    }
+   ]
+  },
+  "Q28": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S16",
+     "quote": "more GPUs keep quality but add communication overhead and a bigger minimum replica"
+    }
+   ]
+  },
+  "Q29": {
+   "answer": "0.69",
+   "cites": [
+    {
+     "step": "S04",
+     "visual": true,
+     "quote": "chart labels 0.5 → 0.69"
+    }
+   ]
+  },
+  "Q30": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "you only join rows with timestamps ≤ t"
+    }
+   ]
+  },
+  "Q31": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "tools and system prompt first, then documents, then the user's question last"
+    }
+   ]
+  },
+  "Q32": {
+   "answer": [
+    "B",
+    "D",
+    "E"
+   ],
+   "cites": [
+    {
+     "step": "S06",
+     "quote": "One failed GPU stalls the whole synchronized job, so teams checkpoint often."
+    }
+   ]
+  },
+  "Q33": {
+   "answer": [
+    "B",
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "tokens per second while busy (batching, quantization, better kernels)"
+    }
+   ]
+  },
+  "Q34": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S03",
+     "quote": "The text supplies the right answer, so no one has to label"
+    }
+   ]
+  },
+  "Q35": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S12",
+     "quote": "each tick moves 16 GB of weights plus every user's cache just to emit one token per user"
+    }
+   ]
+  },
+  "Q36": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S11",
+     "quote": "Group commit in a database: batching many transactions into one fsync"
+    }
+   ]
+  },
+  "Q37": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S04",
+     "quote": "A confident wrong prediction is punished far more than a cautious one."
+    }
+   ],
+   "dispute": null
+  },
+  "Q38": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S11",
+     "quote": "Batching trades a little of the second for a lot of the first."
+    }
+   ]
+  },
+  "Q39": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "The freed memory goes to KV caches, so the batch grows too: two multiplying wins."
+    }
+   ]
+  },
+  "Q40": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "the model learns to copy, which is useless when generating"
+    }
+   ]
+  },
+  "Q41": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S09",
+     "quote": "how much more the model now favors the chosen answer over the rejected one than the starting model did"
+    }
+   ]
+  }
+ },
+ "flags": [
+  {
+   "step": "S04",
+   "kind": "term-before-taught",
+   "note": "S04 'what it is' calls backprop/gradient etc fine, but 'logits' and 'softmax' are only reminded by reference to Lesson 2 without a one-line recap"
+  },
+  {
+   "step": "S11",
+   "kind": "term-before-taught",
+   "note": "'memory-bound' and 'bandwidth' used in the decode tick formula; the idea is only reminded in S01's collapsed Go deeper"
+  }
+ ],
+ "visuals": {
+  "S01": "diagram of one pass: text tokens 'The river bank' go through 32 blocks, logits→softmax, sample, appended back; KV cache row per token below",
+  "S02": "two multiple-choice prediction prompts (where weights came from; decode tick time) with answer chips, no data",
+  "S03": "row of tokens The/river/bank/flooded with 'flooded' orange as answer to guess, a table of 3 examples prefix→next token, and a slider for text length giving n-1 examples",
+  "S04": "curve of loss=-ln p vs probability with orange dot, bars of the 5 words' probabilities (20% each) and gradient bars (blue up 0.80 for flooded, red down 0.20 for the others)",
+  "S05": "4x4 attention grid with percentages, mask off/on toggle; orange cells just right of the diagonal are the answers being copied (cheating); darker teal = more attention",
+  "S06": "sliders for model size and tokens and GPUs; grid of squares=256 H100s each, bar of 67.7 days vs one year, stat cards 3.79e25 FLOPs and 810 GB, training vs serving table",
+  "S07": "toggle base vs chat model; text box with typed prompt in black and generated continuation in orange, teal for special tokens in the template view",
+  "S08": "token strip with <|user|> prompt tokens weighted ×0 and answer tokens with teal loss bars; toggle answer-only vs every token; average loss 1.06 over 8 of 16 predictions",
+  "S09": "chosen (blue) and rejected (red) answers, diverging bar showing change in log-prob of each from the starting model, loss 0.69 at gap 0, RLHF vs DPO pipeline toggle",
+  "S10": "timeline bar: teal prefill block (283 ms TTFT) then blue decode blocks each 5 ticks, orange end line at 8.70 s; sliders for prompt/output tokens; stat cards",
+  "S11": "two curves with orange dot: total tokens/s rising to 11,991 and TPOT per user rising linearly to 27 ms, pink red zone where KV doesn't fit; sliders per users in batch",
+  "S12": "two-row timeline: short teal prefill 24.3 ms vs long blue decode ticks 2.42 s; cards 16.2 µs vs 4.84 ms, red 299.6× ratio; slider of users decoding together",
+  "S13": "bar of one GPU-hour $3.00 filled teal showing 743,097 tokens; sliders for batch and traffic share; cost $4.04 per 1M tokens",
+  "S14": "grid of 5 requests × 8 prefix blocks: green 'write' solid for request 1, dashed 'read' for later ones, orange 'new' suffix block, TTFT 145 ms→20.9 ms per row; cards 2,250 tokens and $0.0107",
+  "S15": "two GPU memory columns, grey weights 70 GB each with small teal tile for caches under a dashed 92% line; precision toggle 16/8/4-bit; stat cards 140 GB, 21 ms, 10 requests, 460 tokens/s",
+  "S16": "lab controls (model, GPUs, precision, batch, tokens) with memory bar of weights+caches vs 92% cap and result cards TTFT 141.5 ms, TPOT 21.8 ms, 367 tok/s, $4.54 per 1M"
+ }
+}

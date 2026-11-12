@@ -1,0 +1,479 @@
+{
+ "answers": {
+  "Q01": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S11",
+     "quote": "At inference the weights are frozen, which is why one copy in GPU memory can serve many users at once"
+    }
+   ],
+   "dispute": null
+  },
+  "Q02": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S17",
+     "quote": "query = bank's row × W_Q, where W_Q is a learned matrix shared by every token"
+    }
+   ],
+   "dispute": null
+  },
+  "Q03": {
+   "answer": "5",
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "A weighted average mixes several vectors, each multiplied by its share"
+    }
+   ],
+   "dispute": null
+  },
+  "Q04": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S19",
+     "quote": "Each head gets its own softmax, so it can focus sharply on its own target."
+    }
+   ],
+   "dispute": null
+  },
+  "Q05": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S04",
+     "quote": "the letters inside each piece are not part of the input"
+    }
+   ],
+   "dispute": null
+  },
+  "Q06": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S01",
+     "quote": "A 100-token answer means about 100 passes through the machine, one per new token."
+    }
+   ],
+   "dispute": null
+  },
+  "Q07": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S09",
+     "quote": "What the model learns from “the river flooded” carries over to “the stream flooded”."
+    }
+   ],
+   "dispute": null
+  },
+  "Q08": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "A gradient says, for each number, how much the error would change if that number moved a little."
+    }
+   ],
+   "dispute": null
+  },
+  "Q09": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "Training the model later can't fix it, because the tokenizer is frozen first."
+    }
+   ],
+   "dispute": null
+  },
+  "Q10": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "The same token always reads the same row; context is added later, by attention."
+    }
+   ],
+   "dispute": null
+  },
+  "Q11": {
+   "answer": [
+    "A"
+   ],
+   "cites": [],
+   "dispute": null
+  },
+  "Q12": {
+   "answer": "409.6",
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "100,000 rows × 4,096 numbers ≈ 410 million learned numbers, just for this table."
+    }
+   ],
+   "dispute": null
+  },
+  "Q13": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "IDs are labels, not quantities."
+    }
+   ],
+   "dispute": null
+  },
+  "Q14": {
+   "answer": [
+    "A",
+    "C",
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S11",
+     "quote": "Weights are the learned numbers (the embedding table and everything else); they change only during training."
+    },
+    {
+     "step": "S17",
+     "quote": "The matrices are weights (frozen in use); each query, key and value is an activation."
+    },
+    {
+     "step": "S15",
+     "quote": "the model keeps a second learned table with one row per token"
+    }
+   ],
+   "dispute": null
+  },
+  "Q15": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S08",
+     "quote": "bank is used in both water and money sentences, so it ends up between the two clusters."
+    }
+   ],
+   "dispute": null
+  },
+  "Q16": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "reordering the words hands attention the same vectors"
+    }
+   ],
+   "dispute": null
+  },
+  "Q17": {
+   "answer": [
+    "B",
+    "C",
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S04",
+     "quote": "The same cause breaks reversing words, rhyming, and arithmetic on long numbers."
+    }
+   ],
+   "dispute": null
+  },
+  "Q18": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S03",
+     "quote": "Characters make sequences long, and attention cost grows with the square of length."
+    }
+   ],
+   "dispute": null
+  },
+  "Q19": {
+   "answer": "16",
+   "cites": [
+    {
+     "step": "S20",
+     "quote": "double the tokens, ×4 the scores"
+    }
+   ],
+   "dispute": null
+  },
+  "Q20": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "raise e to each score, then divide each by the total"
+    }
+   ],
+   "dispute": null
+  },
+  "Q21": {
+   "answer": "5",
+   "cites": [
+    {
+     "step": "S12",
+     "quote": "multiplies two vectors position by position and adds the results into one number"
+    }
+   ],
+   "dispute": null
+  },
+  "Q22": {
+   "answer": "88.1",
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "raise e to each score, then divide each by the total"
+    }
+   ],
+   "dispute": null
+  },
+  "Q23": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S20",
+     "quote": "Every token scores itself and every earlier token"
+    }
+   ],
+   "dispute": null
+  },
+  "Q24": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S02",
+     "quote": "start from single bytes, then repeatedly merge the most frequent neighbouring pair into a new token"
+    }
+   ],
+   "dispute": null
+  },
+  "Q25": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "Shares must sum to 1 because the next step is an average."
+    }
+   ],
+   "dispute": null
+  },
+  "Q26": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "Languages it saw less of get fewer merged pieces, so the same meaning takes more tokens, down to raw bytes in the worst case."
+    }
+   ],
+   "dispute": null
+  },
+  "Q27": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S03",
+     "quote": "Whole words need millions of entries and fail on any unseen word."
+    }
+   ],
+   "dispute": null
+  },
+  "Q28": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S17",
+     "quote": "Score = query · key, softmax, then blend the values."
+    },
+    {
+     "step": "S17",
+     "quote": "Scores are divided by √(vector size) before softmax so they don't grow too large."
+    }
+   ],
+   "dispute": null
+  },
+  "Q29": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S17",
+     "quote": "Separate learned matrices let each job be tuned on its own."
+    }
+   ],
+   "dispute": null
+  },
+  "Q30": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S20",
+     "quote": "A self-join done as a nested loop: every row compared with itself and every earlier row."
+    }
+   ],
+   "dispute": null
+  },
+  "Q31": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "A number multiplied by 0 has no influence, so it never moves."
+    }
+   ],
+   "dispute": null
+  },
+  "Q32": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "a second table with one row per slot (a hard length limit)"
+    }
+   ],
+   "dispute": null
+  },
+  "Q33": {
+   "answer": "8002000",
+   "cites": [
+    {
+     "step": "S20",
+     "quote": "n(n+1)/2 scores for n tokens, about n²/2"
+    }
+   ],
+   "dispute": null
+  },
+  "Q34": {
+   "answer": "128",
+   "cites": [
+    {
+     "step": "S19",
+     "quote": "Heads split the width rather than adding to it: 32 heads × 128 numbers = 4,096."
+    }
+   ],
+   "dispute": null
+  },
+  "Q35": {
+   "answer": [
+    "A",
+    "C",
+    "E"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "More tokens means higher cost (billed per token), slower generation (one token per step), less room in the context window"
+    }
+   ],
+   "dispute": null
+  },
+  "Q36": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S08",
+     "quote": "push river and stream in the same directions, so their rows drift together over billions of examples"
+    }
+   ],
+   "dispute": null
+  }
+ },
+ "flags": [
+  {
+   "step": "S13",
+   "kind": "term-before-taught",
+   "note": "'e' (Euler's number) used as the base of the exponent with no explanation beyond the ≈2.718 in Go deeper; fine for engineers but unexplained why e."
+  },
+  {
+   "step": "S17",
+   "kind": "term-before-taught",
+   "note": "'matrix' and 'W_Q × row' multiplication used without any step teaching matrix-vector multiplication; also 'residual connection' mentioned in passing."
+  },
+  {
+   "step": "S20",
+   "kind": "unclear-visual",
+   "note": "Triangle grid axes labelled 'tokens it scores' / 'token doing the looking' with no per-cell label; the 'later token, not seen' grey is explained only in legend, and Q23-style self-attention (diagonal) is not marked distinctly."
+  },
+  {
+   "step": "S01",
+   "kind": "term-before-taught",
+   "note": "'MLP', 'layer', 'scores' used in the diagram before any step teaches them; MLP deferred to Lesson 2."
+  }
+ ],
+ "visuals": {
+  "S01": "Pipeline diagram text→Tokenizer→Embedding→Attention→MLP→Scores→next token, with a dashed ×N layers box around attention+MLP and an orange chip 'The river bank' showing what travels; brackets mark Lesson 1 vs Lesson 2 boxes.",
+  "S02": "Row of token chips for 'The river bank flooded' (The, river, bank, flood, ed), each with its small token ID underneath.",
+  "S03": "Tabs Characters/Subwords/Words over 'The river bank flooooded' split into 8 subword chips, with counters showing 8 tokens and ~100k vocabulary.",
+  "S04": "Toggle between 'Pieces' (str, aw, berry chips with letters visible) and 'What the model sees' (opaque IDs); shown in the Pieces view.",
+  "S05": "English 'The river flooded' as 4 chips versus Hindi as 36 raw-byte chips like <E0>, with orange bars 4 vs 36 and a '9× more tokens' label.",
+  "S06": "Two-axis plot (money-ness right, water-ness up) with an orange arrow v at [2,1] controlled by two sliders.",
+  "S07": "Clickable token chips and an embedding table of ID/token/dim rows (bank row highlighted: 0.50, 0.50, 0.21, -0.35) plus colored dots for bank's numbers (blue positive, red negative, brightness = size).",
+  "S08": "2D scatter of dots cash, bank, river, deposit, loan, lake, stream at 0% training progress; slider moves them so clusters form (teal money, blue water, black bank); only distance matters.",
+  "S09": "2D scatter after training: teal money words, blue lake, orange river and stream joined by a dashed line (distance 1.7), black bank between the clusters.",
+  "S10": "Toggle without/with position and river bank/bank river; plot shows blue bank arrow [0.5,0.5] and orange sum arrow identical in both orders; teal slot vector would be added with position on.",
+  "S11": "Flow boxes: embedding table (weights, frozen) → copy → working vector (activation, temporary) → discarded; counter shows requests 0 and rows written to table 0.",
+  "S12": "Tabs for B's key (the, river, bank, cash) and sliders; plot shows orange A=[1,1] and blue river arrow [0,3] with dot product 3, angle 45°, cosine 0.71.",
+  "S13": "Three sliders for scores the 0, river 3, bank 2 and orange bars showing softmax shares 3.5%, 70.5%, 25.9%, with e^score values 1.0, 20.1, 7.4.",
+  "S14": "Slider for river's share and plot with blue river and bank arrows and an orange blend dot at [0.26, 2.38] near river, water-ness up.",
+  "S15": "Table of bank's row numbers 0.200, -0.500 times flooded's output row 1, 3 with last-nudge column, bars for score -1.30, target 2.00 (teal), error 3.30, Train step button.",
+  "S16": "Number line from money to water with an orange bank dot halfway, toggles attention off/on and two sentences; off state shows bank halfway.",
+  "S17": "Step-through attention: orange query q arrow [1,1] on money/water plot, table of keys The [0,0], river [0,3], bank [1,1] with empty score and softmax columns, faded value circles summing to new bank, and a money–water slider.",
+  "S18": "Arc diagram over 'The river bank flooded after the storm' with later words greyed; bank's shares The 0.05, river 0.70, self 0.25 with arc thickness showing share.",
+  "S19": "One head vs Two heads toggle; value dot columns for river, the, bank blended into an output of 0.50 x4 with curves whose width equals share; slider sets river share 45%.",
+  "S20": "Lower-triangular 8x8 grid (teal = scored, grey = later token not seen) with slider; counters 36 scores for 8 tokens and 136 for 16 tokens."
+ }
+}

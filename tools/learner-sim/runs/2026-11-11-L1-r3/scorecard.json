@@ -1,0 +1,767 @@
+{
+  "lesson": 1,
+  "runs": 3,
+  "questions": 36,
+  "metrics": {
+    "grounded": 0.9722222222222222,
+    "groundedPerRun": 0.9722222222222222,
+    "agreement": 1,
+    "openDisputes": 0,
+    "optionsOnly": 0.9310344827586207,
+    "keyLongest": 0.2692307692307692,
+    "confirmedFlags": 2,
+    "coverage": 1,
+    "stepCoverage": 0.9,
+    "viewed": 1,
+    "visualOnlyCites": 0
+  },
+  "pass": {
+    "grounded": false,
+    "agreement": true,
+    "openDisputes": true,
+    "keyLongest": true,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": false,
+  "notGrounded": [
+    {
+      "id": "L1-machine-02",
+      "grounded": 0,
+      "correct": 3
+    }
+  ],
+  "ambiguous": [],
+  "disputes": [],
+  "weakDistractors": [
+    {
+      "id": "L1-machine-01",
+      "right": 3
+    },
+    {
+      "id": "L1-machine-02",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-01",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-02",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-03",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-05",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-06",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-07",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-08",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-01",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-03",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-04",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-05",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-06",
+      "right": 3
+    },
+    {
+      "id": "L1-position-01",
+      "right": 3
+    },
+    {
+      "id": "L1-position-02",
+      "right": 3
+    },
+    {
+      "id": "L1-weights-02",
+      "right": 3
+    },
+    {
+      "id": "L1-basics-03",
+      "right": 2
+    },
+    {
+      "id": "L1-basics-04",
+      "right": 3
+    },
+    {
+      "id": "L1-gradient-01",
+      "right": 3
+    },
+    {
+      "id": "L1-gradient-02",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-01",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-02",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-03",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-04",
+      "right": 2
+    },
+    {
+      "id": "L1-heads-02",
+      "right": 3
+    },
+    {
+      "id": "L1-cost-03",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L1-tokens-02",
+    "L1-embeddings-03",
+    "L1-gradient-01",
+    "L1-gradient-02",
+    "L1-attention-02",
+    "L1-attention-03",
+    "L1-heads-02"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [
+    "S06",
+    "S16"
+  ],
+  "flags": [
+    {
+      "step": "S01",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "Q10 (hallucination) and Q07 (four-space tokens) are not directly taught anywhere; the lesson only poses them in the S22 self-check.",
+        "'MLP', 'layer', 'scores' used in the diagram before any step teaches them; MLP deferred to Lesson 2."
+      ]
+    },
+    {
+      "step": "S05",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Hindi tokens shown as <E0> <A4> etc. (raw bytes, hex) never explained; reader can't tell what they mean"
+      ]
+    },
+    {
+      "step": "S09",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'distance 1.7' has no scale or comparison, so close vs far is unclear; the 2D map has no axes"
+      ]
+    },
+    {
+      "step": "S12",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Uses query and key before they are defined (S17); the step says 'made in 1.4' but the reader has no idea what they are yet."
+      ]
+    },
+    {
+      "step": "S13",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'e' (Euler's number) used as the base of the exponent with no explanation beyond the ≈2.718 in Go deeper; fine for engineers but unexplained why e."
+      ]
+    },
+    {
+      "step": "S15",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'output row' / second learned table and 'layers' are used before Lesson 2 teaches them (only briefly explained in place)"
+      ]
+    },
+    {
+      "step": "S17",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "'residual connection' mentioned without explanation (deferred to next lesson)",
+        "'matrix' and 'W_Q × row' multiplication used without any step teaching matrix-vector multiplication; also 'residual connection' mentioned in passing."
+      ]
+    },
+    {
+      "step": "S18",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Go deeper mentions 'many heads and layers' before heads are taught in S19; minor."
+      ]
+    },
+    {
+      "step": "S20",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Triangle grid axes labelled 'tokens it scores' / 'token doing the looking' with no per-cell label; the 'later token, not seen' grey is explained only in legend, and Q23-style self-attention (diagonal) is not marked distinctly."
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L1-machine-01",
+      "concept": "machine",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S01"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-machine-02",
+      "concept": "machine",
+      "kind": "single",
+      "grounded": 0,
+      "correct": 3,
+      "agree": true,
+      "steps": [],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-01",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-02",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-03",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-04",
+      "concept": "tokens",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L1-tokens-05",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-06",
+      "concept": "tokens",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-07",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-08",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S02"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-01",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-02",
+      "concept": "embeddings",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-embeddings-03",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-04",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-05",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-06",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-position-01",
+      "concept": "position",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-position-02",
+      "concept": "position",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-weights-01",
+      "concept": "weights",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11",
+        "S15",
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L1-weights-02",
+      "concept": "weights",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-basics-01",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-basics-02",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-basics-03",
+      "concept": "basics",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L1-basics-04",
+      "concept": "basics",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-basics-05",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-gradient-01",
+      "concept": "gradient",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-gradient-02",
+      "concept": "gradient",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-01",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-02",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-03",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-04",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S18",
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L1-heads-01",
+      "concept": "heads",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S19"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-heads-02",
+      "concept": "heads",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S19"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-cost-01",
+      "concept": "cost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-cost-02",
+      "concept": "cost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-cost-03",
+      "concept": "cost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": "2026-11-11-L1-r2",
+  "diff": {
+    "metrics": {
+      "grounded": {
+        "before": 1,
+        "after": 0.9722222222222222
+      },
+      "groundedPerRun": {
+        "before": 0.9907407407407407,
+        "after": 0.9722222222222222
+      },
+      "agreement": {
+        "before": 1,
+        "after": 1
+      },
+      "openDisputes": {
+        "before": 1,
+        "after": 0
+      },
+      "optionsOnly": {
+        "before": 0.9310344827586207,
+        "after": 0.9310344827586207
+      },
+      "keyLongest": {
+        "before": 0.2692307692307692,
+        "after": 0.2692307692307692
+      },
+      "confirmedFlags": {
+        "before": 2,
+        "after": 2
+      },
+      "coverage": {
+        "before": 1,
+        "after": 1
+      },
+      "stepCoverage": {
+        "before": 0.9,
+        "after": 0.9
+      },
+      "viewed": {
+        "before": 1,
+        "after": 1
+      },
+      "visualOnlyCites": {
+        "before": 0,
+        "after": 0
+      }
+    },
+    "nowGrounded": [],
+    "lostGrounding": []
+  }
+}

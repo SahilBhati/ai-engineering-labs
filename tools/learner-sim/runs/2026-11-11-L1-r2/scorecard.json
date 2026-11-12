@@ -1,0 +1,763 @@
+{
+  "lesson": 1,
+  "runs": 3,
+  "questions": 36,
+  "metrics": {
+    "grounded": 1,
+    "groundedPerRun": 0.9907407407407407,
+    "agreement": 1,
+    "openDisputes": 1,
+    "optionsOnly": 0.9310344827586207,
+    "keyLongest": 0.2692307692307692,
+    "confirmedFlags": 2,
+    "coverage": 1,
+    "stepCoverage": 0.9,
+    "viewed": 1,
+    "visualOnlyCites": 0
+  },
+  "pass": {
+    "grounded": true,
+    "agreement": true,
+    "openDisputes": false,
+    "keyLongest": true,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": false,
+  "notGrounded": [
+    {
+      "id": "L1-machine-02",
+      "grounded": 2,
+      "correct": 3
+    }
+  ],
+  "ambiguous": [],
+  "disputes": [
+    {
+      "id": "L1-tokens-06",
+      "reasons": [
+        "Option D mentions 'prefill', which the lesson never teaches."
+      ]
+    }
+  ],
+  "weakDistractors": [
+    {
+      "id": "L1-machine-01",
+      "right": 3
+    },
+    {
+      "id": "L1-machine-02",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-01",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-02",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-03",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-04",
+      "right": 2
+    },
+    {
+      "id": "L1-tokens-05",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-06",
+      "right": 2
+    },
+    {
+      "id": "L1-tokens-07",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-08",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-01",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-03",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-04",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-05",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-06",
+      "right": 3
+    },
+    {
+      "id": "L1-position-01",
+      "right": 3
+    },
+    {
+      "id": "L1-position-02",
+      "right": 3
+    },
+    {
+      "id": "L1-weights-02",
+      "right": 3
+    },
+    {
+      "id": "L1-basics-03",
+      "right": 3
+    },
+    {
+      "id": "L1-basics-04",
+      "right": 3
+    },
+    {
+      "id": "L1-gradient-01",
+      "right": 3
+    },
+    {
+      "id": "L1-gradient-02",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-01",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-02",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-03",
+      "right": 3
+    },
+    {
+      "id": "L1-heads-02",
+      "right": 3
+    },
+    {
+      "id": "L1-cost-03",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L1-tokens-02",
+    "L1-embeddings-03",
+    "L1-gradient-01",
+    "L1-gradient-02",
+    "L1-attention-02",
+    "L1-attention-03",
+    "L1-heads-02"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [
+    "S06",
+    "S16"
+  ],
+  "flags": [
+    {
+      "step": "S09",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'distance 1.7' has no scale or reference, so a newcomer can't tell what counts as close"
+      ]
+    },
+    {
+      "step": "S10",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Uses 'attention' mechanism details (compares contents) before attention is taught in 1.4; only S01 gist."
+      ]
+    },
+    {
+      "step": "S12",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Caption 'the scores come out the 0, river 3, bank 2' is garbled; 'the' reads as an article, confusing"
+      ]
+    },
+    {
+      "step": "S15",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Nudge table and timeline show +0.000 and 'press Train step' placeholders before interaction; static view doesn't show cause and effect."
+      ]
+    },
+    {
+      "step": "S17",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "'residual connection' and 'loss'-style training vocabulary appear without explanation (deferred to next lesson)",
+        "'residual connection' used with only 'next lesson' as explanation"
+      ]
+    },
+    {
+      "step": "S18",
+      "kind": "inconsistent-highlight",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Attention shares for bank shown as 0.05/0.70/0.25 while the same sentence's softmax in S13/S14 gave 3.5%/70.5%/25.9%; unexplained mismatch."
+      ]
+    },
+    {
+      "step": "S18",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "'only looks backward' is stated as a rule with the reason deferred to 3.1; Q31 depends on it",
+        "'heads and layers' mentioned in Go deeper before heads are taught in S19; 'layers' only loosely introduced"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L1-machine-01",
+      "concept": "machine",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S01"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-machine-02",
+      "concept": "machine",
+      "kind": "single",
+      "grounded": 2,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S01"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-01",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-02",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-03",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-04",
+      "concept": "tokens",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L1-tokens-05",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-06",
+      "concept": "tokens",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [
+        "Option D mentions 'prefill', which the lesson never teaches."
+      ],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L1-tokens-07",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-08",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S02"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-01",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-02",
+      "concept": "embeddings",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-embeddings-03",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-04",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-05",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-06",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-position-01",
+      "concept": "position",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-position-02",
+      "concept": "position",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-weights-01",
+      "concept": "weights",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11",
+        "S15",
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L1-weights-02",
+      "concept": "weights",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-basics-01",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-basics-02",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-basics-03",
+      "concept": "basics",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-basics-04",
+      "concept": "basics",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-basics-05",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-gradient-01",
+      "concept": "gradient",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-gradient-02",
+      "concept": "gradient",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-01",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-02",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-03",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-04",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S18"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L1-heads-01",
+      "concept": "heads",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S19"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-heads-02",
+      "concept": "heads",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S19"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-cost-01",
+      "concept": "cost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-cost-02",
+      "concept": "cost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-cost-03",
+      "concept": "cost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": "2026-11-11-L1",
+  "diff": {
+    "metrics": {
+      "grounded": {
+        "before": 1,
+        "after": 1
+      },
+      "groundedPerRun": {
+        "before": 0.9907407407407407,
+        "after": 0.9907407407407407
+      },
+      "agreement": {
+        "before": 1,
+        "after": 1
+      },
+      "openDisputes": {
+        "before": 0,
+        "after": 1
+      },
+      "optionsOnly": {
+        "before": 1,
+        "after": 0.9310344827586207
+      },
+      "keyLongest": {
+        "before": 0.2692307692307692,
+        "after": 0.2692307692307692
+      },
+      "confirmedFlags": {
+        "before": 4,
+        "after": 2
+      },
+      "coverage": {
+        "before": 1,
+        "after": 1
+      },
+      "stepCoverage": {
+        "before": 0.9,
+        "after": 0.9
+      },
+      "viewed": {
+        "before": 1,
+        "after": 1
+      },
+      "visualOnlyCites": {
+        "before": 0,
+        "after": 0
+      }
+    },
+    "nowGrounded": [
+      "L1-tokens-07"
+    ],
+    "lostGrounding": [
+      "L1-machine-02"
+    ]
+  }
+}
