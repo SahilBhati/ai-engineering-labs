@@ -328,7 +328,7 @@ add("M","The whole machine, then zoom in",
   v.append(pic, el("div",{class:"row"}), el("p",{class:"lbl"},"Press Run to send “The river bank” through. The orange chip shows what travels between boxes."));
   v.children[1].append(btn); draw(0);
  },
- "The output is a score for every token in the vocabulary, not a sentence. To write a sentence, the model picks one likely token, appends it to the input, and runs the whole machine again: one full pass per new token. Attention and MLP alternate, and that pair repeats N times (32 layers in Llama 3 8B). Backend version: a stateless function called in a loop, each response appended to the next request.");
+ "The output is a score for every token in the vocabulary, not a sentence. To write a sentence, the model picks one likely token, appends it to the input, and runs the whole machine again: one full pass per new token. Attention and MLP alternate, and that pair repeats N times (32 layers in Llama 3 8B). Because it's a function, not a lookup table, it returns scores for any input, even a question no training text answered. There is no stored fact to find or miss, and nothing checks that one exists, so it can state something false as fluently as something true (hallucination). Backend version: a stateless function called in a loop, each response appended to the next request.");
 
 /* ---------- 1.1 Tokenization ---------- */
 add("1.1","Models read numbers, not text",
@@ -395,7 +395,7 @@ add("1.1","Other languages pay more",
    '<div class="bar"><span>Hindi</span><div class="t"><div class="f" style="width:' + (b.length/max*100) + '%"></div></div><span class="n">' + b.length + '</span></div></div>' +
    '<p class="mono"><b style="color:var(--hot)">' + Math.round(b.length/a.length) + '× more tokens</b> for the same meaning (toy, worst case)</p>';
  },
- "More tokens for the same meaning means higher cost (billed per token), slower output (one token per step), less fits in the context window, and usually worse quality. Training the model afterwards can't fix it, because the tokenizer was built and frozen first. Real tokenizers have some Hindi pieces, so the gap is smaller than this toy's, but it's real. Backend version: a compression dictionary trained on English logs, used on other data.");
+ "More tokens for the same meaning means higher cost (billed per token), slower output (one token per step), less fits in the context window, and usually worse quality. Training the model afterwards can't fix it, because the tokenizer was built and frozen first. Real tokenizers have some Hindi pieces, so the gap is smaller than this toy's, but it's real. The same goes for anything the tokenizer has no piece for, not just languages: if it has no single piece for four spaces, every indent in Python code becomes several tokens, so the same code costs more and fills the context window sooner. Code-aware tokenizers add whitespace pieces for this reason. Backend version: a compression dictionary trained on English logs, used on other data.");
 
 /* ---------- 1.2 Embeddings ---------- */
 const TABLE = [
