@@ -17,7 +17,7 @@ from __future__ import annotations
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from hark.events import (
     Answered,
@@ -53,22 +53,26 @@ class TurnRunner:
     brain: Brain
     tts: TextToSpeech
     bus: EventBus
+    listen_timeout: float | None = 8.0  # after the wake: no speech by then ends the turn
+    current_turn: str | None = field(default=None, init=False)  # the gate tags tool calls with it
 
     async def run_once(self) -> str:
         """Wait for the wake phrase, run one turn, return its turn id."""
         wake = await self.wake.wait()
         turn_id = uuid.uuid4().hex
+        self.current_turn = turn_id
         await self.bus.publish(TurnStarted(turn_id=turn_id, wake_phrase=wake.phrase))
         outcome = "error"
         try:
             outcome = await self._run(turn_id)
         finally:
+            self.current_turn = None
             await self.bus.publish(TurnEnded(turn_id=turn_id, outcome=outcome))
         return turn_id
 
     async def _run(self, turn_id: str) -> str:
         async with self._stage(turn_id, "listen"):
-            transcript = await self.stt.listen()
+            transcript = await self.stt.listen(timeout=self.listen_timeout)
         if transcript is None:
             return "no_speech"
         await self.bus.publish(

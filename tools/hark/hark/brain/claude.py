@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 import re
 import time
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
 from hark.brain.process import ClaudeProcess, ProcessDied
@@ -79,6 +79,7 @@ class ClaudeBrain:
         *,
         model: str | None = None,
         cwd: Path | None = None,
+        env: Mapping[str, str] | None = None,
         command: Sequence[str] = ("claude",),
         spoken_cap: int = 240,
         turn_timeout: float = 120.0,
@@ -102,6 +103,7 @@ class ClaudeBrain:
         if model:
             self._argv += ["--model", model]
         self._cwd = cwd if cwd is not None else Path.home()
+        self._env = dict(env) if env else None  # added to the inherited environment
         self._spoken_cap = spoken_cap
         self._turn_timeout = turn_timeout
         self._max_turns = max_turns
@@ -165,7 +167,7 @@ class ClaudeBrain:
     async def _start(self) -> ClaudeProcess:
         failures = 0
         while True:
-            proc = ClaudeProcess(self._argv, cwd=self._cwd)
+            proc = ClaudeProcess(self._argv, cwd=self._cwd, env=self._env)
             try:
                 await proc.start()
                 return proc

@@ -1,0 +1,438 @@
+{
+ "answers": {
+  "Q01": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S11",
+     "quote": "Earlier tokens never change (a token only looks backward)"
+    }
+   ],
+   "dispute": null
+  },
+  "Q02": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "Layer 1 asks thousands of yes/no-style questions about the word"
+    }
+   ],
+   "dispute": null
+  },
+  "Q03": {
+   "answer": "88",
+   "cites": [
+    {
+     "step": "S09",
+     "quote": "p = softmax(logits / T)"
+    }
+   ],
+   "dispute": null
+  },
+  "Q04": {
+   "answer": "52.6",
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "rescale them to 100%, draw one"
+    }
+   ],
+   "dispute": null
+  },
+  "Q05": {
+   "answer": "410",
+   "cites": [
+    {
+     "step": "S08",
+     "quote": "100k × 4,096 ≈ 410 million multiply-adds per generated token"
+    }
+   ],
+   "dispute": null
+  },
+  "Q06": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S06",
+     "quote": "every handler reads the request context and attaches fields"
+    }
+   ],
+   "dispute": null
+  },
+  "Q07": {
+   "answer": [
+    "B",
+    "C",
+    "E"
+   ],
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "an 8-bit cache (halves it; try the 8-bit switch)"
+    },
+    {
+     "step": "S15",
+     "quote": "So in practice teams shrink the weights"
+    },
+    {
+     "step": "S15",
+     "quote": "lets several query heads share one KV head"
+    }
+   ],
+   "dispute": null
+  },
+  "Q08": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S09",
+     "quote": "Dividing by a small number stretches the gaps"
+    }
+   ],
+   "dispute": null
+  },
+  "Q09": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "W_up holds the questions (one row per neuron)"
+    }
+   ],
+   "dispute": null
+  },
+  "Q10": {
+   "answer": "7",
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "7 if every byte of the 20.0 GB"
+    }
+   ],
+   "dispute": null
+  },
+  "Q11": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "Memoization keyed by position"
+    }
+   ],
+   "dispute": null
+  },
+  "Q12": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "it sets TTFT (time to first token)"
+    }
+   ],
+   "dispute": null
+  },
+  "Q13": {
+   "answer": [
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "requests join and leave the batch at every step"
+    }
+   ],
+   "dispute": null
+  },
+  "Q14": {
+   "answer": "8",
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "lets several query heads share one KV head"
+    }
+   ],
+   "dispute": null
+  },
+  "Q15": {
+   "answer": "2.68",
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "about 2.7 GB per request"
+    }
+   ],
+   "dispute": "Lesson's 328 KB/token is 327,680 bytes ×8192 = 2.68 GB; rounding to 2.7 is the only ambiguity."
+  },
+  "Q16": {
+   "answer": "2.2",
+   "cites": [
+    {
+     "step": "S12",
+     "quote": "At 2,000 output tokens after a 100-token prompt that's about 2.2 million"
+    }
+   ],
+   "dispute": null
+  },
+  "Q17": {
+   "answer": "328",
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "8 KV heads × 128 × 2 bytes = 328 KB per token"
+    }
+   ],
+   "dispute": null
+  },
+  "Q18": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "Depth is what lets the model chain steps"
+    }
+   ],
+   "dispute": null
+  },
+  "Q19": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "Each decode step computes q, k, v for the new token only"
+    }
+   ],
+   "dispute": null
+  },
+  "Q20": {
+   "answer": [
+    "A",
+    "B"
+   ],
+   "cites": [
+    {
+     "step": "S06",
+     "quote": "instead of replacing it"
+    },
+    {
+     "step": "S06",
+     "quote": "It also lets training nudges flow straight back to early layers"
+    }
+   ],
+   "dispute": null
+  },
+  "Q21": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S13",
+     "quote": "stores every earlier token's key and value vectors"
+    }
+   ],
+   "dispute": null
+  },
+  "Q22": {
+   "answer": [
+    "A",
+    "B",
+    "E"
+   ],
+   "cites": [
+    {
+     "step": "S16",
+     "quote": "KV memory grows in line with tokens"
+    }
+   ],
+   "dispute": null
+  },
+  "Q23": {
+   "answer": "6.44",
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "12 × 4,096² × 32 blocks ≈ 6.4B parameters"
+    }
+   ],
+   "dispute": null
+  },
+  "Q24": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S14",
+     "quote": "Decode does little math per byte it reads"
+    }
+   ],
+   "dispute": null
+  },
+  "Q25": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S15",
+     "quote": "sharing the cache for identical prompt prefixes (prefix caching)"
+    }
+   ],
+   "dispute": null
+  },
+  "Q26": {
+   "answer": "1",
+   "cites": [
+    {
+     "step": "S04",
+     "quote": "score = 1×1 + 1×1 − 1 (bias) = 1"
+    }
+   ],
+   "dispute": null
+  },
+  "Q27": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S08",
+     "quote": "made by comparing bank's final vector with each word's row"
+    }
+   ],
+   "dispute": null
+  },
+  "Q28": {
+   "answer": [
+    "C"
+   ],
+   "cites": [
+    {
+     "step": "S06",
+     "quote": "is the word's vector as it travels through the model"
+    }
+   ],
+   "dispute": null
+  },
+  "Q29": {
+   "answer": "12.9",
+   "cites": [
+    {
+     "step": "S07",
+     "quote": "≈ 12.9 GB at 16-bit"
+    }
+   ],
+   "dispute": null
+  },
+  "Q30": {
+   "answer": "0",
+   "cites": [
+    {
+     "step": "S04",
+     "quote": "one fact alone scores 0, so the neuron stays silent"
+    }
+   ],
+   "dispute": null
+  },
+  "Q31": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "nucleus sampling keeps variety while cutting the unreliable tail"
+    }
+   ],
+   "dispute": null
+  },
+  "Q32": {
+   "answer": [
+    "A"
+   ],
+   "cites": [
+    {
+     "step": "S09",
+     "quote": "As T → 0 you get greedy decoding"
+    }
+   ],
+   "dispute": null
+  },
+  "Q33": {
+   "answer": "3",
+   "cites": [
+    {
+     "step": "S10",
+     "quote": "keep the smallest set reaching p"
+    }
+   ],
+   "dispute": null
+  },
+  "Q34": {
+   "answer": [
+    "D"
+   ],
+   "cites": [
+    {
+     "step": "S05",
+     "quote": "about 116 billion of its 175 billion parameters"
+    }
+   ],
+   "dispute": null
+  }
+ },
+ "flags": [
+  {
+   "step": "S14",
+   "kind": "term-before-taught",
+   "note": "uses compute-bound / memory-bandwidth-bound, H100, FasterTransformer before explaining them (only glossed by analogy)"
+  },
+  {
+   "step": "S07",
+   "kind": "term-before-taught",
+   "note": "'final scoring step' and 'logit lens' invoked before logits are taught in next chapter (forward reference)"
+  },
+  {
+   "step": "S15",
+   "kind": "unclear-visual",
+   "note": "red tiles 'queued' vs teal tiles meaning only explained in small text; two GPU bars show few teal slivers hard to count"
+  }
+ ],
+ "visuals": {
+  "S01": "recap card with tabs Token/Row/Q,K,V/Attention; Token tab shows bank = token ID 33535",
+  "S02": "recap card with five clickable guess words (flooded, collapsed, is, account, closed) for the next-word question",
+  "S03": "three word boxes The/river/bank with arcs from earlier words into bank (orange = attention flow); toggle to MLP mode",
+  "S04": "two yes/no toggles feed one neuron node via blue lines; formula shows score 1×1+1×1−1=1 so it fires",
+  "S05": "three-column diagram: facts about bank -> neurons (brightness = firing strength) -> notes written back; blue lines positive weights; chips show bank's vector + notes",
+  "S06": "horizontal residual stream line with b1/b2 attn and MLP adders; 8-cell vector strip, blue positive, red negative, cell 2 highlighted",
+  "S07": "slider over 32 blocks with attn/MLP boxes grouped early/middle/late; bars show next-word probabilities after the chosen block",
+  "S08": "table of tokens with unembedding rows, dot-product logits, and softmax probability bars (flooded 78%)",
+  "S09": "temperature slider with probability bars for five tokens and the divided logits line",
+  "S10": "temperature and top-p sliders; bars after top-p with cut tokens marked ✕; Sample 50 button",
+  "S11": "token chips and a pass-by-token grid; teal = computed first time, red = recomputed; KV cache off/on toggle; counters of positions",
+  "S12": "triangle area chart of passes vs positions: red = recomputed, teal = new work; counters 2.2M vs 2,100 positions",
+  "S13": "grid of K and V boxes per token for three layers; teal = new key/value, orange = query; size bar of 983 KB",
+  "S14": "timeline of prefill block then blue decode ticks; weights box, user squares, GPU math vs memory bandwidth bars, metrics 0.28 s, 21.1 ms, 47 tok/s",
+  "S15": "64 query-head dots grouped to 8 KV slots; two GPU memory bars with weights grey, teal request tiles up to dashed 92% line, red tiles = queued requests",
+  "S16": "context slider; memory bar weights grey + teal cache + red overflow vs 160 GB; trained-length bar with untrained positions in pink"
+ }
+}

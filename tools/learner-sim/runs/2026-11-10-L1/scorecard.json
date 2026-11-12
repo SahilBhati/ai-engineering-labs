@@ -1,0 +1,752 @@
+{
+  "lesson": 1,
+  "runs": 3,
+  "questions": 36,
+  "metrics": {
+    "grounded": 0.9629629629629629,
+    "agreement": 1,
+    "openDisputes": 1,
+    "optionsOnly": 0.9310344827586207,
+    "keyLongest": 0.9615384615384616,
+    "confirmedFlags": 1,
+    "coverage": 1,
+    "stepCoverage": 0.9,
+    "viewed": 1,
+    "visualOnlyCites": 0
+  },
+  "pass": {
+    "grounded": false,
+    "agreement": true,
+    "openDisputes": false,
+    "keyLongest": false,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": false,
+  "notGrounded": [
+    {
+      "id": "L1-machine-02",
+      "grounded": 1,
+      "correct": 3
+    },
+    {
+      "id": "L1-tokens-07",
+      "grounded": 1,
+      "correct": 3
+    }
+  ],
+  "ambiguous": [],
+  "disputes": [
+    {
+      "id": "L1-basics-03",
+      "reasons": [
+        "The lesson never states that softmax depends only on score gaps; it must be computed from the formula, and the 'stretches the gaps' wording could mislead."
+      ]
+    }
+  ],
+  "weakDistractors": [
+    {
+      "id": "L1-machine-01",
+      "right": 3
+    },
+    {
+      "id": "L1-machine-02",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-01",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-02",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-03",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-04",
+      "right": 2
+    },
+    {
+      "id": "L1-tokens-05",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-06",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-07",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-08",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-01",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-03",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-04",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-05",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-06",
+      "right": 3
+    },
+    {
+      "id": "L1-position-01",
+      "right": 3
+    },
+    {
+      "id": "L1-position-02",
+      "right": 3
+    },
+    {
+      "id": "L1-weights-02",
+      "right": 3
+    },
+    {
+      "id": "L1-basics-03",
+      "right": 2
+    },
+    {
+      "id": "L1-basics-04",
+      "right": 3
+    },
+    {
+      "id": "L1-gradient-01",
+      "right": 3
+    },
+    {
+      "id": "L1-gradient-02",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-01",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-02",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-03",
+      "right": 3
+    },
+    {
+      "id": "L1-heads-02",
+      "right": 3
+    },
+    {
+      "id": "L1-cost-03",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L1-machine-01",
+    "L1-machine-02",
+    "L1-tokens-01",
+    "L1-tokens-02",
+    "L1-tokens-03",
+    "L1-tokens-05",
+    "L1-tokens-07",
+    "L1-tokens-08",
+    "L1-embeddings-01",
+    "L1-embeddings-03",
+    "L1-embeddings-04",
+    "L1-embeddings-05",
+    "L1-embeddings-06",
+    "L1-position-01",
+    "L1-position-02",
+    "L1-weights-02",
+    "L1-basics-04",
+    "L1-gradient-01",
+    "L1-gradient-02",
+    "L1-attention-01",
+    "L1-attention-02",
+    "L1-attention-03",
+    "L1-attention-04",
+    "L1-heads-02",
+    "L1-cost-03"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [
+    "S06",
+    "S16"
+  ],
+  "flags": [
+    {
+      "step": "S01",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'MLP' and 'scores' are named but only defined as a one-liner; 'pass' and 'layers' used before explained (deferred to Lesson 2)"
+      ]
+    },
+    {
+      "step": "S08",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Scatter plot has no axes, so the meaning of position is unstated. The 'deposit' label is clipped at the panel edge. Slider is at 0%, so the plot starts in a random state."
+      ]
+    },
+    {
+      "step": "S09",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "lists 'softmax' among smooth functions before S13 teaches it"
+      ]
+    },
+    {
+      "step": "S12",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Uses 'query' and 'key' (A = bank's query, B = key) before S17 teaches them; says 'made in 1.4'"
+      ]
+    },
+    {
+      "step": "S12",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "A is bank's query but key tabs include 'bank's key'; 'the 0, river 3, bank 2' reads ambiguously as a sentence"
+      ]
+    },
+    {
+      "step": "S15",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'output row' (second learned table) and 'loss/error' used; output table deferred to Lesson 2"
+      ]
+    },
+    {
+      "step": "S17",
+      "kind": "term-before-taught",
+      "runs": 3,
+      "confirmed": true,
+      "notes": [
+        "'residual connection' mentioned without explanation (marked next lesson)",
+        "'residual connection' mentioned with only 'next lesson' pointer",
+        "'residual connection' appears with only a 'next lesson' pointer; also 'W_Q 2×2 matrix multiply' is used without any matrix-multiply explanation."
+      ]
+    },
+    {
+      "step": "S17",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Initial state shows empty score/softmax columns and a faded 'new bank' of [0,0] until Next phase is pressed; the static screenshot doesn't show what the teal value pieces or the final result mean"
+      ]
+    },
+    {
+      "step": "S18",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Arc labels 0.05 and 0.70 overlap and the River/Money toggle meaning is not explained in the step"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L1-machine-01",
+      "concept": "machine",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S01"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-machine-02",
+      "concept": "machine",
+      "kind": "single",
+      "grounded": 1,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S01"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-01",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-02",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-03",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-04",
+      "concept": "tokens",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L1-tokens-05",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S02",
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-06",
+      "concept": "tokens",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-07",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 1,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-08",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S02"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-01",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-02",
+      "concept": "embeddings",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-embeddings-03",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-04",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-05",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-06",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-position-01",
+      "concept": "position",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-position-02",
+      "concept": "position",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-weights-01",
+      "concept": "weights",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11",
+        "S15",
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 0
+    },
+    {
+      "id": "L1-weights-02",
+      "concept": "weights",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-basics-01",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-basics-02",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-basics-03",
+      "concept": "basics",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [
+        "The lesson never states that softmax depends only on score gaps; it must be computed from the formula, and the 'stretches the gaps' wording could mislead."
+      ],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L1-basics-04",
+      "concept": "basics",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-basics-05",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-gradient-01",
+      "concept": "gradient",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-gradient-02",
+      "concept": "gradient",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-01",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-02",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-03",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-04",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S18",
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L1-heads-01",
+      "concept": "heads",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S19"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-heads-02",
+      "concept": "heads",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S19"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-cost-01",
+      "concept": "cost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-cost-02",
+      "concept": "cost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-cost-03",
+      "concept": "cost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": null,
+  "diff": null
+}

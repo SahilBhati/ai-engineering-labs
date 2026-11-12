@@ -1,0 +1,780 @@
+{
+  "lesson": 1,
+  "runs": 3,
+  "questions": 36,
+  "metrics": {
+    "grounded": 1,
+    "groundedPerRun": 0.9907407407407407,
+    "agreement": 1,
+    "openDisputes": 0,
+    "optionsOnly": 1,
+    "keyLongest": 0.2692307692307692,
+    "confirmedFlags": 4,
+    "coverage": 1,
+    "stepCoverage": 0.9,
+    "viewed": 1,
+    "visualOnlyCites": 0
+  },
+  "pass": {
+    "grounded": true,
+    "agreement": true,
+    "openDisputes": true,
+    "keyLongest": true,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": true,
+  "notGrounded": [
+    {
+      "id": "L1-tokens-07",
+      "grounded": 2,
+      "correct": 3
+    }
+  ],
+  "ambiguous": [],
+  "disputes": [],
+  "weakDistractors": [
+    {
+      "id": "L1-machine-01",
+      "right": 3
+    },
+    {
+      "id": "L1-machine-02",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-01",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-02",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-03",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-04",
+      "right": 2
+    },
+    {
+      "id": "L1-tokens-05",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-06",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-07",
+      "right": 3
+    },
+    {
+      "id": "L1-tokens-08",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-01",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-03",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-04",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-05",
+      "right": 3
+    },
+    {
+      "id": "L1-embeddings-06",
+      "right": 3
+    },
+    {
+      "id": "L1-position-01",
+      "right": 3
+    },
+    {
+      "id": "L1-position-02",
+      "right": 3
+    },
+    {
+      "id": "L1-weights-01",
+      "right": 2
+    },
+    {
+      "id": "L1-weights-02",
+      "right": 3
+    },
+    {
+      "id": "L1-basics-03",
+      "right": 3
+    },
+    {
+      "id": "L1-basics-04",
+      "right": 3
+    },
+    {
+      "id": "L1-gradient-01",
+      "right": 3
+    },
+    {
+      "id": "L1-gradient-02",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-01",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-02",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-03",
+      "right": 3
+    },
+    {
+      "id": "L1-attention-04",
+      "right": 2
+    },
+    {
+      "id": "L1-heads-02",
+      "right": 3
+    },
+    {
+      "id": "L1-cost-03",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L1-tokens-02",
+    "L1-embeddings-03",
+    "L1-gradient-01",
+    "L1-gradient-02",
+    "L1-attention-02",
+    "L1-attention-03",
+    "L1-heads-02"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [
+    "S06",
+    "S16"
+  ],
+  "flags": [
+    {
+      "step": "S01",
+      "kind": "term-before-taught",
+      "runs": 3,
+      "confirmed": true,
+      "notes": [
+        "'MLP', 'layer', 'scores' used in the diagram before they are explained; Lesson 2 covers them.",
+        "uses 'MLP', 'layer', 'forward pass' and 'N layers' with only one-line definitions; 'scores' vs probabilities and 'picks a token' deferred",
+        "'MLP' defined but 'inference'/'prefill' never taught; Q35 option 'Prefill' is untaught anywhere"
+      ]
+    },
+    {
+      "step": "S08",
+      "kind": "unclear-visual",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "Scatter plot has no axis labels; at 0% the dots show random placement and the bank dot is clipped ('deposi' cut off); no color legend.",
+        "scatter plot has unlabeled axes and 'deposit' label is clipped at the right edge; no legend for what position means"
+      ]
+    },
+    {
+      "step": "S10",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "the With-position visual state (teal slot vector) is only described in a caption; the screenshot shows only the Without-position state, and the 'weak hint in the panel below' is not clearly pointed to"
+      ]
+    },
+    {
+      "step": "S12",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "query and key used (A = bank's query, B = key) before they are taught in S17; only a one-line forward pointer"
+      ]
+    },
+    {
+      "step": "S15",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "'backpropagation' and 'output row' / second table appear with only a one-line definition; step size is used in the nudge formula without being taught.",
+        "'output row' / second table of scores introduced mid-step and deferred to Lesson 2"
+      ]
+    },
+    {
+      "step": "S17",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "'residual connection' is mentioned without explanation (deferred to next lesson); bank's key is shown as [1,1] though keys are 'picked by hand', so the matrices W_K and W_V are not shown.",
+        "'residual connection' used with only 'next lesson' pointer; also 'weights' vs matrices terms fine"
+      ]
+    },
+    {
+      "step": "S17",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "screenshot shows the table with score/softmax columns empty and blend '?' until stepping; the key result is not visible at rest"
+      ]
+    },
+    {
+      "step": "S18",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'only looks backward' is asserted with the reason deferred to 3.1, while the S20 cost math depends on it"
+      ]
+    },
+    {
+      "step": "S18",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Arc-thickness and the 'self' share are explained only by text; the question's 'earlier tokens plus itself' is clear, but the greyed later words are only inferable."
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L1-machine-01",
+      "concept": "machine",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S01"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-machine-02",
+      "concept": "machine",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S01"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-01",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-02",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-03",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-04",
+      "concept": "tokens",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L1-tokens-05",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-06",
+      "concept": "tokens",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-07",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 2,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-tokens-08",
+      "concept": "tokens",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S02"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-01",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-02",
+      "concept": "embeddings",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-embeddings-03",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-04",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-05",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-embeddings-06",
+      "concept": "embeddings",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-position-01",
+      "concept": "position",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-position-02",
+      "concept": "position",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-weights-01",
+      "concept": "weights",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11",
+        "S15",
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L1-weights-02",
+      "concept": "weights",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-basics-01",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-basics-02",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-basics-03",
+      "concept": "basics",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-basics-04",
+      "concept": "basics",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-basics-05",
+      "concept": "basics",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-gradient-01",
+      "concept": "gradient",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-gradient-02",
+      "concept": "gradient",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-01",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-02",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-03",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S17"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-attention-04",
+      "concept": "attention",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S18",
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L1-heads-01",
+      "concept": "heads",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S19"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-heads-02",
+      "concept": "heads",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S19"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L1-cost-01",
+      "concept": "cost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-cost-02",
+      "concept": "cost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L1-cost-03",
+      "concept": "cost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S20"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": "2026-11-10-L1-r3",
+  "diff": {
+    "metrics": {
+      "grounded": {
+        "before": 1,
+        "after": 1
+      },
+      "groundedPerRun": {
+        "before": 0.9907407407407407,
+        "after": 0.9907407407407407
+      },
+      "agreement": {
+        "before": 1,
+        "after": 1
+      },
+      "openDisputes": {
+        "before": 0,
+        "after": 0
+      },
+      "optionsOnly": {
+        "before": 0.9655172413793104,
+        "after": 1
+      },
+      "keyLongest": {
+        "before": 0.2692307692307692,
+        "after": 0.2692307692307692
+      },
+      "confirmedFlags": {
+        "before": 3,
+        "after": 4
+      },
+      "coverage": {
+        "before": 1,
+        "after": 1
+      },
+      "stepCoverage": {
+        "before": 0.9,
+        "after": 0.9
+      },
+      "viewed": {
+        "before": 1,
+        "after": 1
+      },
+      "visualOnlyCites": {
+        "before": 0,
+        "after": 0
+      }
+    },
+    "nowGrounded": [],
+    "lostGrounding": []
+  }
+}

@@ -1,0 +1,284 @@
+[
+  {
+    "qid": "Q27",
+    "kind": "single",
+    "options": {
+      "A": "Nothing: training would crash",
+      "B": "To generate whole sentences at once",
+      "C": "Exactly the same thing, only slower",
+      "D": "To copy the next token from the input, since it could see it; at generation time that token doesn't exist yet, so the trick fails"
+    }
+  },
+  {
+    "qid": "Q39",
+    "kind": "single",
+    "options": {
+      "A": "It does need labels; they are crowdsourced",
+      "B": "The text supplies the answer: the right label at each position is simply the next token",
+      "C": "A smaller model labels the text first",
+      "D": "Labels are added later, during fine-tuning"
+    }
+  },
+  {
+    "qid": "Q07",
+    "kind": "multi",
+    "options": {
+      "A": "Longer contexts per request",
+      "B": "Larger decode batches, so each weight read is shared by more users",
+      "C": "Quantized weights, so each tick reads fewer bytes",
+      "D": "Smaller KV caches (shorter contexts, fewer KV heads), so more users fit in a batch",
+      "E": "Higher temperature"
+    }
+  },
+  {
+    "qid": "Q22",
+    "kind": "single",
+    "options": {
+      "A": "Only the weight values, through more training with the same next-token loss on curated prompt → answer pairs; architecture, tokenizer and loss stay the same",
+      "B": "The tokenizer is retrained for dialogue",
+      "C": "A new answer-generation layer is added",
+      "D": "The loss function is replaced by a reward"
+    }
+  },
+  {
+    "qid": "Q26",
+    "kind": "multi",
+    "options": {
+      "A": "TPOT: each output token gets much faster",
+      "B": "TTFT: only the new tokens need prefill",
+      "C": "Input cost: providers bill cached input tokens at a discount",
+      "D": "The answer gets more accurate"
+    }
+  },
+  {
+    "qid": "Q17",
+    "kind": "multi",
+    "options": {
+      "A": "Serving updates the weights after every request",
+      "B": "One failed GPU stalls a whole synchronized training job, so teams checkpoint often",
+      "C": "Training GPUs must exchange gradients every step, so the network and stragglers matter as much as the chips",
+      "D": "Training needs several times the memory per parameter (gradients and optimizer state)",
+      "E": "Training uses a KV cache to skip recomputation"
+    }
+  },
+  {
+    "qid": "Q06",
+    "kind": "single",
+    "options": {
+      "A": "Set the attention weights to 0 after the weighted average",
+      "B": "Add −∞ to the scores above the diagonal before softmax, so future positions get exactly 0 weight",
+      "C": "Delete the future tokens from the input",
+      "D": "Multiply the values of future tokens by 0.5"
+    }
+  },
+  {
+    "qid": "Q09",
+    "kind": "single",
+    "options": {
+      "A": "Total tokens per second rises a lot; each user's TPOT rises a little; KV memory eventually caps how many users fit",
+      "B": "Throughput stays the same; each user gets slower",
+      "C": "Each user's TPOT stays exactly the same until compute runs out",
+      "D": "Both throughput and each user's TPOT get better"
+    }
+  },
+  {
+    "qid": "Q13",
+    "kind": "single",
+    "options": {
+      "A": "Quantizing to 8-bit",
+      "B": "Lowering the temperature",
+      "C": "Raising the batch size",
+      "D": "Adding GPUs (tensor parallelism): more bandwidth per tick and more room for caches"
+    }
+  },
+  {
+    "qid": "Q36",
+    "kind": "single",
+    "options": {
+      "A": "There is no difference in what the model learns",
+      "B": "−ln p is cheaper to compute",
+      "C": "−ln p punishes confident wrong answers without limit (p → 0 gives loss → ∞), while 1 − p caps the penalty at 1",
+      "D": "1 − p can be negative"
+    }
+  },
+  {
+    "qid": "Q20",
+    "kind": "single",
+    "options": {
+      "A": "Stores past conversations on the server",
+      "B": "Adds a second model that handles conversation",
+      "C": "Translates the prompt into a fixed format of questions",
+      "D": "Wraps each turn in special tokens (like <|user|>, <|assistant|>) and flattens the messages list into one token string the model continues"
+    }
+  },
+  {
+    "qid": "Q18",
+    "kind": "single",
+    "options": {
+      "A": "A snapshot read: each transaction sees only what was committed before it, never later writes",
+      "B": "A dead-letter queue",
+      "C": "Rate limiting",
+      "D": "A load balancer"
+    }
+  },
+  {
+    "qid": "Q01",
+    "kind": "single",
+    "options": {
+      "A": "Both use the same temperature",
+      "B": "The causal mask makes each position see only itself and earlier positions, exactly what it sees during generation",
+      "C": "They don't; models are adjusted after training to match",
+      "D": "Generation retrains the model after each token"
+    }
+  },
+  {
+    "qid": "Q04",
+    "kind": "single",
+    "options": {
+      "A": "Each tick reads half the weight bytes, and the freed memory holds more KV caches, so the batch grows",
+      "B": "Fewer layers and a smaller vocabulary",
+      "C": "Shorter prompts and shorter answers",
+      "D": "Lower temperature and less sampling"
+    }
+  },
+  {
+    "qid": "Q03",
+    "kind": "single",
+    "options": {
+      "A": "The causal mask would stop working",
+      "B": "The model would forget the vocabulary",
+      "C": "Nothing; it only costs a little more compute",
+      "D": "Training effort would go into predicting user messages, so the model learns to write prompts as well as answers"
+    }
+  },
+  {
+    "qid": "Q16",
+    "kind": "single",
+    "options": {
+      "A": "Return an error",
+      "B": "Refuse, because it has no instructions",
+      "C": "Answer politely like a chat assistant",
+      "D": "Continue the text as a document would, perhaps with more quiz questions, rather than answer"
+    }
+  },
+  {
+    "qid": "Q38",
+    "kind": "single",
+    "options": {
+      "A": "−ln p for every token",
+      "B": "p − 1 for the correct token, and p for every other token",
+      "C": "1 for the correct token, 0 for all others",
+      "D": "The same value for every token"
+    }
+  },
+  {
+    "qid": "Q14",
+    "kind": "single",
+    "options": {
+      "A": "Read replicas",
+      "B": "Group commit: many transactions share one disk flush, so each waits slightly longer but total throughput rises",
+      "C": "A CDN edge cache",
+      "D": "A circuit breaker"
+    }
+  },
+  {
+    "qid": "Q08",
+    "kind": "single",
+    "options": {
+      "A": "TTFT: how long before anything appears",
+      "B": "End-to-end latency",
+      "C": "Time to compute the KV cache size",
+      "D": "Throughput across all users"
+    }
+  },
+  {
+    "qid": "Q32",
+    "kind": "single",
+    "options": {
+      "A": "Order doesn't matter; the cache matches any shared text",
+      "B": "User message first so it gets the most attention",
+      "C": "Fixed content first (system prompt, tools, examples), changing content (user message, timestamps) last",
+      "D": "Put a timestamp at the top so the cache knows the prompt's age"
+    }
+  },
+  {
+    "qid": "Q11",
+    "kind": "single",
+    "options": {
+      "A": "A write-through cache in front of a database",
+      "B": "Database sharding",
+      "C": "A content-addressed cache with a TTL: hash the prefix blocks, look them up, expire entries after minutes",
+      "D": "A message queue"
+    }
+  },
+  {
+    "qid": "Q31",
+    "kind": "single",
+    "options": {
+      "A": "Both need a reward model; DPO just trains it faster",
+      "B": "RLHF: only human-written answers. DPO: a reward model",
+      "C": "RLHF: a trained reward model plus reinforcement learning with generation during training. DPO: one loss directly on chosen/rejected pairs, ordinary supervised training",
+      "D": "RLHF trains on single answers; DPO needs a full conversation"
+    }
+  },
+  {
+    "qid": "Q30",
+    "kind": "single",
+    "options": {
+      "A": "How much more the model now favors the chosen answer over the rejected one, compared with the starting model",
+      "B": "The reward model's score difference",
+      "C": "The number of tokens the two answers differ by",
+      "D": "The difference in length between the two answers"
+    }
+  },
+  {
+    "qid": "Q23",
+    "kind": "single",
+    "options": {
+      "A": "Output tokens go through more layers",
+      "B": "Output tokens are longer than input tokens",
+      "C": "Providers charge more for output to discourage long answers; GPU time is the same",
+      "D": "Input tokens are processed together in prefill, with the GPU's math fully busy; each output step reads all the weights and caches to emit just one token per user"
+    }
+  },
+  {
+    "qid": "Q28",
+    "kind": "single",
+    "options": {
+      "A": "Quantization only applies to output tokens",
+      "B": "Prefill is already cached",
+      "C": "Decode is memory-bound, so fewer bytes per weight means a faster tick; prefill is compute-bound, so it gains only if the GPU also does the math in lower precision",
+      "D": "Prefill doesn't use the weights"
+    }
+  },
+  {
+    "qid": "Q24",
+    "kind": "multi",
+    "options": {
+      "A": "More tokens per second while busy (batching, quantization, better kernels)",
+      "B": "A bigger vocabulary",
+      "C": "Lower temperature",
+      "D": "A higher busy share of each paid hour (traffic, autoscaling, sharing GPUs across models)"
+    }
+  },
+  {
+    "qid": "Q21",
+    "kind": "single",
+    "options": {
+      "A": "SFT replaces most of what pre-training learned",
+      "B": "SFT examples are worth more than pre-training tokens for learning facts",
+      "C": "Knowledge comes from pre-training; a small, high-quality post-training set mainly shapes behavior and format",
+      "D": "Pre-training is mostly wasted"
+    }
+  },
+  {
+    "qid": "Q05",
+    "kind": "single",
+    "options": {
+      "A": "Keys and values at position i depend only on tokens 1…i (the causal mask), so an identical prefix always gives identical KV",
+      "B": "KV values are the same for every prompt",
+      "C": "The server re-checks every value against the new request",
+      "D": "It isn't fully safe; small errors are accepted for speed"
+    }
+  }
+]

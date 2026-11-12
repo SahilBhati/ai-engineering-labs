@@ -1,0 +1,412 @@
+{
+  "lesson": 1,
+  "title": "Tokens, embeddings, attention",
+  "url": "../lessons/llm-foundations-1/",
+  "concepts": {
+    "machine": { "label": "The whole machine", "anchor": "ch-m" },
+    "tokens": { "label": "Tokenization", "anchor": "ch-1-1" },
+    "embeddings": { "label": "Embeddings", "anchor": "ch-1-2" },
+    "position": { "label": "Position information", "anchor": "ch-1-2" },
+    "weights": { "label": "Weights vs activations", "anchor": "ch-1-2" },
+    "basics": { "label": "Dot product, softmax, weighted average", "anchor": "ch-1-3" },
+    "gradient": { "label": "Gradient", "anchor": "ch-1-3" },
+    "attention": { "label": "Attention: query, key, value", "anchor": "ch-1-4" },
+    "heads": { "label": "Multi-head attention", "anchor": "ch-1-4" },
+    "cost": { "label": "Attention cost grows with n²", "anchor": "ch-1-4" }
+  },
+  "questions": [
+    {
+      "id": "L1-machine-01", "concept": "machine", "kind": "single",
+      "prompt": "A model writes a 100-token answer. Roughly how many times does the whole model run?",
+      "options": [
+        "Once: a single forward pass produces the whole 100-token answer at the same time",
+        "About 100: one pass per new token, each with the last token appended",
+        "Once per sentence: the model plans a sentence, then writes out its tokens",
+        "Once per layer, so 32 times for a 32-layer model, with every token made in that sweep"
+      ],
+      "answer": [1],
+      "why": "An LLM is one function: text so far in, a score for every vocabulary token out. To write 100 tokens it is called about 100 times, each time with the token it just picked appended to the input."
+    },
+    {
+      "id": "L1-machine-02", "concept": "machine", "kind": "single",
+      "prompt": "How does “an LLM is a function, not a lookup table” explain hallucination?",
+      "options": [
+        "It retrieves the closest stored document from its training data and sometimes retrieves the wrong one",
+        "It scores a plausible next token for any input; nothing checks that a source for the claim exists",
+        "It comes only from sampling randomness, so at temperature 0 a model can no longer make up a fact",
+        "The fact's token is missing from the vocabulary, so the model substitutes the most similar token it has"
+      ],
+      "answer": [1],
+      "why": "There is no table of facts to miss in. The function always returns scores, and a fluent, confident continuation can be produced whether or not the training text supported it. Greedy decoding (temperature 0) still hallucinates: it picks the top score, which can be wrong."
+    },
+    {
+      "id": "L1-tokens-01", "concept": "tokens", "kind": "single",
+      "prompt": "Why do LLMs split text into subword pieces rather than single characters?",
+      "options": [
+        "Characters can't represent scripts other than Latin, so non-English text would need a separate tokenizer",
+        "Characters make sequences several times longer, and attention's work grows with the square of length",
+        "A model can't learn spelling from single characters, so it would misspell words it has never seen",
+        "A character vocabulary would hold millions of entries, too large to store as an embedding table"
+      ],
+      "answer": [1],
+      "why": "Characters give a tiny vocabulary but very long sequences, and every token scores every earlier token (about n²/2 scores). Subwords keep sequences short while a fallback to bytes can still spell any text, in any language."
+    },
+    {
+      "id": "L1-tokens-02", "concept": "tokens", "kind": "single",
+      "prompt": "Why don't LLMs use whole words as tokens?",
+      "options": [
+        "Whole words make sequences longer than subwords do, so attention's square-law cost would grow too fast",
+        "Whole words can't be turned into vectors, because an embedding row needs a fixed number of characters",
+        "The vocabulary would need millions of entries and still fail on unseen words: new names, typos, identifiers",
+        "Attention can only compare pieces shorter than a word, so a whole-word token would be invisible to it"
+      ],
+      "answer": [2],
+      "why": "Words give short sequences but an enormous vocabulary, and anything not in the list has no ID at all. Subword pieces can build any word from smaller parts, so nothing is ever out of vocabulary."
+    },
+    {
+      "id": "L1-tokens-03", "concept": "tokens", "kind": "single",
+      "prompt": "Why can't an LLM reliably count the r's in “strawberry”?",
+      "options": [
+        "It sees a few token IDs (str + aw + berry); the letters inside each piece never reach it",
+        "The word was rare in its training data, so the model never learned how many r's it contains",
+        "Softmax rounds small counts to zero, so the third r gets a share too small to register",
+        "It reads the word one letter at a time but only remembers the last few letters it has seen"
+      ],
+      "answer": [0],
+      "why": "The model never sees letters, only IDs. To count r's it would need to have memorized how each piece is spelled and add across pieces. The word being common doesn't help: its pieces are still opaque."
+    },
+    {
+      "id": "L1-tokens-04", "concept": "tokens", "kind": "multi",
+      "prompt": "Which of these tasks are hard for an LLM for the same reason as counting letters? Pick all that apply.",
+      "options": [
+        "Reversing a word letter by letter",
+        "Finding words that rhyme",
+        "Exact arithmetic on long numbers",
+        "Translating a common sentence",
+        "Summarizing a paragraph"
+      ],
+      "answer": [0, 1, 2],
+      "why": "Reversing, rhyming and digit-by-digit arithmetic all need the characters inside tokens, which the model never receives. Translation and summarization work on meaning, which the token vectors do carry."
+    },
+    {
+      "id": "L1-tokens-05", "concept": "tokens", "kind": "single",
+      "prompt": "The same paragraph costs more tokens in Hindi than in English. Why can't fine-tuning the model fix this?",
+      "options": [
+        "The tokenizer is built and frozen before the model trains; training never changes how text is split",
+        "Hindi needs more weights per token, and fine-tuning can only adjust weights, never add new ones",
+        "Providers bill per word rather than per token, so the extra Hindi tokens are not what you pay for",
+        "Fine-tuning could fix it by teaching the model longer Hindi pieces, but it costs too much to be worth it"
+      ],
+      "answer": [0],
+      "why": "The tokenizer learned its merges from text with less Hindi, so Hindi gets fewer merged pieces and more tokens per sentence. That split happens before the model sees anything; only a new tokenizer (and a model trained on it) changes it."
+    },
+    {
+      "id": "L1-tokens-06", "concept": "tokens", "kind": "multi",
+      "prompt": "A language needs 3× as many tokens for the same meaning. What follows? Pick all that apply.",
+      "options": [
+        "Higher cost per request (billed per token)",
+        "Slower generation (one token per step)",
+        "Less text fits in the context window",
+        "The model has more weights for that language",
+        "Prefill gets faster"
+      ],
+      "answer": [0, 1, 2],
+      "why": "Every downstream number is per token: price, decode steps, context slots. The model's weights are the same for every language, and more tokens make prefill slower, not faster."
+    },
+    {
+      "id": "L1-tokens-07", "concept": "tokens", "kind": "single",
+      "prompt": "A tokenizer has no single piece for four spaces. What happens when you send it Python code indented with four spaces?",
+      "options": [
+        "The tokenizer drops runs of spaces it has no piece for, so the code reaches the model with broken indentation",
+        "Nothing changes: whitespace is stripped before billing, so indentation costs no tokens at all",
+        "Each indent becomes several tokens, so the same code costs more and fills the context window sooner",
+        "The tokenizer rejects text containing a sequence it has no single piece for, so the whole request fails"
+      ],
+      "answer": [2],
+      "why": "Text that the tokenizer saw rarely is split into more, smaller pieces. Repeated indentation multiplies that: more tokens per line means more cost, slower generation and less room in the context window. Code-aware tokenizers add whitespace pieces for this reason."
+    },
+    {
+      "id": "L1-tokens-08", "concept": "tokens", "kind": "single",
+      "prompt": "How does byte-pair encoding (BPE) build its vocabulary?",
+      "options": [
+        "Split the text at spaces, keep the most common words, and spell out every rarer word letter by letter",
+        "Start from single bytes and repeatedly merge the most frequent neighbouring pair into a new token",
+        "Learn the pieces by gradient descent while the model trains, so the splits improve with the model",
+        "Linguists write a list of common prefixes, roots and suffixes, and every word is split along them"
+      ],
+      "answer": [1],
+      "why": "BPE is a compression algorithm: merge the most frequent adjacent pair, add it to the vocabulary, repeat until the target size (roughly 50k–200k). It runs once, before model training, and is then frozen."
+    },
+    {
+      "id": "L1-embeddings-01", "concept": "embeddings", "kind": "single",
+      "prompt": "Why can't a token ID be fed to the model as a plain number?",
+      "options": [
+        "IDs run into the hundreds of thousands, too large for a GPU to multiply without overflowing its 16-bit numbers",
+        "IDs are labels, not quantities: 500 isn't “close to” 501 in meaning. Each ID selects a learned row instead",
+        "The model only accepts numbers between 0 and 1, so IDs are divided by the vocabulary size first",
+        "IDs are reassigned on every request, so the same word would reach the model as a different number each time"
+      ],
+      "answer": [1],
+      "why": "Everything after the input is smooth math (multiply, add), so nearby inputs give nearby outputs. That only helps if nearby means similar. Raw IDs have no such order; learned embedding rows do."
+    },
+    {
+      "id": "L1-embeddings-02", "concept": "embeddings", "kind": "number",
+      "prompt": "An embedding table has one row per vocabulary token. Vocabulary 100,000, width 4,096. How many learned numbers are in the table, in millions?",
+      "answer": [409.6], "tol": 0.03, "unit": "million",
+      "why": "100,000 rows × 4,096 numbers = 409,600,000 ≈ 410 million, just to look up the input tokens."
+    },
+    {
+      "id": "L1-embeddings-03", "concept": "embeddings", "kind": "single",
+      "prompt": "Nobody labels “river” and “stream” as related. How do their embedding rows end up close?",
+      "options": [
+        "The tokenizer gives similar words neighbouring IDs, and neighbouring IDs are given neighbouring rows",
+        "They fill the same slots in sentences (“the ___ overflowed”), so training nudges their rows the same way",
+        "A synonym dictionary is loaded before training, and each listed pair of rows starts out close together",
+        "Attention copies one row into the other at inference time whenever both words appear in one request"
+      ],
+      "answer": [1],
+      "why": "Rows start random. Every prediction mistake nudges the rows involved, and words used in the same contexts get the same nudges, so over billions of examples their rows drift together. Usage, not labels."
+    },
+    {
+      "id": "L1-embeddings-04", "concept": "embeddings", "kind": "single",
+      "prompt": "“bank” is used in water sentences and in money sentences. Where does its embedding row end up?",
+      "options": [
+        "In the water cluster, because the first meaning seen in training fixes the row for good",
+        "Two separate rows, one per meaning, and the tokenizer picks which row each sentence uses",
+        "Somewhere between the water and money clusters; attention picks the meaning later from context",
+        "At a random spot, because the corrections from its two uses cancel out, so the row never moves"
+      ],
+      "answer": [2],
+      "why": "One token, one row. Both kinds of sentences nudge it, so it settles between the two clusters. The sentence-specific meaning comes from attention, which blends in the surrounding words."
+    },
+    {
+      "id": "L1-embeddings-05", "concept": "embeddings", "kind": "single",
+      "prompt": "Why does it help that similar words have nearby rows?",
+      "options": [
+        "Nearby rows can share storage, so a model with many synonyms needs fewer numbers in its table",
+        "The model answers by finding the training sentence whose rows are nearest to the prompt, so close rows match well",
+        "Similar inputs give similar outputs, so what it learned about “river flooded” carries over to “stream flooded”",
+        "It lets the tokenizer merge words with nearby rows into one token, which keeps sequences short"
+      ],
+      "answer": [2],
+      "why": "This is generalization: small input changes give small output changes, so lessons from one example transfer to similar ones the model never saw."
+    },
+    {
+      "id": "L1-embeddings-06", "concept": "embeddings", "kind": "single",
+      "prompt": "“The river bank flooded” and “The bank raised rates”. Compare the row looked up for “bank” in the two sentences.",
+      "options": [
+        "Different rows: the tokenizer reads the sentence and picks the water or money ID for bank",
+        "Identical: the same ID reads the same row; context is mixed in later by attention",
+        "The same row at first, but the model edits that row in place for the money sentence",
+        "Different rows, because the two “bank”s sit at different positions in their sentences"
+      ],
+      "answer": [1],
+      "why": "The lookup is by ID only. What differs between the sentences is the vector after attention, an activation computed for that sentence and thrown away afterwards."
+    },
+    {
+      "id": "L1-position-01", "concept": "position", "kind": "single",
+      "prompt": "Remove all position information. What happens to “dog bites man” versus “man bites dog”?",
+      "options": [
+        "Attention receives the same set of vectors either way, so it can't tell the two orders apart",
+        "The tokenizer sorts the words alphabetically, so both sentences become the same token sequence",
+        "Order survives, because each token's embedding row already records where it appears",
+        "Only the last word's meaning is lost, since position mainly marks where the sentence ends"
+      ],
+      "answer": [0],
+      "why": "Attention compares contents, not places. Without position, reordering the words just reorders the same vectors. Position vectors (or RoPE) make “first” and “third” different inputs."
+    },
+    {
+      "id": "L1-position-02", "concept": "position", "kind": "single",
+      "prompt": "A model learns positions as a second table with one row per slot (slots 1 to 4,096). What does that design imply?",
+      "options": [
+        "Positions keep being relearned at inference, so each request adjusts the slot table",
+        "A hard length limit: input past slot 4,096 has no row to read",
+        "Word order stops mattering, since a table can't express which slot comes first",
+        "The vocabulary must also have 4,096 tokens"
+      ],
+      "answer": [1],
+      "why": "A learned table has a fixed number of rows, so it caps sequence length. That is one reason most modern models build position into attention itself with RoPE (rotary position embedding)."
+    },
+    {
+      "id": "L1-weights-01", "concept": "weights", "kind": "multi",
+      "prompt": "Which of these are learned weights (changed only by training), not per-request activations? Pick all that apply.",
+      "options": [
+        "The embedding table",
+        "The query, key and value matrices (W_Q, W_K, W_V)",
+        "“bank”'s blended vector after attention in this sentence",
+        "The attention weights (softmax shares) for this sentence",
+        "The output table used to score the next token"
+      ],
+      "answer": [0, 1, 4],
+      "why": "Weights are learned and frozen at inference. Anything computed for one request is an activation, including the “attention weights”: despite the name, those softmax shares are recomputed for every sentence and discarded."
+    },
+    {
+      "id": "L1-weights-02", "concept": "weights", "kind": "single",
+      "prompt": "Why can one copy of a model's weights in GPU memory serve many users at once?",
+      "options": [
+        "At inference the weights are only read, never written; each request's activations are its own",
+        "Each user gets a private copy of the weights, loaded from disk into GPU memory when the session opens",
+        "The weights are recomputed for each request from the training data, so nothing has to be shared",
+        "Users take turns: the GPU serves one request at a time, fast enough that nobody notices the queue"
+      ],
+      "answer": [0],
+      "why": "Training writes the weights; using the model only reads them. Read-only shared state plus private per-request state is what makes batching many users on one copy safe."
+    },
+    {
+      "id": "L1-basics-01", "concept": "basics", "kind": "number",
+      "prompt": "Compute the dot product of [2, 1, 0] and [1, 3, 5].",
+      "answer": [5], "tol": 0,
+      "why": "Multiply position by position and add: 2×1 + 1×3 + 0×5 = 2 + 3 + 0 = 5."
+    },
+    {
+      "id": "L1-basics-02", "concept": "basics", "kind": "number",
+      "prompt": "Softmax of the scores [2, 0]. What share does the first score get, in percent? (e ≈ 2.718)",
+      "answer": [88.08], "tol": 0.01, "unit": "%",
+      "why": "e² ≈ 7.389 and e⁰ = 1. Shares: 7.389 ÷ (7.389 + 1) ≈ 0.881, so about 88%. A gap of 2 already gives a clear winner."
+    },
+    {
+      "id": "L1-basics-03", "concept": "basics", "kind": "single",
+      "prompt": "Compare softmax([3, 1]) with softmax([2, 0]).",
+      "options": [
+        "Identical: both come out at about 88% / 12%",
+        "The first gives the top score a bigger share, because its scores are larger",
+        "The first is flatter, because both of its scores are further from zero",
+        "They can't be compared without knowing the rest of the vocabulary"
+      ],
+      "answer": [0],
+      "why": "e³ ÷ (e³ + e¹) = 1 ÷ (1 + e⁻²) ≈ 0.88, and e² ÷ (e² + e⁰) is the same 0.88. Adding the same number to every score multiplies every eˣ by the same factor, which cancels when you divide by the total. Only the gaps between scores matter."
+    },
+    {
+      "id": "L1-basics-04", "concept": "basics", "kind": "single",
+      "prompt": "Why must the attention shares add up to 100%?",
+      "options": [
+        "GPUs require normalized numbers, so any vector entering a multiply must already sum to 1",
+        "So they can be read as the probabilities of the next token, which the model then samples from",
+        "The next step is a weighted average; shares summing to 1 keep the blend on the same scale as the inputs",
+        "So that negative scores cancel positive ones and the strongest match always gets exactly half the weight"
+      ],
+      "answer": [2],
+      "why": "If the shares summed to 3, the blended vector would be three times too big, and the size would depend on how many words came before. Softmax guarantees positive shares that sum to 1. (Next-token probabilities come from a different softmax, over the vocabulary.)"
+    },
+    {
+      "id": "L1-basics-05", "concept": "basics", "kind": "number",
+      "prompt": "Blend two values with a weighted average: 4 with share 75%, 8 with share 25%.",
+      "answer": [5], "tol": 0,
+      "why": "0.75 × 4 + 0.25 × 8 = 3 + 2 = 5. The result sits closer to the value with the bigger share."
+    },
+    {
+      "id": "L1-gradient-01", "concept": "gradient", "kind": "single",
+      "prompt": "What does a gradient tell training?",
+      "options": [
+        "For each number, how the error would change if it moved a little, so training steps each one downhill",
+        "The correct next token at each position, so training can copy it straight into the output table",
+        "Which neuron fired the most on the last example, so training can strengthen that one neuron alone",
+        "How big a step to take on this example: the learning rate training should use for every number"
+      ],
+      "answer": [0],
+      "why": "The gradient is a direction and size per number. Backpropagation computes all of them in one backward pass; training then moves every number a small step against its gradient."
+    },
+    {
+      "id": "L1-gradient-02", "concept": "gradient", "kind": "single",
+      "prompt": "The score for “flooded” is bank's row · flooded's output row. After one training step, one column of bank's row moved a lot and another didn't move at all. Why?",
+      "options": [
+        "Training picks a few columns at random each step and updates only those, which keeps every step cheap enough",
+        "Each column's nudge is proportional to the matching column in flooded's row; a near-zero column gets no nudge",
+        "Only columns with large values get trained; small columns are frozen to keep the row stable",
+        "The column that didn't move had already reached its best value in earlier training, so its gradient was zero"
+      ],
+      "answer": [1],
+      "why": "For a dot product a·b, the gradient with respect to a's column j is b's column j. A column that didn't influence the score gets no blame and no nudge."
+    },
+    {
+      "id": "L1-attention-01", "concept": "attention", "kind": "single",
+      "prompt": "Put one attention step for “bank” in the right order.",
+      "options": [
+        "query · each key → divide by √(head size) → softmax → weighted average of the values",
+        "query · each value → divide by √(head size) → softmax → weighted average of the keys",
+        "key · each query → softmax → divide by √(head size) → weighted average of the values",
+        "softmax of the keys → dot with the query → divide by √(head size) → sum of the values"
+      ],
+      "answer": [0],
+      "why": "Score = query · key (how well each earlier word matches what bank looks for), scale, softmax into shares, then blend the values (what each word hands over). Keys are for matching, values are for handing over."
+    },
+    {
+      "id": "L1-attention-02", "concept": "attention", "kind": "single",
+      "prompt": "Why use three separate vectors (query, key, value) instead of the token's embedding for everything?",
+      "options": [
+        "To store three times as many facts per token, since each of the three vectors holds a different set of facts",
+        "Embeddings can't be multiplied with each other directly, so each is first copied into three forms that can",
+        "Looking, matching and handing over are different jobs; separate learned matrices let each be tuned on its own",
+        "One vector is needed per attention head, and the standard design happens to use three heads"
+      ],
+      "answer": [2],
+      "why": "With one vector, “bank” could only find words similar to itself and could only pass on its own identity. query = x·W_Q, key = x·W_K, value = x·W_V decouple searching, matching and content."
+    },
+    {
+      "id": "L1-attention-03", "concept": "attention", "kind": "single",
+      "prompt": "Who decides a token's query, and how does it get good at finding useful words?",
+      "options": [
+        "Engineers write rules for what each word should look for, and training tunes how strongly each rule fires",
+        "The tokenizer assigns each token ID a fixed query when the vocabulary is built, before training starts",
+        "A learned matrix W_Q times the token's vector; training adjusts W_Q when a better query would lower the loss",
+        "It is drawn at random for each request, and attention averages over enough heads that the noise cancels out"
+      ],
+      "answer": [2],
+      "why": "query = x × W_Q. Nobody designs it: gradients flow back through the attention scores into W_Q, so queries that found helpful words get reinforced."
+    },
+    {
+      "id": "L1-attention-04", "concept": "attention", "kind": "single",
+      "prompt": "In “The river bank flooded”, which words can “bank” attend to?",
+      "options": [
+        "All four words, including “flooded”",
+        "Only “river”, the word right before it",
+        "“The”, “river”, and “bank” itself",
+        "“The” and “river”, but not itself"
+      ],
+      "answer": [2],
+      "why": "A token looks only backward, at earlier tokens and itself. Lesson 3 explains why (the causal mask). “flooded” is the word being predicted, so it can't be an input."
+    },
+    {
+      "id": "L1-heads-01", "concept": "heads", "kind": "number",
+      "prompt": "A model is 4,096 numbers wide and runs 32 attention heads. How many numbers wide is each head?",
+      "answer": [128], "tol": 0,
+      "why": "Heads split the width rather than adding to it: 4,096 ÷ 32 = 128. Their outputs are joined back to 4,096 and mixed by W_O."
+    },
+    {
+      "id": "L1-heads-02", "concept": "heads", "kind": "single",
+      "prompt": "Why run several attention heads instead of one, at the same total width?",
+      "options": [
+        "More heads add parameters even at the same total width, so the model can store more facts in each attention layer",
+        "Each head has its own softmax, so each can focus sharply on its own target; one softmax would blur them into one average",
+        "Heads run on different layers, so splitting into several heads is how depth is added to the model",
+        "Heads are redundant copies that each compute the full attention, so if one produces bad scores the others outvote it"
+      ],
+      "answer": [1],
+      "why": "One softmax produces one set of shares, one blend. Splitting into heads gives several independent blends at the same total cost, then W_O combines their findings."
+    },
+    {
+      "id": "L1-cost-01", "concept": "cost", "kind": "number",
+      "prompt": "Every token scores itself and every earlier token: n(n+1)/2 scores. How many scores for 4,000 tokens (per head, per layer)?",
+      "answer": [8002000], "tol": 0.05,
+      "why": "4,000 × 4,001 ÷ 2 = 8,002,000, about 8 million. Close enough to n²/2 = 8,000,000."
+    },
+    {
+      "id": "L1-cost-02", "concept": "cost", "kind": "number",
+      "prompt": "Context grows from 8,000 to 32,000 tokens. By what factor does the number of attention scores grow?",
+      "answer": [16], "tol": 0.03, "unit": "×",
+      "why": "Scores grow with the square of n: (32,000 ÷ 8,000)² = 4² = 16. Four times the text, sixteen times the scores."
+    },
+    {
+      "id": "L1-cost-03", "concept": "cost", "kind": "single",
+      "prompt": "Which backend operation has the same cost shape as attention over n tokens?",
+      "options": [
+        "A hash lookup per row: constant time each, so the total work is n",
+        "A B-tree index lookup per row: log n each, so about n log n in total",
+        "A single sequential scan over the rows: n, doubling as n doubles",
+        "A self-join comparing every row with every earlier row: about n²/2"
+      ],
+      "answer": [3],
+      "why": "Each token compares itself with every earlier token, like a nested-loop self-join. That is why long context is expensive and why token counts matter."
+    }
+  ]
+}

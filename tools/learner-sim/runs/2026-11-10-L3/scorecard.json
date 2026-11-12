@@ -1,0 +1,807 @@
+{
+  "lesson": 3,
+  "runs": 3,
+  "questions": 41,
+  "metrics": {
+    "grounded": 0.983739837398374,
+    "agreement": 1,
+    "openDisputes": 0,
+    "optionsOnly": 1,
+    "keyLongest": 1,
+    "confirmedFlags": 4,
+    "coverage": 1,
+    "stepCoverage": 1,
+    "viewed": 1,
+    "visualOnlyCites": 0.008264462809917356
+  },
+  "pass": {
+    "grounded": false,
+    "agreement": true,
+    "openDisputes": true,
+    "keyLongest": false,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": false,
+  "notGrounded": [
+    {
+      "id": "L3-outcost-02",
+      "grounded": 2,
+      "correct": 3
+    },
+    {
+      "id": "L3-costpm-02",
+      "grounded": 2,
+      "correct": 3
+    }
+  ],
+  "ambiguous": [],
+  "disputes": [],
+  "weakDistractors": [
+    {
+      "id": "L3-examples-02",
+      "right": 3
+    },
+    {
+      "id": "L3-loss-03",
+      "right": 3
+    },
+    {
+      "id": "L3-loss-04",
+      "right": 3
+    },
+    {
+      "id": "L3-mask-01",
+      "right": 3
+    },
+    {
+      "id": "L3-mask-02",
+      "right": 3
+    },
+    {
+      "id": "L3-mask-03",
+      "right": 3
+    },
+    {
+      "id": "L3-scale-03",
+      "right": 3
+    },
+    {
+      "id": "L3-base-01",
+      "right": 3
+    },
+    {
+      "id": "L3-base-02",
+      "right": 3
+    },
+    {
+      "id": "L3-sft-01",
+      "right": 3
+    },
+    {
+      "id": "L3-sft-02",
+      "right": 3
+    },
+    {
+      "id": "L3-sft-03",
+      "right": 3
+    },
+    {
+      "id": "L3-preference-01",
+      "right": 3
+    },
+    {
+      "id": "L3-preference-02",
+      "right": 3
+    },
+    {
+      "id": "L3-latency-02",
+      "right": 3
+    },
+    {
+      "id": "L3-batching-01",
+      "right": 3
+    },
+    {
+      "id": "L3-batching-03",
+      "right": 3
+    },
+    {
+      "id": "L3-outcost-01",
+      "right": 3
+    },
+    {
+      "id": "L3-outcost-02",
+      "right": 3
+    },
+    {
+      "id": "L3-costpm-03",
+      "right": 3
+    },
+    {
+      "id": "L3-pcache-01",
+      "right": 3
+    },
+    {
+      "id": "L3-pcache-02",
+      "right": 3
+    },
+    {
+      "id": "L3-pcache-03",
+      "right": 3
+    },
+    {
+      "id": "L3-pcache-04",
+      "right": 3
+    },
+    {
+      "id": "L3-quant-02",
+      "right": 3
+    },
+    {
+      "id": "L3-quant-03",
+      "right": 3
+    },
+    {
+      "id": "L3-capacity-01",
+      "right": 3
+    },
+    {
+      "id": "L3-mask-04",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L3-examples-02",
+    "L3-loss-03",
+    "L3-loss-04",
+    "L3-mask-01",
+    "L3-mask-02",
+    "L3-mask-03",
+    "L3-base-01",
+    "L3-base-02",
+    "L3-sft-01",
+    "L3-sft-02",
+    "L3-sft-03",
+    "L3-preference-01",
+    "L3-preference-02",
+    "L3-latency-02",
+    "L3-batching-01",
+    "L3-batching-03",
+    "L3-outcost-01",
+    "L3-pcache-01",
+    "L3-pcache-02",
+    "L3-pcache-04",
+    "L3-quant-02",
+    "L3-quant-03",
+    "L3-capacity-01",
+    "L3-mask-04"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [],
+  "flags": [
+    {
+      "step": "S01",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "recap uses logits, softmax, KV cache, decode tick with only a one-line gist; the diagram's KV cache row is empty/truncated before Run pass"
+      ]
+    },
+    {
+      "step": "S01",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "KV cache caption line is clipped at the right edge in the screenshot, and the KV cache row shows no rows or mark before Run pass"
+      ]
+    },
+    {
+      "step": "S04",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "'cross-entropy', 'logits' and 'backpropagation' used with only a passing gloss; backprop named but only explained in a parenthetical",
+        "'score' vs logit and 'softmax' used with no reminder; the gradient bars have no stated reason for the 0.80 up-arrow being the sum of the others"
+      ]
+    },
+    {
+      "step": "S05",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Attention grid shows 'Mask off' only by default; orange cells highlight the answer to the right of the diagonal but the 28% cell is a lighter orange than 51%/57%, same condition different shade"
+      ]
+    },
+    {
+      "step": "S06",
+      "kind": "term-before-taught",
+      "runs": 3,
+      "confirmed": true,
+      "notes": [
+        "'tensor/optimizer state', 'activations', 'stragglers' and 'checkpoint' used without explanation",
+        "'optimizer state', 'activations', 'stragglers' used without definition",
+        "'optimizer state' and 'activations' are used with no explanation"
+      ]
+    },
+    {
+      "step": "S09",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "σ (sigmoid) appears in 'σ(gap)' and 'P = σ(gap)' with no explanation of what it does"
+      ]
+    },
+    {
+      "step": "S09",
+      "kind": "unclear-visual",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "Bars for chosen/rejected both show 0.00 at step 0 with no scale; the RLHF/DPO toggle diagram is just labels",
+        "Chosen/rejected bars sit at 0.00 before training with no axis scale; 'change in log-probability' is not explained"
+      ]
+    },
+    {
+      "step": "S11",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "charts: the pink 'KV doesn't fit' region and dashed continuation are unexplained; y-axis on the throughput chart starts at '0' overlapping the dot"
+      ]
+    },
+    {
+      "step": "S16",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "'tensor parallelism' named only in passing in the explanation",
+        "'92% cap' / gpu_memory_utilization is only pointed back to Lesson 2 with no reminder of what it is"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L3-examples-01",
+      "concept": "examples",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-examples-02",
+      "concept": "examples",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-loss-01",
+      "concept": "loss",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-loss-02",
+      "concept": "loss",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-loss-03",
+      "concept": "loss",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-loss-04",
+      "concept": "loss",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-mask-01",
+      "concept": "mask",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-mask-02",
+      "concept": "mask",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-mask-03",
+      "concept": "mask",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-scale-01",
+      "concept": "scale",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-scale-02",
+      "concept": "scale",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-scale-03",
+      "concept": "scale",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-base-01",
+      "concept": "base",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-base-02",
+      "concept": "base",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-sft-01",
+      "concept": "sft",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-sft-02",
+      "concept": "sft",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-sft-03",
+      "concept": "sft",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-preference-01",
+      "concept": "preference",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-preference-02",
+      "concept": "preference",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-latency-01",
+      "concept": "latency",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-latency-02",
+      "concept": "latency",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-latency-03",
+      "concept": "latency",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-batching-01",
+      "concept": "batching",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-batching-02",
+      "concept": "batching",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-batching-03",
+      "concept": "batching",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-outcost-01",
+      "concept": "outcost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-outcost-02",
+      "concept": "outcost",
+      "kind": "multi",
+      "grounded": 2,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S12"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-outcost-03",
+      "concept": "outcost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S11"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-costpm-01",
+      "concept": "costpm",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-costpm-02",
+      "concept": "costpm",
+      "kind": "number",
+      "grounded": 2,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-costpm-03",
+      "concept": "costpm",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S13"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-pcache-01",
+      "concept": "pcache",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-pcache-02",
+      "concept": "pcache",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-pcache-03",
+      "concept": "pcache",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-pcache-04",
+      "concept": "pcache",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S14"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-quant-01",
+      "concept": "quant",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-quant-02",
+      "concept": "quant",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-quant-03",
+      "concept": "quant",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S15"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-capacity-01",
+      "concept": "capacity",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S16"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L3-capacity-02",
+      "concept": "capacity",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S10"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L3-mask-04",
+      "concept": "mask",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": null,
+  "diff": null
+}

@@ -734,7 +734,7 @@ add("1.4","The three basics, running together",
     const toks = SENT[k].toks, {sc, w, out, x} = attend(toks), n = toks.length;
     const order = toks.map((_,i)=>i).sort((i,j)=>w[j]-w[i]); // blend order: biggest share first
     const piece = i=>ph < 3 ? 0 : ease(Math.max(0, Math.min(1, p*n - order.indexOf(i)))); // each piece gets 1/n of the phase
-    phase.textContent = ph === 0 ? "Ready. Press Next phase ▸ to start with the scores." : NAMES[ph] + (ph === 3 && p >= 1 ? " · done" : "");
+    phase.textContent = ph === 0 ? "Ready: the score and softmax columns and the blend fill in as you step. Press Next phase ▸ to start with the scores." : NAMES[ph] + (ph === 3 && p >= 1 ? " · done" : "");
     [pic, tblBox, cols, res, meter].forEach(e=>{ e.style.opacity = ACTIVE[ph].includes(e) ? "1" : ".35"; e.style.transition = "opacity .3s"; });
     tbl.innerHTML = '<table class="emb"><thead><tr><td>word</td><td>key</td><td>1. score = query · key</td><td>2. softmax</td></tr></thead><tbody>' +
       toks.map(([tk,key],i)=>'<tr'+(b >= 1 && w[i]>.5?' class="hit"':'')+'><td>'+tk+'</td><td>['+key.join(", ")+']</td><td>'+(a > 0 ? '1×'+key[0]+' + 1×'+key[1]+' = '+(sc[i]*a).toFixed(1) : '')+'</td><td><span style="display:inline-block;vertical-align:middle;height:10px;border-radius:3px;background:var(--hot);width:'+(w[i]*b*80).toFixed(1)+'px"></span> '+(b > 0 ? (w[i]*b*100).toFixed(1)+'%' : '')+'</td></tr>').join("") + '</tbody></table>';
@@ -756,7 +756,7 @@ add("1.4","The three basics, running together",
     s2 += '<text x="268" y="58" text-anchor="middle" style="fill:var(--muted)">→ sum →</text><text x="315" y="14" text-anchor="middle" font-weight="600" style="fill:var(--hot)">new bank</text>' +
       neurons(sum, 3, 315, 40, 34, 12) + '<text x="170" y="135" text-anchor="middle" style="fill:var(--muted)">brightness = size of each number</text>';
     cols.innerHTML = s2 + '</g></svg>';
-    res.textContent = "3. blend → new bank = [" + sum.map(x2=>x2.toFixed(2)).join(", ") + "]   (query stays [1, 1]). Real models add this blend to bank's own vector instead of replacing it (residual connection, next lesson).";
+    res.textContent = ph < 3 ? "3. blend → new bank = ? (computed in phase 3, after the scores and shares). Real models add this blend to bank's own vector instead of replacing it (residual connection, next lesson)." : "3. blend → new bank = [" + sum.map(x2=>x2.toFixed(2)).join(", ") + "]   (query stays [1, 1]). Real models add this blend to bank's own vector instead of replacing it (residual connection, next lesson).";
     const filled = ph < 3 ? 0 : Math.hypot(sum[0], sum[1]) / Math.max(1e-9, Math.hypot(out[0], out[1])), mx = 0.5 + (x - 0.5)*filled;
     meter.innerHTML = '<svg viewBox="0 0 360 70" style="max-width:440px" role="img" aria-label="Where bank ends up between money and water"><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">' +
       '<line x1="30" y1="30" x2="330" y2="30" style="stroke:var(--line)" stroke-width="6" stroke-linecap="round"/>' +
@@ -787,22 +787,22 @@ function attW(s,i){ if(s.w[i]) return s.w[i]; const w = new Array(i+1).fill(0); 
   const z=w.reduce((a,b)=>a+b,0); return w.map(x=>x/z); }
 function arcsSVG(toks, sel, w){
   const gap = 360/toks.length, xs = toks.map((_,i)=>gap*i + gap/2);
-  let s = '<svg viewBox="0 0 360 170" style="max-width:640px" role="img" aria-label="Arcs show how much the selected token attends to each earlier token"><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">';
+  let s = '<svg viewBox="0 0 360 170" style="max-width:640px" role="img" aria-label="Arcs show how much the selected token attends to each earlier token; the number under each word is its share"><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">';
   const rank = []; for(let j=0;j<sel;j++) rank.push(j); rank.sort((a,b)=>w[b]-w[a]); // draw order: heaviest first
   for(let j=0;j<sel;j++){ const h = Math.min(100, 18 + (sel-j)*14), wt = w[j], r = rank.indexOf(j); // h = arc peak height
     s += '<path data-r="' + r + '" pathLength="1" d="M' + xs[sel] + ',125 C' + xs[sel] + ',' + (125-h/0.75).toFixed(1) + ' ' + xs[j] + ',' + (125-h/0.75).toFixed(1) + ' ' + xs[j] + ',125" fill="none" style="stroke:var(--hot)" stroke-width="' + Math.max(1, wt*16).toFixed(1) + '" stroke-linecap="round" opacity="' + (0.35 + wt*0.65).toFixed(2) + '"/>';
-    s += '<text data-r="' + r + '" x="' + ((xs[sel]+xs[j])/2).toFixed(1) + '" y="' + (125 - h - 6).toFixed(1) + '" text-anchor="middle" style="fill:var(--hot);stroke:var(--surface);stroke-width:3;paint-order:stroke">' + wt.toFixed(2) + '</text>'; }
+    s += '<text data-r="' + r + '" x="' + xs[j] + '" y="162" text-anchor="middle" style="fill:var(--hot)">' + wt.toFixed(2) + '</text>'; } // each share sits under its own word
   toks.forEach((t,i)=>{ const st = i===sel ? "fill:var(--hot);font-weight:600" : i>sel ? "fill:var(--muted);opacity:.4" : "fill:var(--ink)";
     s += '<text data-i="' + i + '" x="' + xs[i] + '" y="145" text-anchor="middle" style="' + st + ';cursor:pointer">' + esc(t) + '</text>'; });
   const last = sel === toks.length-1;
-  s += '<text x="' + (last ? 358 : xs[sel]) + '" y="162" text-anchor="' + (last ? 'end' : 'middle') + '" style="fill:var(--muted)" font-size="10">self ' + w[sel].toFixed(2) + '</text>';
+  s += '<text x="' + (last ? 358 : xs[sel]) + '" y="162" text-anchor="' + (last ? 'end' : 'middle') + '" style="fill:var(--hot)">self ' + w[sel].toFixed(2) + '</text>';
   return s + '</g></svg>';
 }
 add("1.4","Who does each token listen to?",
- "Each token blends earlier tokens; arc thickness shows how much. Tap any word. Later words are greyed: a token only looks backward (why comes in 3.1).",
+ "Each token blends earlier tokens and itself. The number under each word is its share (arc thickness shows the same); “self” is the share a token keeps from its own vector. Tap any word, or switch sentences. Later words are greyed: a token only looks backward (why comes in 3.1).",
  v=>{
   let k = "A";
-  const seg = el("div",{class:"seg",role:"group","aria-label":"Sentence"},'<button data-k="A">River</button><button data-k="B">Money</button>');
+  const seg = el("div",{class:"seg",role:"group","aria-label":"Sentence"},'<button data-k="A">River sentence</button><button data-k="B">Money sentence</button>');
   const box = el("div");
   let stop = ()=>{};
   const grow = ()=>{ // arcs draw in order of weight, about 600 ms in total
@@ -950,6 +950,7 @@ add("✓","Check yourself",
     q.innerHTML = '<span class="tag">' + (n+1) + ' · ' + esc(tag.replace("warm-up · L1","review · lesson 1")) + '</span><p>' + esc(p) + '</p>';
     v.appendChild(q);
   });
+  v.appendChild(el("p",{class:"say",style:"margin-top:8px"},'Then test yourself: ten scored questions with explanations and a list of what to study again. <a href="../../quiz/?lesson=1"><b>Take the quiz →</b></a>'));
  });
 
 
@@ -973,7 +974,7 @@ const DUO = (a, b) => '<div class="duo"><div><b>Everyday</b><span>' + a + '</spa
 const SRC = (href, text) => ' <a href="' + href + '">' + text + ' ↗</a>';
 const PANELS = {
   "The whole machine, then zoom in": {
-    what: "<p>A <b>large language model (LLM)</b> is one function: in goes the text so far, out comes a score for every token in its vocabulary. The boxes: a <b>tokenizer</b> (text → token IDs), an <b>embedding</b> table (each ID → a list of numbers, plus its position), <b>attention</b> (each token pulls in context from earlier tokens), an <b>MLP</b> (multi-layer perceptron: a small network applied to each token on its own), with attention + MLP stacked N times, then <b>scores</b> over the whole vocabulary.</p>",
+    what: "<p>A <b>large language model (LLM)</b> is one function: in goes the text so far, out comes a score for every token in its vocabulary. The boxes: a <b>tokenizer</b> (text → token IDs), an <b>embedding</b> table (each ID → a list of numbers, plus its position), <b>attention</b> (each token pulls in context from earlier tokens), an <b>MLP</b> (multi-layer perceptron: a small network applied to each token on its own), with attention + MLP stacked N times (one attention + MLP pair is a <b>layer</b>), then <b>scores</b> over the whole vocabulary: one number per token, higher means likelier to come next.</p>",
     analogy: DUO("An assembly line: raw material enters, each station reshapes it, one product (the next word) comes out. Then the line runs again with that word added to the input.",
                  "A request pipeline: parse → look up → join with context → transform → rank every candidate → return one. Called in a loop, each response appended to the next request."),
     real: "<p>Llama 3 8B, for example, has a 128,000-token vocabulary, vectors 4,096 numbers wide, and 32 layers of attention + MLP. A 100-token answer means about 100 passes through the machine, one per new token.</p>",
@@ -1053,7 +1054,7 @@ const PANELS = {
     what: "<p>A <b>gradient</b> says, for each number, how much the error would change if that number moved a little. Training moves every number a small step in the direction that reduces the error.</p>",
     analogy: DUO("Adjusting a recipe after tasting: too salty, so cut the salt most, because salt had the biggest effect on the taste.",
                  "A profiler for error: blame is attributed to each config value in proportion to how much it contributed, and each is adjusted accordingly, all at once."),
-    real: "<p>Here the score for “flooded” is bank's row · flooded's <b>output row</b> (a row in a second learned table, one per token, used to score next tokens; Lesson 2 explains it). <b>Backpropagation</b> computes every number's gradient in one backward pass. Repeated over billions of sentences, these nudges set the embedding rows, the attention matrices, and everything else.</p>",
+    real: "<p>Here the score for “flooded” is bank's row · flooded's <b>output row</b>: the model keeps a second learned table with one row per token, and a token's score as the next word is the dot product with its row. That's all this step needs; Lesson 2 shows where the table sits in the model. <b>Backpropagation</b> computes every number's gradient in one backward pass. Repeated over billions of sentences, these nudges set the embedding rows, the attention matrices, and everything else.</p>",
     evidence: "<p>3Blue1Brown's chapters on gradient descent and backpropagation animate this." + SRC("https://www.youtube.com/watch?v=IHZwWFHWa-w","Gradient descent, how neural networks learn") + "</p>"},
   "bank has one row, but two meanings": {
     what: "<p><b>Attention</b> updates each word's vector using the words before it, so the same row ends up meaning different things in different sentences.</p>",
@@ -1064,7 +1065,7 @@ const PANELS = {
     what: "<p>Each word computes a <b>query</b> (what it's looking for); every earlier word offers a <b>key</b> (what it matches on) and a <b>value</b> (what it hands over). Score = query · key, softmax, then blend the values.</p>",
     analogy: DUO("Asking a room “who knows about water?”: people whose expertise matches answer loudest, and you take in a mix of what they say.",
                  "A search engine that returns a blend of every document, weighted by relevance, instead of only the top hit: a soft lookup."),
-    real: "<p>query = x × W_Q, key = x × W_K, value = x × W_V, where the three matrices are learned weights. Scores are divided by √(vector size) before softmax so they don't grow too large.</p>",
+    real: "<p>query = x × W_Q, key = x × W_K, value = x × W_V, where the three matrices are learned weights. Why three, and not the token's own vector for everything? Looking, matching and handing over are different jobs: what bank is looking for is not what makes it a good match for other words, nor what it should pass on. Separate learned matrices let each job be tuned on its own. Scores are divided by √(vector size) before softmax so they don't grow too large.</p>",
     evidence: "<p>This is scaled dot-product attention as defined in the original transformer paper." + SRC("https://arxiv.org/abs/1706.03762","Vaswani et al., Attention Is All You Need (2017)") + "</p>"},
   "Who does each token listen to?": {
     what: "<p>The <b>attention weights</b> (the softmax shares) say how much each word draws from each earlier word. They always add up to 1 per word.</p>",
