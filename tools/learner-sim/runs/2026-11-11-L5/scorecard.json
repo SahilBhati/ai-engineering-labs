@@ -1,0 +1,603 @@
+{
+  "lesson": 5,
+  "runs": 3,
+  "questions": 31,
+  "metrics": {
+    "grounded": 1,
+    "groundedPerRun": 1,
+    "agreement": 1,
+    "openDisputes": 0,
+    "optionsOnly": 0.9166666666666666,
+    "keyLongest": 0.23809523809523808,
+    "confirmedFlags": 1,
+    "coverage": 1,
+    "stepCoverage": 1,
+    "viewed": 1,
+    "visualOnlyCites": 0
+  },
+  "pass": {
+    "grounded": true,
+    "agreement": true,
+    "openDisputes": true,
+    "keyLongest": true,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": true,
+  "notGrounded": [],
+  "ambiguous": [],
+  "disputes": [],
+  "weakDistractors": [
+    {
+      "id": "L5-notools-01",
+      "right": 3
+    },
+    {
+      "id": "L5-notools-02",
+      "right": 3
+    },
+    {
+      "id": "L5-notools-03",
+      "right": 2
+    },
+    {
+      "id": "L5-toolcall-01",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-02",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-03",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-04",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-05",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-06",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-01",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-03",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-04",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-05",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-06",
+      "right": 3
+    },
+    {
+      "id": "L5-ctxcost-03",
+      "right": 3
+    },
+    {
+      "id": "L5-ctxcost-05",
+      "right": 3
+    },
+    {
+      "id": "L5-nxm-03",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-01",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-02",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-03",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-04",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpscope-04",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L5-loop-01",
+    "L5-loop-03",
+    "L5-loop-04",
+    "L5-loop-05",
+    "L5-ctxcost-05"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [],
+  "flags": [
+    {
+      "step": "S03",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "S03 uses 'context window' and 'retrieval' fine via recap, but 'harness' is only defined here; S02 recap uses 'the program running the model' - OK. Minor: 'side-effecting layer' jargon unexplained."
+      ]
+    },
+    {
+      "step": "S04",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'stop_reason' and 'JSON Schema' used with little explanation before the loop step"
+      ]
+    },
+    {
+      "step": "S05",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'prompt injection' named only in a collapsed Go deeper; Q06 relies on it"
+      ]
+    },
+    {
+      "step": "S06",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'prompt caching' is only reminded as '(Lesson 3)' on a toggle; cache write/read pricing is used with no explanation of what is cached"
+      ]
+    },
+    {
+      "step": "S06",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Bars for 630-1,110 tokens are tiny slivers against the 128K axis, so growth between requests is nearly invisible."
+      ]
+    },
+    {
+      "step": "S08",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "JSON-RPC and 'host' introduced densely; 'harness' vs 'host' vs 'client' used interchangeably without clear mapping"
+      ]
+    },
+    {
+      "step": "S08",
+      "kind": "unclear-visual",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "Diagram shows only message 1 of 7 at first; the model box and 'left gap' vs 'right gap' wording is only decoded in a tiny caption, and Go deeper refers to gaps",
+        "Diagram at message 1 of 7 shows only the first message; the model-side gap is empty and nothing indicates what appears in later messages."
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L5-notools-01",
+      "concept": "notools",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-notools-02",
+      "concept": "notools",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-notools-03",
+      "concept": "notools",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L5-toolcall-01",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-02",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-03",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-04",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-05",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-06",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-01",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-02",
+      "concept": "loop",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-loop-03",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-04",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-05",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-06",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03",
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-ctxcost-01",
+      "concept": "ctxcost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-ctxcost-02",
+      "concept": "ctxcost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-ctxcost-03",
+      "concept": "ctxcost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-ctxcost-04",
+      "concept": "ctxcost",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L5-ctxcost-05",
+      "concept": "ctxcost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-nxm-01",
+      "concept": "nxm",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-nxm-02",
+      "concept": "nxm",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-nxm-03",
+      "concept": "nxm",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-01",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-02",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-03",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-04",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpscope-01",
+      "concept": "mcpscope",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-mcpscope-02",
+      "concept": "mcpscope",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-mcpscope-03",
+      "concept": "mcpscope",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 0
+    },
+    {
+      "id": "L5-mcpscope-04",
+      "concept": "mcpscope",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": null,
+  "diff": null
+}

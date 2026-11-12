@@ -1,0 +1,643 @@
+{
+  "lesson": 5,
+  "runs": 3,
+  "questions": 31,
+  "metrics": {
+    "grounded": 1,
+    "groundedPerRun": 0.989247311827957,
+    "agreement": 1,
+    "openDisputes": 0,
+    "optionsOnly": 0.9166666666666666,
+    "keyLongest": 0.23809523809523808,
+    "confirmedFlags": 2,
+    "coverage": 1,
+    "stepCoverage": 1,
+    "viewed": 1,
+    "visualOnlyCites": 0.010869565217391304
+  },
+  "pass": {
+    "grounded": true,
+    "agreement": true,
+    "openDisputes": true,
+    "keyLongest": true,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": true,
+  "notGrounded": [
+    {
+      "id": "L5-loop-06",
+      "grounded": 2,
+      "correct": 3
+    }
+  ],
+  "ambiguous": [],
+  "disputes": [],
+  "weakDistractors": [
+    {
+      "id": "L5-notools-01",
+      "right": 3
+    },
+    {
+      "id": "L5-notools-02",
+      "right": 3
+    },
+    {
+      "id": "L5-notools-03",
+      "right": 2
+    },
+    {
+      "id": "L5-toolcall-01",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-02",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-03",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-04",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-05",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-06",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-01",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-03",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-04",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-05",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-06",
+      "right": 3
+    },
+    {
+      "id": "L5-ctxcost-03",
+      "right": 3
+    },
+    {
+      "id": "L5-ctxcost-05",
+      "right": 3
+    },
+    {
+      "id": "L5-nxm-03",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-01",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-02",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-03",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-04",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpscope-04",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L5-loop-01",
+    "L5-loop-03",
+    "L5-loop-04",
+    "L5-loop-05",
+    "L5-ctxcost-05"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [],
+  "flags": [
+    {
+      "step": "S04",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Screenshot shows only message 1 of 5 of the stepper; the token-view tab and later messages aren't visible without interaction"
+      ]
+    },
+    {
+      "step": "S06",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "'prompt caching' and cache write/read pricing used as a toggle; only a '(Lesson 3)' label, no one-line reminder of what a cache hit is",
+        "'prompt caching' toggle is labelled 'Lesson 3' but cache write/read pricing (1.25x/0.1x) and what a cache hit needs are never reminded here"
+      ]
+    },
+    {
+      "step": "S06",
+      "kind": "unclear-visual",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "Caching on/off toggle shown only by tab; bar meaning of cached vs uncached tokens unclear without switching",
+        "With caching toggle, nothing visible explains how bars/cost change; default view shows caching off only"
+      ]
+    },
+    {
+      "step": "S07",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Caption mentions thick black lines for the protocol, but default view shows only grey adapter lines; legend refers to a hidden tab"
+      ]
+    },
+    {
+      "step": "S08",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "JSON-RPC, 'host' and 'resources/prompts' introduced in passing; model-API vs MCP link labels lean on 'step 2 format' without recap"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L5-notools-01",
+      "concept": "notools",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-notools-02",
+      "concept": "notools",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-notools-03",
+      "concept": "notools",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L5-toolcall-01",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-02",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-03",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-04",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-05",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-06",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-01",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-02",
+      "concept": "loop",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-loop-03",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-04",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-05",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-06",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 2,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-ctxcost-01",
+      "concept": "ctxcost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-ctxcost-02",
+      "concept": "ctxcost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-ctxcost-03",
+      "concept": "ctxcost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-ctxcost-04",
+      "concept": "ctxcost",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 1
+    },
+    {
+      "id": "L5-ctxcost-05",
+      "concept": "ctxcost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-nxm-01",
+      "concept": "nxm",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-nxm-02",
+      "concept": "nxm",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-nxm-03",
+      "concept": "nxm",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07",
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-01",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-02",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-03",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-04",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpscope-01",
+      "concept": "mcpscope",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-mcpscope-02",
+      "concept": "mcpscope",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-mcpscope-03",
+      "concept": "mcpscope",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 0
+    },
+    {
+      "id": "L5-mcpscope-04",
+      "concept": "mcpscope",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": "2026-11-11-L5",
+  "diff": {
+    "metrics": {
+      "grounded": {
+        "before": 1,
+        "after": 1
+      },
+      "groundedPerRun": {
+        "before": 1,
+        "after": 0.989247311827957
+      },
+      "agreement": {
+        "before": 1,
+        "after": 1
+      },
+      "openDisputes": {
+        "before": 0,
+        "after": 0
+      },
+      "optionsOnly": {
+        "before": 0.9166666666666666,
+        "after": 0.9166666666666666
+      },
+      "keyLongest": {
+        "before": 0.23809523809523808,
+        "after": 0.23809523809523808
+      },
+      "confirmedFlags": {
+        "before": 1,
+        "after": 2
+      },
+      "coverage": {
+        "before": 1,
+        "after": 1
+      },
+      "stepCoverage": {
+        "before": 1,
+        "after": 1
+      },
+      "viewed": {
+        "before": 1,
+        "after": 1
+      },
+      "visualOnlyCites": {
+        "before": 0,
+        "after": 0.010869565217391304
+      }
+    },
+    "nowGrounded": [],
+    "lostGrounding": [
+      "L5-loop-06"
+    ]
+  }
+}

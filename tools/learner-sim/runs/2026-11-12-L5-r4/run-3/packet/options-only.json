@@ -1,0 +1,242 @@
+[
+  {
+    "qid": "Q27",
+    "kind": "single",
+    "options": {
+      "A": "Have the tool return a summary or only the matching lines, so less is re-sent each turn",
+      "B": "Turn on prompt caching, so the log no longer counts toward the 128K window",
+      "C": "Move the log into the tool's definition, so it is sent only once for the whole loop",
+      "D": "Raise the turn limit, so the model gets more turns to read through the whole log"
+    }
+  },
+  {
+    "qid": "Q12",
+    "kind": "single",
+    "options": {
+      "A": "When every tool in the tools list has been called once, or the user closes the chat",
+      "B": "When the context window is exactly full, because no more results can be appended",
+      "C": "When the harness checks the answer against the docs and finds that it is correct",
+      "D": "When the model replies in plain text instead of a tool call, or a turn limit is reached"
+    }
+  },
+  {
+    "qid": "Q09",
+    "kind": "single",
+    "options": {
+      "A": "Nothing: after fine-tuning, the model sends the HTTP requests itself while it decodes",
+      "B": "A bigger context window, so the model can store tool results in its weights between turns",
+      "C": "More pre-training, so the model learns each tool's code and runs it while decoding",
+      "D": "A harness: code that parses the tool calls, runs the tools, and loops results back in"
+    }
+  },
+  {
+    "qid": "Q01",
+    "kind": "single",
+    "options": {
+      "A": "Nothing about tools: the MCP server picks and runs the right tool before the model replies",
+      "B": "Only the MCP server's address, and it connects to fetch the definitions itself",
+      "C": "Raw JSON-RPC messages, so it must learn the tools/list and tools/call formats",
+      "D": "Tool definitions and tool results in its context, as without MCP; no MCP messages"
+    }
+  },
+  {
+    "qid": "Q03",
+    "kind": "single",
+    "options": {
+      "A": "Streamed in while the model is still decoding its first response, mid-sentence",
+      "B": "Loaded into the KV cache directly, so it skips the context and costs no tokens",
+      "C": "Written into the model's weights, so it is remembered for later questions",
+      "D": "As a tool_result in the next request, so it enters the context as input tokens"
+    }
+  },
+  {
+    "qid": "Q11",
+    "kind": "multi",
+    "options": {
+      "A": "Asking the user before running a tool",
+      "B": "The message format for listing and calling tools",
+      "C": "Choosing which tool definitions to send to the model",
+      "D": "Treating tool descriptions and results as untrusted"
+    }
+  },
+  {
+    "qid": "Q05",
+    "kind": "single",
+    "options": {
+      "A": "The model paused after writing a tool call; run it and send back the result",
+      "B": "The model refused to answer, because a tool in the list matched the question",
+      "C": "The context window is full, so the harness must drop a tool definition and retry",
+      "D": "The tool has already run, and its result is attached in this same response"
+    }
+  },
+  {
+    "qid": "Q08",
+    "kind": "single",
+    "options": {
+      "A": "The ticket is created as a draft, and the model's next turn decides whether to send it",
+      "B": "The model waits, rereads the docs, and decides by itself whether to run it",
+      "C": "The harness runs it, then asks the user afterwards whether to keep the ticket open",
+      "D": "The harness pauses and runs it only after the user approves, since it changes something"
+    }
+  },
+  {
+    "qid": "Q22",
+    "kind": "single",
+    "options": {
+      "A": "User to harness, so every chat app shows the same dialog when it asks for approval",
+      "B": "Harness to model, so every model provider accepts one and the same tool-call format",
+      "C": "Harness to tool servers; harness to model stays each model provider's own API",
+      "D": "Model layer to layer, so tool definitions skip the context and cost no tokens"
+    }
+  },
+  {
+    "qid": "Q20",
+    "kind": "single",
+    "options": {
+      "A": "The tool result replaces the question, so the harness adds it back for the final answer",
+      "B": "The question expired from the context window, so it must be added back once to refresh it",
+      "C": "The model keeps no state between requests, so each one must carry the whole conversation",
+      "D": "The model asked for the question again, by writing a tool call named get_question"
+    }
+  },
+  {
+    "qid": "Q13",
+    "kind": "single",
+    "options": {
+      "A": "Fewer tokens per request, but every MCP server must restart for each new search",
+      "B": "More accurate tool choice, but the full tool list must now be sent twice per request",
+      "C": "No definition tokens at all, but the model can no longer call tools that change things",
+      "D": "Far fewer definition tokens per request, for one extra loop turn to search first"
+    }
+  },
+  {
+    "qid": "Q10",
+    "kind": "single",
+    "options": {
+      "A": "Because the context window holds exactly ten tool results, so an eleventh can't fit",
+      "B": "So the KV cache can be cleared every ten turns, which keeps prefill free of cost",
+      "C": "Because the model API rejects an eleventh request, so the harness must stop first",
+      "D": "So a model that keeps asking for tools can't run forever, burning requests and tokens"
+    }
+  },
+  {
+    "qid": "Q02",
+    "kind": "single",
+    "options": {
+      "A": "A draft ticket was saved, because the chat server stores any reply that looks like an action",
+      "B": "Nothing was sent: the reply is only generated tokens, and no code ran to create a ticket",
+      "C": "The ticket was queued, so it gets created once a harness connects to the ticket system",
+      "D": "The ticket was filed, because the model can call any public API it read about in training"
+    }
+  },
+  {
+    "qid": "Q19",
+    "kind": "multi",
+    "options": {
+      "A": "Explain how to rotate an API key, when that docs page is in its context",
+      "B": "Say whether the orders service is degraded at this moment",
+      "C": "Rephrase a docs paragraph that is in its context",
+      "D": "Create a ticket in the ticket system"
+    }
+  },
+  {
+    "qid": "Q28",
+    "kind": "single",
+    "options": {
+      "A": "The provider rewrites its plain-text answer into JSON after generation has already finished",
+      "B": "The harness updates its weights on each request, so it learns the schema of every new tool",
+      "C": "Pre-training on code taught it every API's schema, so no definition is needed in the request",
+      "D": "Post-training showed it tool-call examples, and the definitions sit in its context as tokens"
+    }
+  },
+  {
+    "qid": "Q14",
+    "kind": "single",
+    "options": {
+      "A": "The model sends calls in a compressed form, so validation is how the harness decodes them",
+      "B": "Validation tells the model the call worked, so it can end the loop one turn sooner",
+      "C": "The schema holds the user's credentials, so checking it is what authorizes the call",
+      "D": "A tool call is generated text, so it can be malformed or name a tool that doesn't exist"
+    }
+  },
+  {
+    "qid": "Q04",
+    "kind": "single",
+    "options": {
+      "A": "Writes a confident answer anyway, because a fluent sentence is likely whether or not it's true",
+      "B": "Returns an empty reply, because generation stops when no document in the context matches",
+      "C": "Says it cannot know, because models are trained to refuse every question about the present",
+      "D": "Checks the status API itself, because the service name in the question is enough for it to find one"
+    }
+  },
+  {
+    "qid": "Q23",
+    "kind": "single",
+    "options": {
+      "A": "The page runs code inside the harness, because fetched pages are executed before they are ever read",
+      "B": "The harness forwards all page text to the ticket system, which treats it as a command",
+      "C": "Each tool result updates the model's weights, so new instructions overwrite the old ones",
+      "D": "Tool results enter the context as ordinary tokens, and the model can't reliably tell data from orders"
+    }
+  },
+  {
+    "qid": "Q15",
+    "kind": "single",
+    "options": {
+      "A": "The server reads the model's output stream directly and runs get_status when the name appears",
+      "B": "The client sends tools/call to the server that owns get_status and wraps the reply as a tool_result",
+      "C": "The model sends tools/call to the server itself, then reads the server's reply as its next token",
+      "D": "The client sends tools/list again, because a tool must be listed again before every single call to it"
+    }
+  },
+  {
+    "qid": "Q18",
+    "kind": "single",
+    "options": {
+      "A": "The server sends its source code, and the client reads the function names out of it",
+      "B": "The model guesses tool names from training, and the server corrects any wrong guess",
+      "C": "The user types the tool names into the chat, and the harness passes them to the model",
+      "D": "Its MCP client sends tools/list; the server returns each name, description and schema"
+    }
+  },
+  {
+    "qid": "Q21",
+    "kind": "single",
+    "options": {
+      "A": "LSP: a language ships one server, and every editor that speaks it can then use it",
+      "B": "A load balancer: one front door spreads each tool call across copies of the model",
+      "C": "A message queue: tool calls wait in order until a free worker is able to run them",
+      "D": "A CDN: tool results are cached near the user, so a repeated call skips the server"
+    }
+  },
+  {
+    "qid": "Q24",
+    "kind": "single",
+    "options": {
+      "A": "The model writes longer tool calls as the loop goes on, because its context is fuller",
+      "B": "Each request re-sends every earlier tool call and result, so turn i pays for all i − 1 before it",
+      "C": "Each tool result is compressed less on later turns, so the same data takes up more and more tokens",
+      "D": "Prompt caching expires after each turn, so from turn 2 every token is billed twice"
+    }
+  },
+  {
+    "qid": "Q30",
+    "kind": "single",
+    "options": {
+      "A": "The harness, after parsing the model's tool call and checking it against the input schema",
+      "B": "The status API, which reads the tools list in the request and calls itself when it is named",
+      "C": "The model, which executes the function during its forward pass before writing the answer",
+      "D": "The user's browser, which sees the tool call in the reply and calls the status API directly"
+    }
+  },
+  {
+    "qid": "Q17",
+    "kind": "multi",
+    "options": {
+      "A": "The bill for the re-sent prefix",
+      "B": "How much of the 128K window each request uses",
+      "C": "The KV cache memory a request holds while decoding",
+      "D": "Prefill work on the re-sent prefix"
+    }
+  }
+]

@@ -1,0 +1,51 @@
+{
+"answers": {
+"Q01":{"answer":["A","B","D"],"cites":[{"step":"S09","quote":"context budget (which tool definitions to send), trust (tool descriptions and results are untrusted text"}],"dispute":null},
+"Q02":{"answer":"14760","cites":[{"step":"S06","quote":"Request i = 630 + (i − 1) × (40 + result size) tokens here."}],"dispute":null},
+"Q03":{"answer":["A"],"cites":[{"step":"S03","quote":"produces the likeliest text: a guess, or a claim of an action that never happened"}],"dispute":null},
+"Q04":{"answer":["C"],"cites":[{"step":"S04","quote":"The model is stateless between requests: request 2 re-sends everything."}],"dispute":null},
+"Q05":{"answer":["B"],"cites":[{"step":"S08","quote":"clients discover them with tools/list and invoke them with tools/call"}],"dispute":null},
+"Q06":{"answer":["C"],"cites":[{"step":"S05","quote":"enters the context as ordinary tokens, and the model can't reliably tell data from instructions"}],"dispute":null},
+"Q07":{"answer":"100","cites":[{"step":"S07","quote":"every pairing needs its own glue code"}],"dispute":null},
+"Q08":{"answer":["A","D"],"cites":[{"step":"S03","quote":"The answer was in the context window, so the model only had to rephrase it."}],"dispute":null},
+"Q09":{"answer":["D"],"cites":[{"step":"S06","quote":"Harnesses trim results, return summaries instead of raw data"}],"dispute":null},
+"Q10":{"answer":["B"],"cites":[{"step":"S06","quote":"turn i re-sends all i – 1 earlier results"}],"dispute":null},
+"Q11":{"answer":"25","cites":[{"step":"S07","quote":"The cost moves from N × M integrations to N + M implementations of the same spec."}],"dispute":null},
+"Q12":{"answer":["D"],"cites":[{"step":"S08","quote":"the client forwards it as tools/call to the server that owns that tool"}],"dispute":null},
+"Q13":{"answer":"2610","cites":[{"step":"S06","quote":"Total 2,610 input tokens for one question, not 630."}],"dispute":null},
+"Q14":{"answer":"3","cites":[{"step":"S05","quote":"The question needs two tools, so the loop calls the model three times."}],"dispute":null},
+"Q15":{"answer":["A"],"cites":[{"step":"S05","quote":"That is why actions that change things sit behind an approval gate"}],"dispute":null},
+"Q16":{"answer":["D"],"cites":[{"step":"S04","quote":"Because a tool call is generated text, it can be malformed or name a tool that doesn't exist"}],"dispute":null},
+"Q17":{"answer":["D"],"cites":[{"step":"S03","quote":"it can only write that it acted"}],"dispute":null},
+"Q18":{"answer":["A"],"cites":[{"step":"S08","quote":"MCP takes some inspiration from the Language Server Protocol"}],"dispute":null},
+"Q19":{"answer":["A"],"cites":[{"step":"S05","quote":"The stop condition is a plain-text reply"}],"dispute":null},
+"Q20":{"answer":["C"],"cites":[{"step":"S09","quote":"Loading on demand has a price too: one extra loop turn to search before the real call."}],"dispute":null},
+"Q21":{"answer":"12000","cites":[{"step":"S09","quote":"10 servers × 8 tools × 150 tokens = 12,000 tokens"}],"dispute":null},
+"Q22":{"answer":["A","C"],"cites":[{"step":"S06","quote":"Caching cuts the bill and the prefill work for the re-sent prefix, but not the window limit or the KV memory a request holds."}],"dispute":null},
+"Q23":{"answer":"36","cites":[{"step":"S09","quote":"Illustrative: ~150 tokens per tool definition, $3 per million input tokens.","visual":true}],"dispute":null},
+"Q24":{"answer":["C"],"cites":[{"step":"S04","quote":"is what the harness sends back, as part of the next request"}],"dispute":null},
+"Q25":{"answer":["D"],"cites":[{"step":"S04","quote":"Post-training includes examples of tool calls"}],"dispute":null},
+"Q26":{"answer":["C"],"cites":[{"step":"S04","quote":"so the harness validates it against the schema before running anything"}],"dispute":null},
+"Q27":{"answer":["C"],"cites":[{"step":"S03","quote":"is the only part that can run code"}],"dispute":null},
+"Q28":{"answer":["B"],"cites":[{"step":"S08","quote":"The model never sees an MCP message."}],"dispute":null},
+"Q29":{"answer":["B"],"cites":[{"step":"S05","quote":"and why the loop has a turn limit"}],"dispute":null},
+"Q30":{"answer":["B"],"cites":[{"step":"S04","quote":"The server watches for the call marker, stops generation, and returns"}],"dispute":null},
+"Q31":{"answer":["C"],"cites":[{"step":"S08","quote":"the model ↔ harness link is still each model provider's own API"}],"dispute":null}
+},
+"flags":[
+{"step":"S06","kind":"term-before-taught","note":"'prompt caching' and cache write/read pricing used as a toggle; only a '(Lesson 3)' label, no one-line reminder of what a cache hit is"},
+{"step":"S04","kind":"unclear-visual","note":"Screenshot shows only message 1 of 5 of the stepper; the token-view tab and later messages aren't visible without interaction"},
+{"step":"S07","kind":"unclear-visual","note":"Caption mentions thick black lines for the protocol, but default view shows only grey adapter lines; legend refers to a hidden tab"}
+],
+"visuals":{
+"S01":"slider for context size with a bar showing 3.1% of 128K and a readout of prefill, KV cache (0.52 GB) and input bill ($0.012) at 4,000 tokens",
+"S02":"two multiple-choice guess panels (live status vs confident answer vs can't know; who sends ticket request), unanswered",
+"S03":"tabs for three user questions; shows user message, orange model text reply, and blue 'reality ✓' box saying the docs-based reply is true",
+"S04":"stepper diagram model–harness–status API with JSON of request 1 (tools definition get_status plus user message), message 1 of 5; orange=model, teal=harness, grey=user",
+"S05":"agent loop pseudo-code panel with run-next-turn button, Ask me first/Run automatically toggle, user message and ~630-token context; grey highlight marks current line",
+"S06":"two sliders (tool calls, tokens per result) and horizontal teal bars for each request: 630, 870, 1,110 vs 128K window red line; summary of 2,610 input tokens, $0.0099",
+"S07":"bipartite diagram of 3 apps and 4 tools with 12 thin grey adapter lines; sliders for counts; toggle to shared protocol (7)",
+"S08":"stepper diagram model, harness+MCP client, MCP server with arrow labelled with JSON-RPC tools/list request, message 1 of 7",
+"S09":"slider for MCP servers (2) with bar showing 2,400 definition tokens (1.8% of 128K), tools count 16, $7.20 per 1,000 requests; toggle to search-then-load"
+}
+}

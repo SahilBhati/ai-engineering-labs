@@ -1,0 +1,675 @@
+{
+  "lesson": 5,
+  "runs": 3,
+  "questions": 31,
+  "metrics": {
+    "grounded": 1,
+    "groundedPerRun": 0.989247311827957,
+    "agreement": 1,
+    "openDisputes": 1,
+    "optionsOnly": 0.9583333333333334,
+    "keyLongest": 0.23809523809523808,
+    "confirmedFlags": 1,
+    "coverage": 1,
+    "stepCoverage": 1,
+    "viewed": 1,
+    "visualOnlyCites": 0.010869565217391304
+  },
+  "pass": {
+    "grounded": true,
+    "agreement": true,
+    "openDisputes": false,
+    "keyLongest": true,
+    "coverage": true,
+    "viewed": true
+  },
+  "gate": false,
+  "notGrounded": [
+    {
+      "id": "L5-loop-05",
+      "grounded": 2,
+      "correct": 3
+    }
+  ],
+  "ambiguous": [],
+  "disputes": [
+    {
+      "id": "L5-mcpscope-02",
+      "reasons": [
+        "Not stated directly for 12,000 tokens; computed by scaling the lesson's 2,400-token = $7.20 example (12,000 x 1,000 x $3/M = $36)."
+      ]
+    }
+  ],
+  "weakDistractors": [
+    {
+      "id": "L5-notools-01",
+      "right": 3
+    },
+    {
+      "id": "L5-notools-02",
+      "right": 3
+    },
+    {
+      "id": "L5-notools-03",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-01",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-02",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-03",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-04",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-05",
+      "right": 3
+    },
+    {
+      "id": "L5-toolcall-06",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-01",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-03",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-04",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-05",
+      "right": 3
+    },
+    {
+      "id": "L5-loop-06",
+      "right": 3
+    },
+    {
+      "id": "L5-ctxcost-03",
+      "right": 3
+    },
+    {
+      "id": "L5-ctxcost-05",
+      "right": 3
+    },
+    {
+      "id": "L5-nxm-03",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-01",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-02",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-03",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpflow-04",
+      "right": 3
+    },
+    {
+      "id": "L5-mcpscope-03",
+      "right": 2
+    },
+    {
+      "id": "L5-mcpscope-04",
+      "right": 3
+    }
+  ],
+  "keyLongestIds": [
+    "L5-loop-01",
+    "L5-loop-03",
+    "L5-loop-04",
+    "L5-loop-05",
+    "L5-ctxcost-05"
+  ],
+  "uncoveredConcepts": [],
+  "uncoveredSteps": [],
+  "flags": [
+    {
+      "step": "S01",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Recap uses 'prefill', 'KV cache', 'block' with only one-line gloss; fine as recap but 'KV cache' is never defined"
+      ]
+    },
+    {
+      "step": "S03",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'weights' and 'frozen after training' are used with only a Lesson 3 pointer, no one-line reminder."
+      ]
+    },
+    {
+      "step": "S05",
+      "kind": "term-before-taught",
+      "runs": 2,
+      "confirmed": true,
+      "notes": [
+        "'prompt injection' is named only in Go deeper, in a parenthetical, with no definition beyond the example.",
+        "'prompt injection' and 'approval gate' appear in Go deeper; briefly glossed but approval mode toggle ('Ask me first') is not explained"
+      ]
+    },
+    {
+      "step": "S06",
+      "kind": "inconsistent-highlight",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Prose says '2,610 input tokens' billed but the step's Go deeper formula uses 'i – 1' vs 'i − 1' styles; minor. Also teal means harness tokens but the cached/new split uses light vs dark teal only in the Caching-on view not shown in the screenshot."
+      ]
+    },
+    {
+      "step": "S06",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Caching-on bar split and 'cache writes 1.25×' are mentioned but the default view shows caching off; slider values hard to see effect"
+      ]
+    },
+    {
+      "step": "S08",
+      "kind": "term-before-taught",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "'stub', 'OpenAPI document' used in technical analogy without explanation"
+      ]
+    },
+    {
+      "step": "S08",
+      "kind": "unclear-visual",
+      "runs": 1,
+      "confirmed": false,
+      "notes": [
+        "Diagram's model box is greyed out and the message arrows between model and harness are described only in text; hard to tell which link each of the 7 messages travels."
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "L5-notools-01",
+      "concept": "notools",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-notools-02",
+      "concept": "notools",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-notools-03",
+      "concept": "notools",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-01",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-02",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-03",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-04",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-05",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-toolcall-06",
+      "concept": "toolcall",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S04"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-01",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-02",
+      "concept": "loop",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-loop-03",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-04",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-05",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 2,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S05"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-loop-06",
+      "concept": "loop",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S03"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-ctxcost-01",
+      "concept": "ctxcost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-ctxcost-02",
+      "concept": "ctxcost",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-ctxcost-03",
+      "concept": "ctxcost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-ctxcost-04",
+      "concept": "ctxcost",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 0
+    },
+    {
+      "id": "L5-ctxcost-05",
+      "concept": "ctxcost",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S06"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-nxm-01",
+      "concept": "nxm",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-nxm-02",
+      "concept": "nxm",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-nxm-03",
+      "concept": "nxm",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S07",
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-01",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-02",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-03",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpflow-04",
+      "concept": "mcpflow",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S08"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    },
+    {
+      "id": "L5-mcpscope-01",
+      "concept": "mcpscope",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-mcpscope-02",
+      "concept": "mcpscope",
+      "kind": "number",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [
+        "Not stated directly for 12,000 tokens; computed by scaling the lesson's 2,400-token = $7.20 example (12,000 x 1,000 x $3/M = $36)."
+      ],
+      "optionsOnly": null
+    },
+    {
+      "id": "L5-mcpscope-03",
+      "concept": "mcpscope",
+      "kind": "multi",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 2
+    },
+    {
+      "id": "L5-mcpscope-04",
+      "concept": "mcpscope",
+      "kind": "single",
+      "grounded": 3,
+      "correct": 3,
+      "agree": true,
+      "steps": [
+        "S09"
+      ],
+      "disputes": [],
+      "optionsOnly": 3
+    }
+  ],
+  "previous": "2026-11-12-L5",
+  "diff": {
+    "metrics": {
+      "grounded": {
+        "before": 1,
+        "after": 1
+      },
+      "groundedPerRun": {
+        "before": 0.989247311827957,
+        "after": 0.989247311827957
+      },
+      "agreement": {
+        "before": 1,
+        "after": 1
+      },
+      "openDisputes": {
+        "before": 0,
+        "after": 1
+      },
+      "optionsOnly": {
+        "before": 0.9166666666666666,
+        "after": 0.9583333333333334
+      },
+      "keyLongest": {
+        "before": 0.23809523809523808,
+        "after": 0.23809523809523808
+      },
+      "confirmedFlags": {
+        "before": 2,
+        "after": 1
+      },
+      "coverage": {
+        "before": 1,
+        "after": 1
+      },
+      "stepCoverage": {
+        "before": 1,
+        "after": 1
+      },
+      "viewed": {
+        "before": 1,
+        "after": 1
+      },
+      "visualOnlyCites": {
+        "before": 0.010869565217391304,
+        "after": 0.010869565217391304
+      }
+    },
+    "nowGrounded": [
+      "L5-loop-06"
+    ],
+    "lostGrounding": [
+      "L5-loop-05"
+    ]
+  }
+}

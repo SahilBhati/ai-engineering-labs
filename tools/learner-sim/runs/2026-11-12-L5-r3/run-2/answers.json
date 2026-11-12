@@ -1,0 +1,50 @@
+{
+"answers": {
+"Q01":{"answer":["C"],"cites":[{"step":"S05","quote":"actions that change things sit behind an approval gate"}]},
+"Q02":{"answer":["A"],"cites":[{"step":"S04","quote":"The server watches for the call marker, stops generation, and returns"}]},
+"Q03":{"answer":["C"],"cites":[{"step":"S06","quote":"Harnesses trim results, return summaries instead of raw data"}]},
+"Q04":{"answer":["C"],"cites":[{"step":"S08","quote":"the client forwards it as tools/call to the server that owns that tool"}]},
+"Q05":{"answer":["C"],"cites":[{"step":"S08","quote":"the model ↔ harness link is still each model provider's own API"}]},
+"Q06":{"answer":["A","B"],"cites":[{"step":"S03","quote":"The answer was in the context window, so the model only had to rephrase it."}]},
+"Q07":{"answer":["B"],"cites":[{"step":"S04","quote":"it can be malformed or name a tool that doesn't exist"}]},
+"Q08":{"answer":["A"],"cites":[{"step":"S05","quote":"it's also common to include stopping conditions"}]},
+"Q09":{"answer":["B"],"cites":[{"step":"S04","quote":"is what the harness sends back, as part of the next request"}]},
+"Q10":{"answer":"12000","cites":[{"step":"S09","quote":"10 servers × 8 tools × 150 tokens = 12,000 tokens"}]},
+"Q11":{"answer":["A","B"],"cites":[{"step":"S06","quote":"Caching cuts the bill and the prefill work for the re-sent prefix, but not the window limit or the KV memory a request holds."}]},
+"Q12":{"answer":["A","B","C"],"cites":[{"step":"S09","quote":"Three things stay the harness's job with MCP"}]},
+"Q13":{"answer":"14760","cites":[{"step":"S06","quote":"Request i = 630 + (i − 1) × (40 + result size) tokens here."}]},
+"Q14":{"answer":["A"],"cites":[{"step":"S03","quote":"a claim of an action that never happened"}]},
+"Q15":{"answer":["B"],"cites":[{"step":"S04","quote":"Post-training includes examples of tool calls"}]},
+"Q16":{"answer":["D"],"cites":[{"step":"S05","quote":"the model can't reliably tell data from instructions"}]},
+"Q17":{"answer":"3","cites":[{"step":"S05","quote":"One question that needs two tools costs three requests"}]},
+"Q18":{"answer":"100","cites":[{"step":"S07","quote":"The cost moves from N × M integrations to N + M implementations"}]},
+"Q19":{"answer":["C"],"cites":[{"step":"S08","quote":"clients discover them with tools/list and invoke them with tools/call"}]},
+"Q20":{"answer":"36","cites":[{"step":"S09","quote":"12,000 × 1,000 × $3 per million = $36 per 1,000 requests"}]},
+"Q21":{"answer":["D"],"cites":[{"step":"S06","quote":"turn i re-sends all i – 1 earlier results"}]},
+"Q22":{"answer":["C"],"cites":[{"step":"S05","quote":"The stop condition is a plain-text reply"}]},
+"Q23":{"answer":["C"],"cites":[{"step":"S03","quote":"is the only part that can run code"}]},
+"Q24":{"answer":["D"],"cites":[{"step":"S08","quote":"MCP takes some inspiration from the Language Server Protocol"}]},
+"Q25":{"answer":["A"],"cites":[{"step":"S08","quote":"The model never sees an MCP message."}]},
+"Q26":{"answer":["A"],"cites":[{"step":"S09","quote":"one extra loop turn to search before the real call"}]},
+"Q27":{"answer":["D"],"cites":[{"step":"S03","quote":"a fluent, confident sentence is likely whether or not it's true"}]},
+"Q28":{"answer":"2610","cites":[{"step":"S06","quote":"Total 2,610 input tokens for one question, not 630."}]},
+"Q29":{"answer":["A"],"cites":[{"step":"S04","quote":"the harness sends the request, never the model"}]},
+"Q30":{"answer":["D"],"cites":[{"step":"S04","quote":"The model is stateless between requests: request 2 re-sends everything."}]},
+"Q31":{"answer":"25","cites":[{"step":"S07","quote":"The cost moves from N × M integrations to N + M implementations"}]}
+},
+"flags":[
+{"step":"S06","kind":"term-before-taught","note":"'prefill' and 'KV cache' used heavily; only reminded in S01 recap, fine, but 'cache writes 1.25×' is never explained"},
+{"step":"S09","kind":"unclear-visual","note":"Servers slider default (2) shows 2,400 tokens; 'search then load' tab outcome not described in text, newcomer can't tell what bar means without toggling"}
+],
+"visuals":{
+"S01":"slider of context tokens with a progress bar showing 3.1% of 128K full, and readouts of prefill, KV cache GB and input bill",
+"S02":"two guess questions with three pill options each; no data visual",
+"S03":"tabbed question picker with user message, orange model reply and blue/red reality check box (✓ true for API key question)",
+"S04":"stepper of 5 messages between model, harness and status API boxes showing JSON request with tools list and user message; orange=model, teal=harness, grey=user",
+"S05":"pseudo-code of agent loop with run-next-turn button, highlighted current line, context growing from 630 tokens; colors orange model, teal harness, grey user",
+"S06":"horizontal bars of input tokens per request (630, 870, 1110) with 128K red dashed limit, sliders for tool calls and result size, caching toggle splitting bars",
+"S07":"bipartite graph of 3 apps and 4 tools with 12 thin grey adapter lines; toggle to shared protocol shows 7 thick lines",
+"S08":"diagram model - harness+MCP client - MCP server with arrow and JSON-RPC tools/list message, 7-message stepper",
+"S09":"slider of MCP servers with a bar showing 2,400 tokens (1.8% of window) of tool definitions and cost readout $7.20 per 1,000 requests; toggle for search-then-load"
+}
+}
